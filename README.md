@@ -91,11 +91,11 @@ CROSTO[サービスURL:https://play.google.com/store/apps/details?id=app.forty_y
 
 お洋服の洗濯表示をチェックしてお家で洗えるか判定するアプリです。
 
-SmartLaundry[https://smartlaundry.jp/benefit/#user](https://smartlaundry.jp/benefit/#user)
+SmartLaundry[サービスURL:https://smartlaundry.jp/benefit/#user](https://smartlaundry.jp/benefit/#user)
 
 主に コインランドリーで利用できる、Bluetooth接続やQRコードスキャンで洗濯機の操作、料金の支払いをアプリから行える「キャッシュレス洗濯アプリ」です。
 
-はれほす[https://apps.apple.com/jp/app/%E3%81%AF%E3%82%8C%E3%81%BB%E3%81%99-sdgs%E3%81%AB%E8%B2%A2%E7%8C%AE%E3%81%A7%E3%81%8D%E3%82%8B%E6%B4%97%E6%BF%AF%E3%82%A2%E3%83%97%E3%83%AA/id1606295926?mt=8](https://apps.apple.com/jp/app/%E3%81%AF%E3%82%8C%E3%81%BB%E3%81%99-sdgs%E3%81%AB%E8%B2%A2%E7%8C%AE%E3%81%A7%E3%81%8D%E3%82%8B%E6%B4%97%E6%BF%AF%E3%82%A2%E3%83%97%E3%83%AA/id1606295926?mt=8)
+はれほす[サービスURL:https://apps.apple.com/jp/app/%E3%81%AF%E3%82%8C%E3%81%BB%E3%81%99-sdgs%E3%81%AB%E8%B2%A2%E7%8C%AE%E3%81%A7%E3%81%8D%E3%82%8B%E6%B4%97%E6%BF%AF%E3%82%A2%E3%83%97%E3%83%AA/id1606295926?mt=8](https://apps.apple.com/jp/app/%E3%81%AF%E3%82%8C%E3%81%BB%E3%81%99-sdgs%E3%81%AB%E8%B2%A2%E7%8C%AE%E3%81%A7%E3%81%8D%E3%82%8B%E6%B4%97%E6%BF%AF%E3%82%A2%E3%83%97%E3%83%AA/id1606295926?mt=8)
 
 洗濯物が外干しできるか？いつ洗濯物が乾くかが、ひと目でわかるアプリです。「気温」「湿度」「風」「日射量」を表示してくれ、乾燥機を使わずに外で干せるかを通知することでCO2削減を目指そうというコンセプトのアプリです。
 

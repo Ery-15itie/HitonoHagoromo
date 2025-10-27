@@ -10,7 +10,7 @@
 ### ProjectsのURL
 [https://github.com/users/Ery-15itie/projects/4/views/1?sumFields=%5B231156121%5D&hideItemsCount=false&sortedBy%5Bdirection%5D=asc&sortedBy%5BcolumnId%5D=Status](https://github.com/users/Ery-15itie/projects/4/views/1?sumFields=%5B231156121%5D&hideItemsCount=false&sortedBy%5Bdirection%5D=asc&sortedBy%5BcolumnId%5D=Status)
 
-### MVPまでの開発の流れ一覧(全24ステップ)
+### MVPまでの開発の流れ一覧(全20ステップ)
 ※実装の技術的なつながり、issueの読みやすさを考慮して敢えて複数機能をまとめている部分があります。
 本計画書ではエラー発生も想定して予備期間を組んでいますが、看板からは削除しています
 

@@ -1,6 +1,12 @@
 Rails.application.routes.draw do
-  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
+  # アプリケーションのルートパス（/）を設定
+  # PagesControllerのindexアクションにルーティング
+  root to: 'pages#index'
 
-  # Defines the root path route ("/")
-  # root "articles#index"
+  # Health check route
+  get "up" => "rails/health#show", as: :rails_health_check
+
+  # 今後の機能（認証など）はここに記述
+  # devise_for :users
+  # resources :meetings, :closets
 end

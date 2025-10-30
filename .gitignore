@@ -1,0 +1,6 @@
+.DS_Store
+/log
+/tmp
+/vendor/bundle
+/.byebug_history
+db/*.sqlite3

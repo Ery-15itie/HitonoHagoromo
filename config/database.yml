@@ -1,0 +1,23 @@
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  # 接続ホスト名は docker-compose.yml の db サービス名に合わせる
+  host: db
+  username: <%= ENV.fetch("POSTGRES_USER") { "postgres" } %>
+  password: <%= ENV.fetch("POSTGRES_PASSWORD") { "password" } %>
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+
+development:
+  <<: *default
+  # データベース名も docker-compose.yml に合わせる
+  database: qol_closet_development
+
+test:
+  <<: *default
+  database: qol_closet_test
+
+production:
+  <<: *default
+  database: qol_closet_production
+  username: <%= ENV.fetch("POSTGRES_USER") { "postgres" } %>
+  password: <%= ENV.fetch("POSTGRES_PASSWORD") { "password" } %>

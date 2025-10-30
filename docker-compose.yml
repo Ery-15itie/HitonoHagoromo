@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  # Railsアプリケーションのサービス定義
+  web:
+    build: .
+    # start.sh を実行可能にしてから実行
+    command: bash -c "chmod +x start.sh && ./start.sh"
+    volumes:
+      # ボリュームマウントパスを hitonohagoromo に統一
+      - .:/hitonohagoromo
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    tty: true
+    stdin_open: true
+    environment:
+      # データベース接続情報の指定
+      POSTGRES_HOST: db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+
+  # PostgreSQLデータベースのサービス定義
+  db:
+    image: postgres:14-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: qol_closet_development
+    ports:
+      - "5432:5432"
+
+# データを永続化するためのボリューム
+volumes:
+  postgres_data:

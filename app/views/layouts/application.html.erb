@@ -1,15 +1,64 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>QolCloset</title>
+    <title>HitonoHagoromo</title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
-
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <%= javascript_include_tag "application", "data-turbo-track": "reload", type: "module", defer: true %>
+
   </head>
 
-  <body>
-    <%= yield %>
+  <body class="bg-gray-50 min-h-screen flex flex-col">
+    <!-- ヘッダー (ナビゲーションバー) -->
+    <header class="bg-white shadow-md">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16">
+          <!-- サービス名 -->
+          <div class="flex-shrink-0">
+            <h1 class="text-xl font-bold text-gray-900">
+              <%= link_to 'HitonoHagoromo', root_path, class: 'hover:text-indigo-600 transition duration-150' %>
+            </h1>
+          </div>
+          <!-- 認証リンク -->
+          <div class="flex items-center space-x-4">
+            <% if user_signed_in? %>
+              <span class="text-sm text-gray-600 hidden sm:inline"><%= current_user.email %></span>
+              <%= button_to 'ログアウト', destroy_user_session_path, method: :delete, class: "px-3 py-1 text-sm font-medium text-white bg-red-500 rounded-md hover:bg-red-600 transition duration-150" %>
+            <% else %>
+              <%= link_to 'ログイン', new_user_session_path, class: "px-3 py-1 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition duration-150" %>
+              <%= link_to '新規登録', new_user_registration_path, class: "px-3 py-1 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 transition duration-150" %>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- フラッシュメッセージ -->
+    <div class="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 mt-4">
+      <% if notice %>
+        <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4 rounded shadow-sm" role="alert">
+          <p class="font-bold">成功</p>
+          <p><%= notice %></p>
+        </div>
+      <% end %>
+      <% if alert %>
+        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded shadow-sm" role="alert">
+          <p class="font-bold">エラー</p>
+          <p><%= alert %></p>
+        </div>
+      <% end %>
+    </div>
+    
+    <!-- メインコンテンツ -->
+    <main class="flex-grow">
+      <%= yield %>
+    </main>
+
+    <!-- フッター (オプション: 今回はシンプルに) -->
+    <footer class="mt-8 py-4 text-center text-sm text-gray-500 border-t">
+      &copy; <%= Time.current.year %> HitonoHagoromo. All rights reserved.
+    </footer>
   </body>
 </html>

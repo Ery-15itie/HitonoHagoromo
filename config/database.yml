@@ -1,23 +1,25 @@
+# PostgreSQLを使用するための設定
 default: &default
   adapter: postgresql
   encoding: unicode
-  # 接続ホスト名は docker-compose.yml の db サービス名に合わせる
-  host: db
-  username: <%= ENV.fetch("POSTGRES_USER") { "postgres" } %>
-  password: <%= ENV.fetch("POSTGRES_PASSWORD") { "password" } %>
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
 
 development:
   <<: *default
-  # データベース名も docker-compose.yml に合わせる
-  database: qol_closet_development
+  database: hitonohagoromo_development
+  username: <%= ENV["DB_USERNAME"] %>
+  password: <%= ENV["DB_PASSWORD"] %>
+  host: <%= ENV["DB_HOST"] %>
+  port: <%= ENV["DB_PORT"] %>
 
 test:
   <<: *default
-  database: qol_closet_test
+  database: hitonohagoromo_test
 
+# Render用 Production 設定
 production:
-  <<: *default
-  database: qol_closet_production
-  username: <%= ENV.fetch("POSTGRES_USER") { "postgres" } %>
-  password: <%= ENV.fetch("POSTGRES_PASSWORD") { "password" } %>
+  url: <%= ENV['DATABASE_URL'] %>
+  # RenderではSSL接続が必須
+  sslmode: 'require'
+  # Rails 7で必要となる設定
+  pool: 5

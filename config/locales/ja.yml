@@ -1,0 +1,64 @@
+ja:
+  # Rails標準の日本語設定
+  time:
+    formats:
+      default: "%Y/%m/%d %H:%M:%S"
+      short: "%m/%d %H:%M"
+      long: "%Y年%m月%d日(%a) %H:%M"
+  
+  # Deviseの日本語翻訳
+  devise:
+    confirmations:
+      confirmed: "アカウントを正常に確認しました。"
+      send_instructions: "アカウントの確認方法を数分以内にメールでご連絡します。"
+      send_paranoid_instructions: "あなたのメールアドレスがデータベースに存在する場合、数分以内にアカウントの確認方法をメールでご連絡します。"
+    failure:
+      already_authenticated: "既にログインしています。"
+      inactive: "アカウントが有効になっていません。"
+      invalid: "メールアドレスまたはパスワードが違います。"
+      locked: "アカウントがロックされています。"
+      last_attempt: "次のログイン試行でアカウントがロックされます。"
+      not_found_in_database: "メールアドレスまたはパスワードが違います。"
+      timeout: "セッションの有効期限が切れました。再度ログインしてください。"
+      unauthenticated: "アカウントを登録するか、ログインする必要があります。"
+      unconfirmed: "アカウントが確認されていません。"
+    omniauth_callbacks:
+      failure: "%{kind} アカウントによる認証に失敗しました。理由: 「%{reason}」"
+      success: "%{kind} アカウントによる認証に成功しました。"
+    passwords:
+      no_token: "このページにアクセスすることはできません。パスワード再設定メールからアクセスしていることを確認してください。"
+      send_instructions: "数分以内にパスワード再設定の方法をメールでご連絡します。"
+      send_paranoid_instructions: "あなたのメールアドレスがデータベースに存在する場合、数分以内にパスワード再設定の方法をメールでご連絡します。"
+      updated: "パスワードを変更しました。ログインしています。"
+      updated_not_active: "パスワードを変更しました。"
+    registrations:
+      destroyed: "アカウントを削除しました。またのご利用をお待ちしております。"
+      signed_up: "ようこそ！アカウント登録が完了しました。"
+      signed_up_but_inactive: "アカウントは正常に登録されましたが、ログインできませんでした。メールで送られた案内に従ってアカウントを有効にしてください。"
+      signed_up_but_locked: "アカウントは正常に登録されましたが、ログインできませんでした。アカウントはロックされています。"
+      signed_up_but_unconfirmed: "アカウントは正常に登録されましたが、ログインできませんでした。メールで送られた案内に従ってアカウントを確認してください。"
+      update_needs_confirmation: "アカウントは正常に更新されましたが、新しいメールアドレスの確認が必要です。メールで送られた案内に従ってメールアドレスを確認してください。"
+      updated: "アカウントを正常に更新しました。"
+      
+    sessions:
+      signed_in: "ログインしました。"
+      signed_out: "ログアウトしました。"
+      
+    unlocks:
+      send_instructions: "数分以内にアカウントのロック解除方法をメールでご連絡します。"
+      send_paranoid_instructions: "あなたのメールアドレスがデータベースに存在する場合、数分以内にアカウントのロック解除方法をメールでご連絡します。"
+      unlocked: "アカウントのロックを解除しました。ログインしています。"
+      
+    # Deviseのビューで使用されるラベル名
+    user:
+      email: "メールアドレス"
+      password: "パスワード"
+      password_confirmation: "パスワード (確認)"
+      remember_me: "ログイン情報を記憶する"
+
+  # ActiveModel の日本語翻訳 (バリデーションエラーなど)
+  activerecord:
+    attributes:
+      user:
+        email: "メールアドレス"
+        password: "パスワード"

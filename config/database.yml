@@ -16,10 +16,10 @@ test:
   <<: *default
   database: hitonohagoromo_test
 
-# Render用 Production 設定
+# Render用 Production 設定 
 production:
+  # defaultの設定を継承し、adapter: postgresql を確実に含める
+  <<: *default 
   url: <%= ENV['DATABASE_URL'] %>
   # RenderではSSL接続が必須
   sslmode: 'require'
-  # Rails 7で必要となる設定
-  pool: 5

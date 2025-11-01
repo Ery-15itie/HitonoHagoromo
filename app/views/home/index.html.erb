@@ -1,0 +1,337 @@
+<%# トップページ (レスポンシブ対応 - PC:横並び / Mobile:縦積み) %>
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600;700&family=Noto+Serif+JP:wght=300;400;600;700&display=swap');
+  
+  /* 全体のフォント */
+  .elegant-font {
+    font-family: 'Cormorant Garamond', 'Noto Serif JP', serif;
+  }
+  
+  /* グラデーション背景 (メイン背景) */
+  .gradient-bg {
+    background: linear-gradient(135deg, #F8F4F8 0%, #E8E4E8 50%, #D8D4D8 100%);
+  }
+  
+  /* メインカードの背景 */
+  .frost-effect {
+    background: rgba(255, 255, 255, 0.95);
+  }
+  
+  /* メインカラー: グレイッシュピンク */
+  .main-color-bg {
+    background-color: #D8B5C5; 
+  }
+  .main-color-text {
+    color: #8B6F47; /* ブラウン系のアクセント */
+  }
+  
+  /* ボタンのスタイル */
+  .btn-elegant {
+    background-color: #8B6F47; /* ブラウン */
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .btn-elegant:hover {
+    background-color: #6B5537;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
+  }
+  
+  /* リンクのスタイル */
+  .link-elegant {
+    color: #8B6F47;
+    text-decoration: none;
+    font-weight: 600;
+  }
+  
+  .link-elegant:hover {
+    color: #6B5537;
+    text-decoration: underline;
+  }
+  
+  /* インプットフォーカス */
+  .input-elegant:focus {
+    border-color: #8B6F47;
+    box-shadow: 0 0 0 1px #8B6F47;
+    outline: none;
+  }
+  
+  /* 特徴ボックスのスタイル */
+  .feature-box {
+    border: 1px solid #F0E6EF;
+    background-color: #FAFAFA;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .feature-box:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  }
+  
+  /* タイトル装飾 */
+  .section-title::after {
+    content: '';
+    display: block;
+    width: 60px;
+    height: 1px;
+    margin-top: 5px;
+    background-color: #D8B5C5;
+  }
+
+ /* PCサイズ (lg) 以上での3カラムグリッド設定 */
+  @media (min-width: 1024px) {
+    .three-column-grid {
+      /* 3カラム: 左(説明)2fr 中央(フォーム)3fr 右(特徴)3fr */
+      grid-template-columns: 2fr 3fr 3fr; 
+    }
+  }
+</style>
+
+<div class="min-h-screen gradient-bg flex items-center justify-center elegant-font py-8 px-2 sm:px-6 lg:px-8">
+  
+  <%# メインコンテナ: レスポンシブグリッド %>
+  <div class="max-w-7xl w-full flex flex-col lg:grid lg:three-column-grid shadow-2xl rounded-2xl overflow-hidden">
+    
+    <%# 1. 左カラム: プロモーション/説明エリア (ピンク) %>
+    <div class="lg:col-span-1 main-color-bg relative p-8 sm:p-10 flex flex-col justify-between text-black/90">
+      
+      <div class="relative z-10">
+        <h1 class="text-4xl sm:text-5xl font-bold mb-4 tracking-wider border-b border-black/50 pb-2">
+            ヒトノハゴロモ
+        </h1>
+        <p class="text-xl font-light italic leading-snug mb-8">
+          「あの人との一着」を、完璧に保ちます。
+        </p>
+      </div>
+
+      <%# サービスの概要説明 %>
+      <div class="relative z-10 mt-auto pt-6 border-t border-black/30">
+        <h2 class="text-xl font-semibold mb-3">二度目の装い問題に、もう悩まされない。</h2>
+        <p class="text-sm font-light leading-relaxed text-black/90">
+          「ヒトノハゴロモ」は、特定の人に会った際に、あなたが何を着用していたかを密かに記録する、プライベートなクローゼット管理サービスです。
+        </p>
+      </div>
+      
+    </div>
+
+    <%# 2. 中央カラム (モバイルでは2番目): 認証フォームエリア %>
+    <div class="lg:col-span-1 frost-effect p-8 sm:p-10 border-b lg:border-r lg:border-b-0 border-gray-100">
+      
+      <%# タイトル %>
+      <div class="mb-8">
+        <h2 id="form-title" class="text-3xl font-bold text-gray-800 main-color-text section-title">
+          サインイン
+        </h2>
+      </div>
+      
+      <%# ==== Devise Flash Message表示エリア ==== %>
+      <% if flash[:alert] %>
+        <div class="p-3 mb-4 bg-red-50 border-l-4 border-red-500 text-red-800 rounded-r-lg text-sm font-medium">
+          <%= flash[:alert] %>
+        </div>
+      <% end %>
+      <% if flash[:notice] %>
+        <div class="p-3 mb-4 bg-green-50 border-l-4 border-green-500 text-green-800 rounded-r-lg text-sm font-medium">
+          <%= flash[:notice] %>
+        </div>
+      <% end %>
+      
+      <%# --- ログインフォームパネル --- %>
+      <div id="login-form-panel" class="auth-panel border border-gray-100 p-6 rounded-xl shadow-sm">
+        <%= form_for(@user, as: :user, url: session_path(:user), html: { class: "space-y-5" }) do |f| %>
+          
+          <%# メールアドレス %>
+          <div>
+            <%= f.email_field :email, autofocus: true, autocomplete: "email", required: true,
+              class: "input-elegant appearance-none block w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 transition duration-200", 
+              placeholder: "メールアドレス" %>
+          </div>
+          
+          <%# パスワード %>
+          <div>
+            <%= f.password_field :password, autocomplete: "current-password", required: true,
+              class: "input-elegant appearance-none block w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 transition duration-200", 
+              placeholder: "パスワード" %>
+          </div>
+          
+          <%# Remember Meとリンク %>
+          <div class="flex items-center justify-between text-sm pt-1">
+            <div class="flex items-center">
+              <%= f.check_box :remember_me, class: "h-4 w-4 rounded border-gray-300 text-gray-700 focus:ring-gray-700" %>
+              <%= f.label :remember_me, "ログイン情報を記憶", class: "ml-2 text-gray-700 font-medium" %>
+            </div>
+            <%= link_to "パスワードを忘れた場合", new_password_path(@user), class: "link-elegant text-sm" %>
+          </div>
+
+          <%# ログインボタン %>
+          <div class="pt-2">
+            <%= f.button "ログイン", type: "submit", class: "btn-elegant w-full py-3.5 px-6 text-lg font-semibold rounded-lg text-white cursor-pointer" %>
+          </div>
+        <% end %>
+
+        <div class="text-center pt-6 border-t border-gray-100 mt-6">
+          <p class="text-sm text-gray-600">
+            アカウントをお持ちでない方は
+            <%# 新規登録へのリンクを強調して配置 %>
+            <a href="#" id="switch-to-signup" class="link-elegant block mt-2 text-base">新規アカウントを作成</a>
+          </p>
+        </div>
+      </div>
+      
+      <%# --- 新規登録フォームパネル --- %>
+      <div id="signup-form-panel" class="auth-panel hidden border border-gray-100 p-6 rounded-xl shadow-sm">
+        <%# Deviseの登録エラーメッセージ %>
+        <% if @user.errors.any? %>
+          <div class="mb-4 p-3 bg-red-50 border-l-4 border-red-500 rounded-r-lg">
+            <h3 class="font-semibold text-red-800 text-sm mb-1">
+              <%= @user.errors.count %>件のエラーがあります
+            </h3>
+            <ul class="list-disc list-inside text-xs text-red-700 space-y-0.5">
+              <% @user.errors.full_messages.each do |message| %>
+                <li><%= message %></li>
+              <% end %>
+            </ul>
+          </div>
+        <% end %>
+        
+        <%= form_for(@user, as: :user, url: registration_path(:user), html: { class: "space-y-5" }) do |f| %>
+          
+          <%# メールアドレス %>
+          <div>
+            <%= f.email_field :email, autofocus: true, autocomplete: "email", required: true, id: "email_signup",
+              class: "input-elegant appearance-none block w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 transition duration-200", 
+              placeholder: "メールアドレス" %>
+          </div>
+
+          <%# パスワード %>
+          <div>
+            <%= f.password_field :password, autocomplete: "new-password", required: true, id: "password_signup",
+              class: "input-elegant appearance-none block w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 transition duration-200", 
+              placeholder: "パスワード (6文字以上)" %>
+          </div>
+          
+          <%# パスワード確認 %>
+          <div>
+            <%= f.password_field :password_confirmation, autocomplete: "new-password", required: true,
+              class: "input-elegant appearance-none block w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 transition duration-200", 
+              placeholder: "パスワードを再入力" %>
+          </div>
+
+          <%# 新規登録ボタン %>
+          <div class="pt-2">
+            <%= f.button "アカウントを作成", type: "submit", class: "btn-elegant w-full py-3.5 px-6 text-lg font-semibold rounded-lg text-white cursor-pointer" %>
+          </div>
+        <% end %>
+
+        <div class="text-center pt-6 border-t border-gray-100 mt-6">
+          <p class="text-sm text-gray-600">
+            すでにアカウントをお持ちの方は
+            <a href="#" id="switch-to-login" class="link-elegant block mt-2 text-base">サインイン</a>
+          </p>
+        </div>
+      </div>
+
+    </div>
+    
+    <%# 3. 右カラム (モバイルでは3番目): 特徴/ステップエリア (カタログ風のボックス) %>
+    <div class="lg:col-span-1 frost-effect p-8 sm:p-10">
+      <div class="mt-0">
+        <h3 class="text-xl font-semibold text-gray-800 mb-6 section-title main-color-text">
+          ヒトノハゴロモが提供するもの/環境
+        </h3>
+        
+        <div class="space-y-4">
+          
+          <%# 特徴ボックス 1: 記録 %>
+          <div class="feature-box p-4 rounded-xl flex items-start shadow-sm">
+            <span class="text-xl mr-4 text-gray-500 mt-1">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-check"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="16 11 18 13 22 9"/></svg>
+            </span>
+            <div>
+              <p class="font-bold text-gray-800 text-base">人物ごとの密接な記録</p>
+              <p class="text-sm text-gray-600 mt-1">
+                会う人や場面に合わせて、あなたがその時何を着用していたかをピンポイントで管理できます。
+              </p>
+            </div>
+          </div>
+          
+          <%# 特徴ボックス 2: 回避 %>
+          <div class="feature-box p-4 rounded-xl flex items-start shadow-sm">
+            <span class="text-xl mr-4 text-gray-500 mt-1">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-refresh-ccw"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.79 2.75"/><path d="M6.3 15H3v3"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.79-2.75"/><path d="M17.7 9H21V6"/></svg>
+            </span>
+            <div>
+              <p class="font-bold text-gray-800 text-base">スマートな重複警告</p>
+              <p class="text-sm text-gray-600 mt-1">
+                二度目以降の機会で同じ服を避けたい場合、システムが自動で過去の記録から警告を出します。
+              </p>
+            </div>
+          </div>
+          
+          <%# 特徴ボックス 3: プライベート %>
+          <div class="feature-box p-4 rounded-xl flex items-start shadow-sm">
+            <span class="text-xl mr-4 text-gray-500 mt-1">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-lock"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </span>
+            <div>
+              <p class="font-bold text-gray-800 text-base">プライバシー配慮</p>
+              <p class="text-sm text-gray-600 mt-1">
+                あなたのクローゼットと対人関係の履歴は、誰にも知られることなく、完全に保護されます。
+              </p>
+            </div>
+          </div>
+          
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // フォーム切り替え用のJavaScript
+  document.addEventListener('DOMContentLoaded', () => {
+    const title = document.getElementById('form-title');
+    const loginPanel = document.getElementById('login-form-panel');
+    const signupPanel = document.getElementById('signup-form-panel');
+    const switchToSignup = document.getElementById('switch-to-signup');
+    const switchToLogin = document.getElementById('switch-to-login');
+
+    function switchTo(panel) {
+      if (panel === 'login') {
+        loginPanel.classList.remove('hidden');
+        signupPanel.classList.add('hidden');
+        title.textContent = 'サインイン';
+      } else {
+        loginPanel.classList.add('hidden');
+        signupPanel.classList.remove('hidden');
+        title.textContent = '新規登録';
+      }
+    }
+
+    // Deviseのエラーがある場合、新規登録フォームをデフォルト表示
+    const isRegistrationError = '<%= @user.errors.any? ? 'true' : 'false' %>';
+    if (isRegistrationError === 'true') {
+      switchTo('signup');
+    } else {
+      switchTo('login');
+    }
+
+    // リンククリックによる切り替え
+    if (switchToSignup) {
+      switchToSignup.addEventListener('click', (e) => {
+        e.preventDefault();
+        switchTo('signup');
+      });
+    }
+
+    if (switchToLogin) {
+      switchToLogin.addEventListener('click', (e) => {
+        e.preventDefault();
+        switchTo('login');
+      });
+    }
+  });
+</script>

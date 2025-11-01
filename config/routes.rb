@@ -1,15 +1,21 @@
-Rails.application.routes.draw do
-  # Deviseのルーティングを追加
-  # Userモデルに基づき、新規登録、ログイン、ログアウトのパスが自動で生成される
-  devise_for :users
+# config/routes.rb
 
-  # 認証後のルート設定: ログイン後やサインアップ後の遷移先を設定
-  # 認証済みユーザーが / にアクセスした場合、現在は静的ページへ戻る
-  # 本格的な機能実装後、/dashboard などに変更予定
+Rails.application.routes.draw do
+  # Deviseの認証機能のルーティング
+  # controllersオプションを追加し、SessionsとRegistrationsにカスタムコントローラーを指定
+  devise_for :users, controllers: {
+    sessions: 'users/sessions',
+    registrations: 'users/registrations'
+  }
+  
+  # アイテム管理のCRUDルーティング
+  resources :items 
+  
+  # 認証済みユーザーの場合のルート (アイテム一覧へ)
   authenticated :user do
-    root 'pages#index', as: :authenticated_root
+    root to: "items#index", as: :authenticated_root
   end
 
-  # 未認証ユーザーが / にアクセスした場合、静的ページを表示
-  root "pages#index"
+  # 未認証ユーザーの場合のルート (カスタムLPへ)
+  root to: "home#index"
 end

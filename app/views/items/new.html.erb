@@ -1,0 +1,21 @@
+<div class="elegant-font py-10 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
+  <div class="bg-white p-8 rounded-xl shadow-2xl border border-gray-100">
+
+    <h1 class="text-3xl font-bold text-gray-800 border-b border-amber-100 pb-4 mb-8 text-center">
+      新しいアイテムを登録
+    </h1>
+
+    <%# form_with の中でパーシャルを呼び出す %>
+    <%= form_with model: @item, url: items_path, local: true, class: "space-y-6" do |f| %>
+      
+      <%# _form.html.erb を呼び出し、f (FormBuilder) と item (@item) を渡す %>
+      <%= render 'form', f: f, item: @item %>
+
+    <% end %>
+
+    <%# === 戻るリンク === %>
+    <div class="mt-8 text-center">
+      <%= link_to "アイテム一覧に戻る", items_path, class: "text-amber-700 hover:text-amber-900 text-sm font-medium transition duration-150" %>
+    </div>
+  </div>
+</div>

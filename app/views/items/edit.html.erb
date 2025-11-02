@@ -1,0 +1,25 @@
+<div class="elegant-font py-10 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
+  <div class="bg-white p-8 rounded-xl shadow-2xl border border-gray-100">
+
+    <h1 class="text-3xl font-bold text-gray-800 border-b border-amber-100 pb-4 mb-8 text-center">
+      アイテム情報編集
+      <span class="block text-xl text-amber-700 mt-1">「<%= @item.name %>」</span>
+    </h1>
+
+    <%# form_with の中でパーシャルを呼び出す %>
+    <%= form_with model: @item, url: item_path(@item), local: true, method: :patch, class: "space-y-6" do |f| %>
+      
+      <%# _form.html.erb を呼び出し、f (FormBuilder) と item (@item) を渡す %>
+      <%= render 'form', f: f, item: @item %>
+
+    <% end %>
+
+    <%# === 戻る・削除リンク === %>
+    <div class="mt-8 text-center flex justify-center space-x-6">
+      <%= link_to "詳細画面に戻る", item_path(@item), class: "text-gray-600 hover:text-gray-900 text-sm font-medium transition duration-150" %>
+      
+      <%# 削除ボタン %>
+      <%= button_to "このアイテムを削除", @item, method: :delete, data: { turbo_confirm: '本当にこのアイテムを削除してもよろしいですか？' }, class: "text-red-500 hover:text-red-700 text-sm font-medium transition duration-150 inline-block" %>
+    </div>
+  </div>
+</div>

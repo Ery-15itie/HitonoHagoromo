@@ -1,5 +1,3 @@
-# config/routes.rb
-
 Rails.application.routes.draw do
   # Deviseの認証機能のルーティング
   # controllersオプションを追加し、SessionsとRegistrationsにカスタムコントローラーを指定

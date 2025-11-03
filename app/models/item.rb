@@ -1,12 +1,18 @@
 class Item < ApplicationRecord
-  # Categoryモデルとの関連付け
-  belongs_to :category, optional: true 
-
-  # Userモデルとの関連付け
+  # --- 関連付け ---
   belongs_to :user
-
-  # === バリデーション ===
-  # アイテム名のみを必須とする
-  validates :name, presence: true
+  belongs_to :category, optional: true # category_idがnilを許容するように設定
   
+  # アイテムは複数の着用記録を持つ (1:多)
+  has_many :actual_outfits, dependent: :destroy
+
+  # --- バリデーション ---
+  validates :name, presence: true, length: { maximum: 50 }
+  validates :price, numericality: { only_integer: true, greater_than_or_equal_to: 0 }, allow_nil: true
+  
+  # 価格が存在する場合、10桁以下であること
+  validates :price, length: { maximum: 10 }, if: -> { price.present? }
+  
+  # 色の文字数制限
+  validates :color, length: { maximum: 30 }, allow_nil: true
 end

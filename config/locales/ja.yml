@@ -1,12 +1,24 @@
 ja:
-  # Rails標準の日本語設定
+  # --- 日付/時刻のフォーマットを追加 ---
+  date:
+    formats:
+      default: "%Y/%m/%d"
+      short: "%m/%d"
+      long: "%Y年%m月%d日(%a)"
+      short_date: "%m/%d" # カレンダーの範囲表示用 (例: 11/03)
+
+    day_names: [月曜日, 火曜日, 水曜日, 木曜日, 金曜日, 土曜日, 日曜日]
+    abbr_day_names: [月, 火, 水, 木, 金, 土, 日]
+    month_names: [~, 1月, 2月, 3月, 4月, 5月, 6月, 7月, 8月, 9月, 10月, 11月, 12月]
+    abbr_month_names: [~, 1月, 2月, 3月, 4月, 5月, 6月, 7月, 8月, 9月, 10月, 11月, 12月]
+
   time:
     formats:
       default: "%Y/%m/%d %H:%M:%S"
       short: "%m/%d %H:%M"
       long: "%Y年%m月%d日(%a) %H:%M"
-  
-  # Deviseの日本語翻訳
+
+  # --- Deviseの日本語翻訳 ---
   devise:
     confirmations:
       confirmed: "アカウントを正常に確認しました。"

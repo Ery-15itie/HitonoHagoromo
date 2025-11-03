@@ -1,16 +1,21 @@
 <div class="elegant-font py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-  <div class="flex justify-between items-center mb-8 border-b border-amber-100 pb-4">
+  <div class="flex flex-col sm:flex-row justify-between items-center mb-8 border-b border-amber-100 pb-4">
     <h1 class="text-4xl font-bold text-gray-800">
       私のクローゼット
     </h1>
     
-    <%# 新規アイテム登録ボタン %>
-    <%= link_to new_item_path, class: "flex items-center space-x-2 bg-amber-800 text-white py-2 px-4 rounded-xl font-semibold hover:bg-amber-900 transition duration-150 shadow-lg" do %>
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-        <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
-      </svg>
-      <span>新規アイテム登録</span>
-    <% end %>
+    <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3 mt-4 sm:mt-0">
+      <%# === 着用カレンダーへのリンク  === %>
+      <%= link_to "着用カレンダーへ", actual_outfits_path, class: "flex items-center space-x-2 bg-amber-600 text-white py-2 px-4 rounded-xl font-semibold hover:bg-amber-700 transition duration-150 shadow-lg text-sm" %>
+      
+      <%# 新規アイテム登録ボタン %>
+      <%= link_to new_item_path, class: "flex items-center space-x-2 bg-amber-800 text-white py-2 px-4 rounded-xl font-semibold hover:bg-amber-900 transition duration-150 shadow-lg text-sm" do %>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
+        </svg>
+        <span>新規アイテム登録</span>
+      <% end %>
+    </div>
   </div>
 
   <%# === アイテムリストの表示 === %>

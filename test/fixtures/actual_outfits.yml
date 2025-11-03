@@ -1,0 +1,11 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  worn_on: 2025-11-02
+  item: one
+  user: one
+
+two:
+  worn_on: 2025-11-02
+  item: two
+  user: two

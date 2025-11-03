@@ -1,0 +1,46 @@
+<%# - カレンダーから遷移する着用記録作成フォーム %>
+
+<div class="elegant-font py-10 px-4 sm:px-6 lg:px-8 max-w-xl mx-auto">
+  <div class="bg-white p-8 rounded-xl shadow-2xl border border-amber-100">
+
+    <div class="text-center mb-8">
+      <h1 class="text-3xl font-extrabold text-gray-800 mb-2">
+        着用アイテムの記録
+      </h1>
+      <p class="text-xl text-amber-700 font-medium">
+        <%# コントローラで設定された日付を表示 %>
+        <%= l @actual_outfit.worn_on.presence || Date.current, format: :long %>
+      </p>
+      <p class="text-sm text-gray-500 mt-1">
+        この日に着用したアイテムを選択してください。
+      </p>
+    </div>
+
+    <%# フォームのURLが /actual_outfits になるように変更 %>
+    <%= form_with model: @actual_outfit, url: actual_outfits_path, class: "space-y-6" do |f| %>
+      <%# @actual_outfitにエラーメッセージがないか確認 %>
+      <%= render "shared/error_messages", resource: @actual_outfit %>
+      
+      <%# 隠しフィールド: 着用日（コントローラで初期値が設定されている） %>
+      <%= f.hidden_field :worn_on %>
+
+      <%# アイテム選択フィールド %>
+      <div>
+        <%= f.label :item_id, "アイテムの選択", class: "block text-sm font-medium text-gray-700 mb-1" %>
+        <%# @items (current_user.items.order(:name)) を使用 %>
+        <%= f.collection_select :item_id, @items, :id, :name, 
+              { prompt: "アイテムを選択してください" },
+              { required: true, class: "mt-1 block w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-amber-500 focus:border-amber-500 transition duration-150" } %>
+      </div>
+
+      <%# 送信ボタン %>
+      <%= f.submit "このアイテムの着用を記録する", class: "w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-md text-base font-semibold text-white bg-amber-600 hover:bg-amber-700 transition duration-150 cursor-pointer" %>
+    <% end %>
+
+    <div class="mt-6 text-center">
+      <%# カレンダーに戻るリンクは、記録日の週に戻るように設定 %>
+      <% back_date = @actual_outfit.worn_on.presence || Date.current %>
+      <%= link_to "カレンダーに戻る", actual_outfits_path(start_date: back_date.beginning_of_week(:sunday)), class: "text-sm text-gray-600 hover:text-gray-800 transition duration-150" %>
+    </div>
+  </div>
+</div>

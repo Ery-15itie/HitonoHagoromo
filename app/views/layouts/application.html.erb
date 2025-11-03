@@ -22,14 +22,38 @@
         <div class="text-2xl font-bold text-gray-800">
           <%= link_to "ヒトノハゴロモ", root_path %>
         </div>
-        <nav>
-          <%# ログイン後のナビゲーション %>
-          <%= link_to "アイテム一覧", items_path, class: "text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md font-medium" %>
-          <%= link_to "ログアウト", destroy_user_session_path, data: { "turbo-method": :delete }, class: "text-white bg-amber-800 hover:bg-amber-900 px-3 py-2 rounded-md font-medium ml-4" %>
+        <nav class="flex items-center space-x-3">
+          <%# === 着用カレンダーへのリンク === %>
+          <%= link_to "カレンダー", actual_outfits_path, class: "text-gray-600 hover:text-amber-700 px-3 py-2 rounded-md font-medium transition duration-150" %>
+          
+          <%# アイテム一覧（クローゼット）へのリンク %>
+          <%= link_to "アイテム一覧", authenticated_root_path, class: "text-gray-600 hover:text-amber-700 px-3 py-2 rounded-md font-medium transition duration-150" %>
+          
+          <%# === ログアウトボタン (button_toで確実なDELETEリクエストを送信) === %>
+          <%= button_to "ログアウト", destroy_user_session_path, 
+                        method: :delete,
+                        data: { confirm: "ログアウトしますか？" },
+                        class: "text-white bg-red-500 hover:bg-red-600 px-3 py-2 rounded-md font-medium ml-4 transition duration-150 shadow-md cursor-pointer border-none" %>
         </nav>
       </div>
     </header>
   <% end %>
+
+  <%# フラッシュメッセージの表示 %>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+    <% if notice %>
+      <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4 rounded shadow-md" role="alert">
+        <p class="font-bold">お知らせ</p>
+        <p><%= notice %></p>
+      </div>
+    <% end %>
+    <% if alert %>
+      <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded shadow-md" role="alert">
+        <p class="font-bold">注意</p>
+        <p><%= alert %></p>
+      </div>
+    <% end %>
+  </div>
 
   <%# メインコンテンツエリア %>
   <main>

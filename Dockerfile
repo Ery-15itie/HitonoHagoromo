@@ -19,11 +19,10 @@ ENV PATH $BUNDLE_PATH/bin:$PATH
 # 作業ディレクトリの設定
 WORKDIR /hitonohagoromo
 
-# GemfileとGemfile.lockをコンテナにコピー
+# Gemfileをコピー
 COPY Gemfile /hitonohagoromo/Gemfile
-COPY Gemfile.lock /hitonohagoromo/Gemfile.lock
 
-# Gemをインストール 
+# Gemをインストール (Gemをイメージに焼き付ける)
 RUN bundle install --jobs 4 --retry 3
 
 # アプリケーションコードをコピー

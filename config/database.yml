@@ -1,26 +1,22 @@
-# PostgreSQLを使用するための設定
 default: &default
   adapter: postgresql
   encoding: unicode
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  # Dockerコンテナ間の通信設定をdefaultに統一
+  host: db
+  username: postgres
+  password: <%= ENV["POSTGRES_PASSWORD"] %> 
 
 development:
   <<: *default
   database: hitonohagoromo_development
-  # Docker Composeで定義されたDBサービス名（'db'）を設定
-  host: db
-  # ユーザー名とパスワードを環境変数から取得
-  username: postgres
-  password: <%= ENV["POSTGRES_PASSWORD"] %> 
 
 test:
   <<: *default
   database: hitonohagoromo_test
 
-# Render用 Production 設定 
 production:
-  # defaultの設定を継承し、adapter: postgresql を確実に含める
   <<: *default 
   url: <%= ENV['DATABASE_URL'] %>
-  # RenderではSSL接続が必須
+  # クラウド環境ではSSL接続が必須
   sslmode: 'require'

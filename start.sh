@@ -1,15 +1,28 @@
 #!/bin/bash
 
-# Webサーバー起動前のクリーンアップ（サーバーが異常終了した場合のpidファイル削除）
+# データベースの準備ができるまで待機
+echo "Waiting for PostgreSQL to start..."
+while ! pg_isready -h db -U postgres; do
+  sleep 1
+done
+echo "PostgreSQL started successfully."
+
+# Webサーバー起動前のクリーンアップ
 rm -f tmp/pids/server.pid
 
-# Gemを確実にインストールするためにbundle installを実行
-echo "Running bundle install to ensure dependencies are loaded..."
+# Ruby Gemのインストールと更新
+echo "Running bundle install..."
 bundle install
 
-# GemがPATHに追加されたことを確認するため、新しいシェルを起動し環境を再ロード
-# 新しいシェル内でPumaを起動させる
-echo "Starting Puma web server via exec..."
+# JavaScriptパッケージのインストール
+echo "Running yarn install..."
+yarn install
 
-# $SHELL の代わりに bash を明示的に使用し、新しい環境でコマンドを実行
-/bin/bash -c "exec bundle exec puma -C config/puma.rb"
+# データベースが存在しない場合は作成し、マイグレーションを実行
+echo "Checking and running migrations..."
+bundle exec rails db:create || true
+bundle exec rails db:migrate
+
+# Webサーバー(Puma)を起動
+echo "Starting Puma web server..."
+exec bundle exec puma -C config/puma.rb -b 0.0.0.0

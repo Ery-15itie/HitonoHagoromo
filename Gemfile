@@ -6,38 +6,39 @@ gem "rails", "~> 7.0.8"
 # PostgreSQLデータベースアダプタ
 gem "pg", "~> 1.5"
 
-# Tailwind CSS、Hotwire (Turbo and Stimulus)
-# Sprockets-rails を削除 (Propshaftとの衝突回避)
+# --- Webアプリ実行に必要な標準Gem ---
+gem "puma", "~> 5.0"
+gem "tzinfo-data" # タイムゾーンデータ (Docker環境で必要)
+
+# --- フロントエンド技術 ---
 gem "tailwindcss-rails"
+gem "dartsass-rails" # Tailwind CSSの依存関係
+gem "jsbundling-rails" # JavaScript バンドラー 
 gem "turbo-rails"
 gem "stimulus-rails"
 
-# 認証機能
+# --- 認証機能 ---
 gem "devise"
-
 # デフォルトのJavaScriptバンドルとアセット管理
 gem "propshaft"
 
-# デバッグと開発
+# --- 環境別Gem ---
+
+# 開発/テスト環境でのみ使用
 group :development, :test do
   gem "debug", platforms: %i[ mri windows ]
 end
 
+# 開発環境でのみ使用
 group :development do
-  # web-consoleはDocker環境では使えないためコメントアウト
-  # gem "web-console" 
+  # 開発用データベースをPostgreSQLに統一しているため、sqlite3は削除
 end
 
+# テスト環境でのみ使用
 group :test do
   gem "rspec-rails"
 end
 
-# Production環境用：PostgreSQLを使用し、RailsサーバーとしてPumaを導入
+# Production環境用：ProductionではPumaを使用
 group :production do
-  gem "puma"
-end
-
-# 開発用データベース（Docker環境で簡単に動かすためSQLite3を使用）
-group :development do
-  gem "sqlite3", "~> 1.4"
 end

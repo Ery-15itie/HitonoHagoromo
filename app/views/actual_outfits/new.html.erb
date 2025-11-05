@@ -1,46 +1,52 @@
-<%# - カレンダーから遷移する着用記録作成フォーム %>
+<%# --- 新しい着用記録の作成フォーム --- %>
 
-<div class="elegant-font py-10 px-4 sm:px-6 lg:px-8 max-w-xl mx-auto">
-  <div class="bg-white p-8 rounded-xl shadow-2xl border border-amber-100">
+<div class="max-w-4xl mx-auto py-6 sm:px-6 lg:px-8">
+  <div class="bg-white p-8 rounded-xl shadow-2xl">
+    <h1 class="text-3xl font-bold text-gray-900 mb-6">新しい着用記録</h1>
+    
+    <%# エラーメッセージの表示 %>
+    <%= render "shared/error_messages", resource: @actual_outfit %>
 
-    <div class="text-center mb-8">
-      <h1 class="text-3xl font-extrabold text-gray-800 mb-2">
-        着用アイテムの記録
-      </h1>
-      <p class="text-xl text-amber-700 font-medium">
-        <%# コントローラで設定された日付を表示 %>
-        <%= l @actual_outfit.worn_on.presence || Date.current, format: :long %>
-      </p>
-      <p class="text-sm text-gray-500 mt-1">
-        この日に着用したアイテムを選択してください。
-      </p>
-    </div>
-
-    <%# フォームのURLが /actual_outfits になるように変更 %>
-    <%= form_with model: @actual_outfit, url: actual_outfits_path, class: "space-y-6" do |f| %>
-      <%# @actual_outfitにエラーメッセージがないか確認 %>
-      <%= render "shared/error_messages", resource: @actual_outfit %>
+    <%= form_with(model: @actual_outfit, url: actual_outfits_path, local: true) do |form| %>
       
-      <%# 隠しフィールド: 着用日（コントローラで初期値が設定されている） %>
-      <%= f.hidden_field :worn_on %>
-
-      <%# アイテム選択フィールド %>
-      <div>
-        <%= f.label :item_id, "アイテムの選択", class: "block text-sm font-medium text-gray-700 mb-1" %>
-        <%# @items (current_user.items.order(:name)) を使用 %>
-        <%= f.collection_select :item_id, @items, :id, :name, 
-              { prompt: "アイテムを選択してください" },
-              { required: true, class: "mt-1 block w-full border border-gray-300 rounded-lg shadow-sm p-3 focus:ring-amber-500 focus:border-amber-500 transition duration-150" } %>
+      <%# --- 1. 着用日 (Hidden/Readonly) --- %>
+      <div class="mb-6">
+        <label class="block text-sm font-medium text-gray-700">着用日</label>
+        <p class="text-xl font-bold text-amber-700">
+          <%= l @actual_outfit.worn_on, format: :long %>
+        </p>
+        <%= form.hidden_field :worn_on %>
       </div>
 
-      <%# 送信ボタン %>
-      <%= f.submit "このアイテムの着用を記録する", class: "w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-md text-base font-semibold text-white bg-amber-600 hover:bg-amber-700 transition duration-150 cursor-pointer" %>
-    <% end %>
+      <%# --- 2. 時間帯の選択 (Time Slot) --- %>
+      <div class="mb-6">
+        <%= form.label :time_slot, "時間帯", class: "block text-sm font-medium text-gray-700" %>
+        <%# コントローラーで準備された @time_slot_options を使用 %>
+        <%= form.select :time_slot, @time_slot_options, { prompt: "時間帯を選択してください" }, class: "mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-amber-500 focus:border-amber-500 sm:text-sm rounded-md shadow-sm" %>
+      </div>
 
-    <div class="mt-6 text-center">
-      <%# カレンダーに戻るリンクは、記録日の週に戻るように設定 %>
-      <% back_date = @actual_outfit.worn_on.presence || Date.current %>
-      <%= link_to "カレンダーに戻る", actual_outfits_path(start_date: back_date.beginning_of_week(:sunday)), class: "text-sm text-gray-600 hover:text-gray-800 transition duration-150" %>
-    </div>
+      <%# --- 3. アイテムの選択 --- %>
+      <div class="mb-6">
+        <%= form.label :item_id, "アイテム", class: "block text-sm font-medium text-gray-700" %>
+        <%# @items を使用し、requiredを付与 %>
+        <%= form.select :item_id, @items.map { |i| [i.name, i.id] }, { prompt: "アイテムを選択してください" }, 
+              { required: true, class: "mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-amber-500 focus:border-amber-500 sm:text-sm rounded-md shadow-sm" } %>
+        <p class="mt-2 text-sm text-gray-500">※ 現在の仕様では、一つの記録で一つのアイテムのみ選択できます。</p>
+      </div>
+
+      <%# --- 4. メモ/感想 (Impression) --- %>
+      <div class="mb-8">
+        <%= form.label :impression, "メモ・感想", class: "block text-sm font-medium text-gray-700" %>
+        <%= form.text_area :impression, rows: 4, placeholder: "着用した時の天気、気分、コメントなどを記入してください。", class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500 sm:text-sm" %>
+      </div>
+
+      <%# --- 5. 送信ボタン --- %>
+      <div class="flex justify-end space-x-4">
+        <%# キャンセルボタンは、タイムラインビューに戻るように設定 %>
+        <%# start_dateは月曜始まりに統一 %>
+        <%= link_to 'キャンセル', actual_outfits_path(start_date: @actual_outfit.worn_on.beginning_of_week(:monday)), class: "bg-gray-300 text-gray-800 hover:bg-gray-400 px-4 py-2 rounded-md font-medium transition duration-150 shadow-md" %>
+        <%= form.submit "記録を保存", class: "bg-amber-600 text-white hover:bg-amber-700 px-4 py-2 rounded-md font-medium transition duration-150 shadow-md cursor-pointer" %>
+      </div>
+    <% end %>
   </div>
 </div>

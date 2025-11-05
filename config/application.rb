@@ -6,12 +6,10 @@ require "rails/all"
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
 
-module HitonoHagoromo
+module Hitonohagoromo
   class Application < Rails::Application
     # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 7.0
-
-    config.railties_order = [:all, Sprockets::Railtie] if defined?(Sprockets::Railtie)
 
     # Configuration for the application, engines, and railties goes here.
     #
@@ -19,10 +17,17 @@ module HitonoHagoromo
     # in config/environments, which are processed later.
     #
     # config.time_zone = "Central Time (US & Canada)"
-    config.eager_load_paths << Rails.root.join("extras")
+    # config.eager_load_paths << Rails.root.join("extras")
 
-    # Timezoneとロケールを日本に設定
-    config.time_zone = "Tokyo"
+    # 日本語をデフォルトのロケールとして設定
     config.i18n.default_locale = :ja
+
+    # タイムゾーンを日本時間に設定
+    config.time_zone = "Tokyo"
+
+    # ★ I18n::MissingTranslationData エラーを解消する★
+    # サブディレクトリを含むすべてのロケールファイルを読み込むように設定
+    config.i18n.load_path += Dir[Rails.root.join('config', 'locales', '**', '*.{rb,yml}')]
+    
   end
 end

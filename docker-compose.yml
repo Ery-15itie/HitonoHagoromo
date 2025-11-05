@@ -4,8 +4,8 @@ services:
   # Railsアプリケーションのサービス定義
   web:
     build: .
-    # start.sh を実行可能にしてから実行
-    command: bash -c "chmod +x start.sh && ./start.sh"
+    # サーバー起動コマンドを直接指定
+    command: bundle exec rails server -p 3000 -b '0.0.0.0'
     volumes:
       # ボリュームマウントパスを hitonohagoromo に統一
       - .:/hitonohagoromo
@@ -16,7 +16,6 @@ services:
     tty: true
     stdin_open: true
     environment:
-      # データベース接続情報の指定
       POSTGRES_HOST: db
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password

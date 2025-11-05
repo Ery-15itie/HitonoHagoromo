@@ -16,10 +16,10 @@
 <%# 価格 %>
 <%= f.label :price, "価格 (円)", class: "block text-sm font-semibold text-gray-700 mb-1" %> <%= f.number_field :price, class: "w-full border-gray-300 rounded-lg shadow-sm focus:border-amber-600 focus:ring-amber-600 p-3 transition duration-150", placeholder: "例: 5000", min: 0 %>
 <%# 色 %>
-<%= f.label :color, "色", class: "block text-sm font-semibold text-gray-700 mb-1" %> <%= f.text_field :color, class: "w-full border-gray-300 rounded-lg shadow-sm focus:border-amber-600 focus:ring-amber-600 p-3 transition duration-150", placeholder: "例: ネイビー or Black" %>
+<%= f.label :color, "色", class: "block text-sm font-semibold text-gray-700 mb-1" %> <%= f.text_field :color, class: "w-full border-gray-300 rounded-lg shadow-sm focus:border-amber-600 focus:ring-amber-600 p-3 transition duration-150", placeholder: "例: 白" %>
 
 <%# === 説明 === %>
-<%= f.label :description, "説明・メモ", class: "block text-sm font-semibold text-gray-700 mb-1" %> <%= f.text_area :description, rows: 4, class: "w-full border-gray-300 rounded-lg shadow-sm focus:border-amber-600 focus:ring-amber-600 p-3 transition duration-150", placeholder: "購入した場所、特別な手入れ方法など..." %>
+<%= f.label :description, "説明・メモ", class: "block text-sm font-semibold text-gray-700 mb-1" %> <%= f.text_area :description, rows: 4, class: "w-full border-gray-300 rounded-lg shadow-sm focus:border-amber-600 focus:ring-amber-600 p-3 transition duration-150", placeholder: "購入した場所、ブランド、管理方法など" %>
 
 <%# === 送信ボタン === %>
 <%# f.object.new_record? で新規作成か編集かを判断し、ボタンのテキストを切り替える %> <%= f.submit f.object.new_record? ? "アイテムを登録" : "アイテム情報を更新", class: "w-full bg-amber-800 text-white py-3 px-4 rounded-xl font-bold text-lg hover:bg-amber-900 transition duration-300 cursor-pointer shadow-lg shadow-amber-200/50" %>

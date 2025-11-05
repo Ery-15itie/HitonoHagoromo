@@ -16,9 +16,14 @@ Rails.application.routes.draw do
   # index/カレンダー画面からの「記録追加」で必要な new と、destroyを定義
   resources :actual_outfits, only: [:new, :destroy]
   
-  # 全ての着用記録を一覧表示するためのトップレベルのルーティング
-  # URL: /outfits
-  get 'outfits', to: 'actual_outfits#index', as: :actual_outfits
+  # === タイムテーブルビューをメインの /outfits として設定 ===
+  # タイムテーブル表示 (メインの /outfits として設定)
+  get 'outfits', to: 'actual_outfits#timeline', as: :actual_outfits
+  get 'outfits/timeline', to: 'actual_outfits#timeline', as: :timeline_actual_outfits # 念のため、明確なパスも残す
+
+  # 週間カレンダー表示 (URLを /outfits/calendar に変更)
+  get 'outfits/calendar', to: 'actual_outfits#index', as: :actual_outfits_calendar
+  
 
   # --- 着用予定記録 (PlannedOutfit) のルーティング ---
   resources :planned_outfits, only: [:new, :create, :destroy]

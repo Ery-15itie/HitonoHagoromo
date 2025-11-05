@@ -1,0 +1,93 @@
+<div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+  <div class="pb-6 flex justify-between items-center">
+    <h1 class="text-3xl font-bold text-gray-900">着用タイムテーブル</h1>
+    <div class="space-x-4">
+      <%# カレンダー表示への切り替えボタン %>
+      <%= link_to "カレンダー表示", actual_outfits_calendar_path(start_date: @week_start), class: "text-gray-600 hover:text-amber-700 px-3 py-2 rounded-md text-sm font-medium transition duration-150 border border-gray-300" %>
+      <%# クローゼットに戻るボタン %>
+      <%= link_to "クローゼット", authenticated_root_path, class: "text-gray-600 hover:text-amber-700 px-3 py-2 rounded-md text-sm font-medium transition duration-150 border border-gray-300" %>
+    </div>
+  </div>
+  
+  <%# 週のナビゲーション %>
+  <div class="flex justify-between items-center mb-4">
+    <div class="flex items-center space-x-2">
+      <%# 前週へ %>
+      <%= link_to timeline_actual_outfits_path(start_date: @week_start - 7.days), class: "text-gray-500 hover:text-gray-700 transition duration-150" do %>
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+      <% end %>
+      
+      <%# 現在の週の範囲 %>
+      <h2 class="text-2xl font-semibold text-amber-800">
+        <%= l @week_start, format: :short_date %> - <%= l @week_end, format: :short_date %>
+      </h2>
+      
+      <%# 翌週へ %>
+      <%= link_to timeline_actual_outfits_path(start_date: @week_start + 7.days), class: "text-gray-500 hover:text-gray-700 transition duration-150" do %>
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+      <% end %>
+    </div>
+
+    <%# 今日の記録ボタン %>
+    <%= link_to "今日の記録を追加", new_actual_outfit_path(worn_on: Date.current), class: "bg-green-600 text-white hover:bg-green-700 px-3 py-2 rounded-md text-sm font-medium transition duration-150 shadow-md" %>
+  </div>
+
+  <%# ==== タイムテーブル本体 (グリッドレイアウト) ==== %>
+  <div class="bg-white p-2 rounded-xl shadow-xl overflow-x-auto">
+    <%# タイムテーブルの列: 時間帯ラベル + 7日分 %>
+    <div class="grid grid-cols-8 min-w-[1000px]"> 
+      
+      <%# 1行目: 曜日ヘッダー %>
+      <div class="col-span-1 bg-gray-50 text-gray-700 font-bold py-3 px-2 border-b-2 border-r-2 border-gray-200">時間帯</div>
+      <% (@week_start..@week_end).each do |date| %>
+        <% day_class = if date.today?; 'bg-amber-50 border-amber-400'; elsif date.sunday?; 'text-red-600'; elsif date.saturday?; 'text-blue-600'; else; 'text-gray-700'; end %>
+        <div class="col-span-1 text-center font-bold py-3 border-b-2 border-gray-200 <%= day_class %>">
+          <%# 日にち(曜日) の形式に変更 %>
+          <%= date.day %> (<%= I18n.t('date.abbr_day_names')[date.wday] %>)
+        </div>
+      <% end %>
+      
+      <%# 2行目以降: 時間帯ごとのセル %>
+      <% @time_slots.each do |slot_key, slot_name| %>
+        
+        <%# 時間帯ラベル列 %>
+        <div class="col-span-1 bg-gray-50 text-gray-800 font-medium py-4 px-2 border-r-2 border-gray-200 border-t border-dashed">
+          <%= slot_name %>
+        </div>
+
+        <%# 7日分の着用記録セル %>
+        <% (@week_start..@week_end).each do |date| %>
+          <% daily_outfits = @timeline_data[date][slot_key] %>
+          
+          <div class="col-span-1 p-2 border-t border-dashed border-gray-200 hover:bg-gray-100 transition duration-100 min-h-[100px]">
+            <% if daily_outfits.present? %>
+              <% daily_outfits.each do |outfit| %>
+                <div class="bg-amber-100 border border-amber-300 rounded-lg p-2 mb-1 text-xs shadow-sm">
+                  <p class="font-bold text-amber-800 truncate">
+                    着用: <%= outfit.item&.name %>
+                  </p>
+                  <% if outfit.impression.present? %>
+                    <p class="text-gray-700 truncate">
+                      メモ: <%= outfit.impression.truncate(10) %>
+                    </p>
+                  <% end %>
+                  <%# 削除ボタン %>
+                  <%= button_to "削除", actual_outfit_path(outfit), method: :delete, data: { turbo_confirm: "この記録を削除しますか？" }, class: "text-xs text-red-500 hover:text-red-700 inline-block bg-transparent border-none p-0 cursor-pointer mt-1" %>
+                </div>
+              <% end %>
+            <% else %>
+              <p class="text-gray-400 text-xs">記録なし</p>
+            <% end %>
+            
+            <%# 新規記録追加ボタン (日付と時間帯をプリセット) %>
+            <div class="mt-2 text-right">
+              <%= link_to new_actual_outfit_path(worn_on: date, time_slot: slot_key), class: "text-green-600 hover:text-green-800" do %>
+                <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+</div>

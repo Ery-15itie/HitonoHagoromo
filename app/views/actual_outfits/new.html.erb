@@ -7,9 +7,10 @@
     <%# エラーメッセージの表示 %>
     <%= render "shared/error_messages", resource: @actual_outfit %>
 
-    <%= form_with(model: @actual_outfit, url: actual_outfits_path, local: true) do |form| %>
-      
-      <%# --- 1. 着用日 (Hidden/Readonly) --- %>
+    <%#  url: '/actual_outfits' を明示的に指定し、POST /actual_outfits ルートに強制的にマッチさせる %>
+    <%= form_with(model: @actual_outfit, url: '/actual_outfits', local: true) do |form| %>
+
+      <%# --- 1. 着用日 --- %>
       <div class="mb-6">
         <label class="block text-sm font-medium text-gray-700">着用日</label>
         <p class="text-xl font-bold text-amber-700">
@@ -18,7 +19,7 @@
         <%= form.hidden_field :worn_on %>
       </div>
 
-      <%# --- 2. 時間帯の選択 (Time Slot) --- %>
+      <%# --- 2. 時間帯の選択 --- %>
       <div class="mb-6">
         <%= form.label :time_slot, "時間帯", class: "block text-sm font-medium text-gray-700" %>
         <%# コントローラーで準備された @time_slot_options を使用 %>
@@ -34,7 +35,7 @@
         <p class="mt-2 text-sm text-gray-500">※ 現在の仕様では、一つの記録で一つのアイテムのみ選択できます。</p>
       </div>
 
-      <%# --- 4. メモ/感想 (Impression) --- %>
+      <%# --- 4. メモ/感想 --- %>
       <div class="mb-8">
         <%= form.label :impression, "メモ・感想", class: "block text-sm font-medium text-gray-700" %>
         <%= form.text_area :impression, rows: 4, placeholder: "着用した時の天気、気分、コメントなどを記入してください。", class: "mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-amber-500 focus:border-amber-500 sm:text-sm" %>

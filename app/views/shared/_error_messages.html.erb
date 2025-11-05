@@ -1,0 +1,14 @@
+<script type="text/template" data-filename="app/views/shared/_error_messages.html.erb">
+<% if resource.errors.any? %>
+  <div id="error_explanation" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+    <p class="font-bold">
+      <%= resource.errors.count %>件のエラーにより、この項目は保存できませんでした。
+    </p>
+    <ul class="list-disc ml-5 mt-2 text-sm">
+      <% resource.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+    </ul>
+  </div>
+<% end %>
+</script>

@@ -1,0 +1,33 @@
+<div class="max-w-xl mx-auto p-4 sm:p-6 lg:p-8 bg-white shadow-xl rounded-xl">
+  <div class="flex justify-between items-center mb-6 border-b pb-3">
+    <h1 class="text-3xl font-extrabold text-gray-900"><%= @contact.name %></h1>
+    <div class="flex space-x-2">
+      <%= link_to "編集", edit_contact_path(@contact), class: "text-indigo-600 hover:text-indigo-900 font-medium text-sm transition duration-150" %>
+      <%= button_to "削除", contact_path(@contact), method: :delete, data: { turbo_confirm: "#{@contact.name} を削除してもよろしいですか？" }, class: "text-red-600 hover:text-red-900 font-medium text-sm transition duration-150 bg-transparent border-none p-0 cursor-pointer" %>
+    </div>
+  </div>
+
+  <div class="space-y-4">
+    <div class="bg-gray-50 p-4 rounded-lg">
+      <h2 class="text-lg font-semibold text-gray-700 mb-2">メモ・備考</h2>
+      <p class="text-gray-800 whitespace-pre-wrap"><%= @contact.memo.presence || "メモは登録されていません。" %></p>
+    </div>
+
+    <div class="pt-4 border-t border-gray-200">
+      <h2 class="text-lg font-semibold text-gray-700 mb-3">この人との着用実績</h2>
+      <p class="text-gray-600 mb-4">
+        過去に **<%= @contact.name %>** さんと会った時のアイテム着用履歴を確認します。
+      </p>
+      
+      <% if @contact.actual_outfits.exists? %>
+        <%= link_to "全ての着用履歴を見る (#{pluralize(@contact.actual_outfits.count, '回')})", history_contact_path(@contact), class: "w-full block text-center bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg shadow transition duration-150 ease-in-out" %>
+      <% else %>
+        <p class="text-sm text-gray-500">まだ <%= @contact.name %> さんと会った実績が記録されていません。</p>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="mt-8 text-center">
+    <%= link_to "会う人一覧に戻る", contacts_path, class: "text-sm text-gray-500 hover:text-gray-700 font-medium transition duration-150" %>
+  </div>
+</div>

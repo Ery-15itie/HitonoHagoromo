@@ -1,0 +1,26 @@
+<%= form_with(model: contact, class: "space-y-6") do |form| %>
+  <% if contact.errors.any? %>
+    <div id="error_explanation" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+      <p class="font-bold"><%= contact.errors.count %>件のエラーがあります:</p>
+      <ul class="list-disc ml-5 mt-2">
+        <% contact.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= form.label :name, "名前 (必須)", class: "block text-sm font-medium text-gray-700" %>
+    <%= form.text_field :name, class: "mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500", placeholder: "例：羽衣さん" %>
+  </div>
+
+  <div class="field">
+    <%= form.label :memo, "メモ・備考", class: "block text-sm font-medium text-gray-700" %>
+    <%= form.text_area :memo, rows: 4, class: "mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500", placeholder: "例：会社の同期、よく会う" %>
+  </div>
+
+  <div class="actions pt-4">
+    <%= form.submit (contact.new_record? ? "登録する" : "更新する"), class: "w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg shadow transition duration-150 ease-in-out cursor-pointer" %>
+  </div>
+<% end %>

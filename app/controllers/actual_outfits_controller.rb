@@ -75,13 +75,20 @@ class ActualOutfitsController < ApplicationController
   def create
     @actual_outfit = current_user.actual_outfits.build(actual_outfit_params)
 
+    # モデル側で重複チェックが行われる
     if @actual_outfit.save
+      # 警告メッセージがあれば取得し、noticeに結合
+      flash[:notice] = "着用を記録しました！"
+      if @actual_outfit.errors.details[:base].present?
+        # エラーメッセージをアラートとして表示
+        flash[:alert] = @actual_outfit.errors.details[:base].map { |e| e[:message] }.join(' / ')
+      end
+      
       # 成功したら、記録した日付を含む週の**タイムラインビュー**に戻る
-      redirect_to timeline_actual_outfits_path(start_date: @actual_outfit.worn_on.beginning_of_week(:monday)), notice: "着用を記録しました！"
+      redirect_to timeline_actual_outfits_path(start_date: @actual_outfit.worn_on.beginning_of_week(:monday))
     else
       flash.now[:alert] = "着用記録の作成に失敗しました。"
       # フォーム再描画のためにアイテム一覧と時間帯選択肢を準備
-      @items = current_user.items.order(:name)
       @time_slot_options = TIME_SLOTS.map { |k, v| [v, k] }
       render :new, status: :unprocessable_entity
     end
@@ -102,9 +109,11 @@ class ActualOutfitsController < ApplicationController
 
   private
 
-  # new/create アクションで使用するアイテム一覧を準備する
+  # new/create アクションで使用するアイテム一覧とContact一覧を準備する
   def set_form_data
     @items = current_user.items.order(:name)
+    # Contact一覧を取得
+    @contacts = current_user.contacts.order(:name) 
   end
   
   def set_actual_outfit
@@ -115,7 +124,7 @@ class ActualOutfitsController < ApplicationController
   end
 
   def actual_outfit_params
-    # worn_on, item_id に加えて、time_slot と impression を許可
-    params.require(:actual_outfit).permit(:worn_on, :item_id, :time_slot, :impression) 
+    # worn_on, item_id, time_slot, impression に加えて、contact_id を許可する 
+    params.require(:actual_outfit).permit(:worn_on, :item_id, :time_slot, :impression, :contact_id) 
   end
 end

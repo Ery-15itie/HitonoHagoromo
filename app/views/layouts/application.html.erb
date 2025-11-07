@@ -23,8 +23,12 @@
           <%= link_to "ヒトノハゴロモ", root_path %>
         </div>
         <nav class="flex items-center space-x-3">
+          
           <%# === 着用カレンダーへのリンク === %>
           <%= link_to "カレンダー", actual_outfits_path, class: "text-gray-600 hover:text-amber-700 px-3 py-2 rounded-md font-medium transition duration-150" %>
+          
+          <%# === 会う人の管理へのリンク  === %>
+          <%= link_to "会う人の管理", contacts_path, class: "text-gray-600 hover:text-amber-700 px-3 py-2 rounded-md font-medium transition duration-150" %>
           
           <%# アイテム一覧（クローゼット）へのリンク %>
           <%= link_to "アイテム一覧", authenticated_root_path, class: "text-gray-600 hover:text-amber-700 px-3 py-2 rounded-md font-medium transition duration-150" %>

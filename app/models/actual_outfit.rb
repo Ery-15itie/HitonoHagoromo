@@ -10,6 +10,9 @@ class ActualOutfit < ApplicationRecord
   # 着用日が未来の日付でないこと
   validate :worn_on_cannot_be_in_the_future
 
+  # 同じユーザーが、同じ着用日、同じ時間帯で、同じアイテムを二重登録できないようにする
+  validates :item_id, uniqueness: { scope: [:worn_on, :time_slot, :user_id] }
+
   # --- カスタムバリデーションメソッド ---
   def worn_on_cannot_be_in_the_future
     if worn_on.present? && worn_on > Date.current

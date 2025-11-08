@@ -29,8 +29,8 @@ Rails.application.routes.draw do
   # new_actual_outfit_path (/actual_outfits/new)
   get 'actual_outfits/new', to: 'actual_outfits#new', as: :new_actual_outfit
   
-  # create (POST /actual_outfits)
-  post 'actual_outfits', to: 'actual_outfits#create'
+  # create (POST /actual_outfits) - ヘルパー名を明示的に指定してフォームと連携
+  post 'actual_outfits', to: 'actual_outfits#create', as: :create_actual_outfits
 
   # destroy (DELETE /actual_outfits/:id)
   delete 'actual_outfits/:id', to: 'actual_outfits#destroy', as: :actual_outfit
@@ -53,6 +53,6 @@ Rails.application.routes.draw do
     root to: "items#index", as: :authenticated_root
   end
 
-  # 未認証ユーザーの場合のルート (カスタムLPへ)
-  root to: "home#index"
+  # 未認証ユーザーの場合のルートを、カスタムLPではなくログインページにリダイレクト
+  root to: redirect("/users/sign_in")
 end

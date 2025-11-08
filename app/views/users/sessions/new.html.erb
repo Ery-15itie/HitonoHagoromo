@@ -1,0 +1,199 @@
+<%# Alpine.jsを読み込み (DOM操作と状態管理に使用) %>
+<script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+
+<style>
+  /* 優雅な印象を保つため、セリフ系のフォントを適用 */
+  .stylish-font {
+    font-family: 'Inter', 'serif'; 
+  }
+  /* Alpine.jsのトランジション用スタイル */
+  .form-transition {
+    /* 絶対位置にあるフォームが切り替わる際の透明度と位置の遷移を定義 */
+    transition: opacity 300ms ease-in-out, transform 300ms ease-in-out;
+  }
+</style>
+
+<%# Alpine.jsで状態 (isLoginFormActive) を管理 %>
+<div class="min-h-screen flex items-center justify-center bg-amber-50 py-12 px-4 sm:px-6 lg:px-8 stylish-font"
+     x-data="{ isLoginFormActive: true }">
+  
+  <div class="max-w-4xl w-full flex rounded-xl shadow-2xl overflow-hidden border border-amber-200">
+
+    <%# 左側: フォームエリア (温かいクリーム色) - フォームを絶対配置で重ねるためにrelativeを設定 %>
+    <div class="w-full md:w-1/2 bg-white p-8 sm:p-12 flex flex-col justify-center relative">
+      
+      <%# --- 1. ログインフォーム --- %>
+      <div class="form-transition" 
+           x-show="isLoginFormActive"
+           x-transition:enter="ease-out duration-300"
+           x-transition:enter-start="opacity-0 -translate-x-4"
+           x-transition:enter-end="opacity-100 translate-x-0"
+           x-transition:leave="ease-in duration-300"
+           x-transition:leave-start="opacity-100 translate-x-0"
+           x-transition:leave-end="opacity-0 -translate-x-4">
+        
+        <h2 class="text-center text-4xl font-light tracking-wider text-stone-800 mb-8 pt-4">
+          サインイン
+        </h2>
+        
+        <%= form_for(resource, as: resource_name, url: session_path(resource_name), html: { class: "space-y-6" }) do |f| %>
+          
+          <%# メールアドレス %>
+          <div class="group">
+            <%= f.email_field :email, autofocus: true, autocomplete: "email", required: true,
+              class: "bg-transparent w-full border-b border-amber-300 py-2 placeholder-stone-500 text-stone-800 focus:outline-none focus:border-amber-500 transition duration-300", 
+              placeholder: "メールアドレス" %>
+          </div>
+          
+          <%# パスワード %>
+          <div class="group">
+            <%= f.password_field :password, autocomplete: "current-password", required: true,
+              class: "bg-transparent w-full border-b border-amber-300 py-2 placeholder-stone-500 text-stone-800 focus:outline-none focus:border-amber-500 transition duration-300", 
+              placeholder: "パスワード" %>
+          </div>
+
+          <div class="flex items-center justify-between pt-4">
+            <%# Remember Me %>
+            <% if devise_mapping.rememberable? %>
+              <div class="flex items-center">
+                <%= f.check_box :remember_me, class: "h-4 w-4 text-amber-700 focus:ring-amber-500 border-amber-300 rounded" %>
+                <%= f.label :remember_me, "ログイン情報を記憶", class: "ml-2 block text-sm text-stone-800 font-light" %>
+              </div>
+            <% end %>
+
+            <%# パスワードを忘れた場合 %>
+            <% if devise_mapping.recoverable? %>
+              <div class="text-sm">
+                <%= link_to "パスワードを忘れた場合", new_password_path(resource_name), class: "font-light text-amber-700 hover:text-amber-900" %>
+              </div>
+            <% end %>
+          </div>
+
+          <%# ログインボタン %>
+          <div class="pt-6">
+            <%= f.button "ログイン", type: "submit", class: "w-full flex justify-center py-3 px-4 border border-amber-500 text-base font-light rounded-lg text-white bg-amber-700 hover:bg-amber-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-600 transition duration-150 ease-in-out cursor-pointer shadow-md" %>
+          </div>
+        <% end %>
+      </div>
+
+
+      <%# --- 2. 新規登録フォーム --- %>
+      <%# absoluteを使って、ログインフォームの上に重ねて配置し、切り替え時にスライドさせる %>
+      <div class="absolute inset-0 p-8 sm:p-12 form-transition bg-white" 
+           x-show="!isLoginFormActive"
+           x-transition:enter="ease-out duration-300"
+           x-transition:enter-start="opacity-0 translate-x-4"
+           x-transition:enter-end="opacity-100 translate-x-0"
+           x-transition:leave="ease-in duration-300"
+           x-transition:leave-start="opacity-100 translate-x-0"
+           x-transition:leave-end="opacity-0 translate-x-4">
+
+        <h2 class="text-center text-4xl font-light tracking-wider text-stone-800 mb-8 pt-4">
+          新規登録
+        </h2>
+
+        <%# 新規登録のための空のUserインスタンスを作成 (Deviseの標準的な要件) %>
+        <% @user ||= User.new %>
+
+        <%= form_for(@user, as: resource_name, url: registration_path(resource_name), html: { class: "space-y-4" }) do |f| %>
+          
+          <%# エラー表示: devise/shared/_error_messages.html.erb が必要 %>
+          <%= render "devise/shared/error_messages", resource: @user %>
+
+          <%# メールアドレス %>
+          <div class="group">
+            <%= f.email_field :email, autofocus: true, autocomplete: "email", required: true,
+              class: "bg-transparent w-full border-b border-amber-300 py-2 placeholder-stone-500 text-stone-800 focus:outline-none focus:border-amber-500 transition duration-300", 
+              placeholder: "メールアドレス" %>
+          </div>
+
+          <%# パスワード %>
+          <div class="group">
+            <%= f.password_field :password, autocomplete: "new-password", required: true,
+              class: "bg-transparent w-full border-b border-amber-300 py-2 placeholder-stone-500 text-stone-800 focus:outline-none focus:border-amber-500 transition duration-300", 
+              placeholder: "パスワード (6文字以上)" %>
+          </div>
+
+          <%# パスワード確認 %>
+          <div class="group">
+            <%= f.password_field :password_confirmation, autocomplete: "new-password", required: true,
+              class: "bg-transparent w-full border-b border-amber-300 py-2 placeholder-stone-500 text-stone-800 focus:outline-none focus:border-amber-500 transition duration-300", 
+              placeholder: "パスワード確認" %>
+          </div>
+
+          <%# 新規登録ボタン %>
+          <div class="pt-6">
+            <%= f.button "新規アカウントを作成", type: "submit", class: "w-full flex justify-center py-3 px-4 border border-amber-500 text-base font-light rounded-lg text-white bg-amber-700 hover:bg-amber-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-600 transition duration-150 ease-in-out cursor-pointer shadow-md" %>
+          </div>
+
+          <%# ログインに戻るリンク (クリックでisLoginFormActiveをtrueに戻す) %>
+          <div class="mt-4 text-center">
+             <a @click.prevent="isLoginFormActive = true" href="#" class="text-sm text-stone-600 hover:text-stone-800 cursor-pointer">
+              サインインに戻る
+            </a>
+          </div>
+        <% end %>
+      </div>
+      
+    </div>
+
+    <%# 右側: ブランド紹介エリア (切り替えボタン含む) %>
+    <div class="hidden md:block w-1/2 bg-amber-50 p-12 flex flex-col justify-center text-center border-l border-amber-100">
+      <h3 class="text-5xl font-extrabold tracking-wider text-amber-500 mb-8">
+        ヒトノハゴロモ
+      </h3>
+      
+      <p class="text-sm text-stone-500 italic mb-4">
+        装いの管理を、日々のQOLケアへ。
+      </p>
+
+      <%# ★★★ divからpx-6とtext-leftを削除し、中央寄せに戻す（画像に合わせる） ★★★ %>
+      <div class="space-y-4"> 
+        <h4 class="text-lg font-medium text-stone-700 mb-4 border-b border-amber-200 pb-1">
+          ヒトノハゴロモが提供する<br>環境/コアバリュー
+        </h4>
+        
+        <%# ★★★ ここから3項目は、中央の親div内で左寄せにするため、max-w-xsとmx-autoを適用 ★★★ %>
+        <div class="max-w-xs mx-auto space-y-4 text-left">
+
+          <%# 1. 日々のリズムを記録  %>
+          <div class="flex items-start space-x-3">
+            <svg class="h-5 w-5 text-amber-500 flex-shrink-0 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div><p class="text-stone-900 font-medium text-sm">日々のリズムを記録</p><p class="text-xs text-stone-600">時間帯ごとの記録で整容状態を可視化し、生活リズムを整えるサポート。</p></div>
+          </div>
+
+          <%# 2. 二度目の装い問題を回避  %>
+          <div class="flex items-start space-x-3">
+            <%# Lucide icon: Users %>
+            <svg class="h-5 w-5 text-amber-500 flex-shrink-0 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2m3-6h2m-2 0h2m0 0h2M12 4a4 4 0 100 8 4 4 0 000-8zm-2 0a2 2 0 114 0 2 2 0 01-4 0zM19 14v2a4 4 0 00-4 4v2" />
+            </svg>
+            <div><p class="text-stone-900 font-medium text-sm">二度目の装い問題を回避</p><p class="text-xs text-stone-600">会う相手と服の記録を照合し、うっかり同じ服で再会するのを防ぎます。</p></div>
+          </div>
+          
+          <%# 3. 着用習慣を可視化  %>
+          <div class="flex items-start space-x-3">
+            <svg class="h-5 w-5 text-amber-500 flex-shrink-0 mt-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <div><p class="text-stone-900 font-medium text-sm">着用習慣を可視化</p><p class="text-xs text-stone-600">カレンダー機能で、あなたの装いの履歴とパターンが一目でわかります。</p></div>
+          </div>
+        </div>
+      </div>
+
+      <p class="text-sm text-stone-600 mt-10 mb-3">
+        <span x-show="isLoginFormActive">アカウントをお持ちではないですか？</span>
+        <span x-show="!isLoginFormActive">既にアカウントをお持ちですか？</span>
+      </p>
+
+      <%# 切り替えボタン: Alpine.jsでisLoginFormActiveを反転させる %>
+      <a @click.prevent="isLoginFormActive = !isLoginFormActive" href="#"
+        class="inline-block py-2 px-6 border border-amber-400 text-amber-700 font-light rounded-lg hover:bg-amber-100 transition duration-300 cursor-pointer">
+        <span x-text="isLoginFormActive ? '新規登録' : 'サインイン'"></span>
+      </a>
+    </div>
+    
+  </div>
+</div>

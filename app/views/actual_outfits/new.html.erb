@@ -1,7 +1,7 @@
 <div class="max-w-xl mx-auto p-4 sm:p-6 lg:p-8 bg-white shadow-xl rounded-xl">
   <h1 class="text-3xl font-extrabold text-gray-900 mb-6 border-b pb-3">着用実績の記録</h1>
 
-  <%= form_with(model: @actual_outfit, url: actual_outfits_path, class: "space-y-6") do |form| %>
+  <%= form_with(model: @actual_outfit, url: create_actual_outfits_path, class: "space-y-6") do |form| %>
     <% if @actual_outfit.errors.any? %>
       <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
         <p class="font-bold"><%= @actual_outfit.errors.count %>件のエラーがあります:</p>

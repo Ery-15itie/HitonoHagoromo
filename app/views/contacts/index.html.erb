@@ -1,0 +1,39 @@
+<h1>会う人の管理</h1>
+
+<div class="mb-4">
+  <%= link_to "新しく会う人を登録", new_contact_path, class: "bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg shadow transition duration-150 ease-in-out" %>
+</div>
+
+<div class="bg-white shadow-lg rounded-xl overflow-hidden">
+  <% if @contacts.any? %>
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/3">名前</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/2">メモ</th>
+          <th class="relative px-6 py-3 w-1/6"><span class="sr-only">アクション</span></th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200">
+        <% @contacts.each do |contact| %>
+          <tr class="hover:bg-gray-50 transition-colors">
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+              <%= link_to contact.name, contact_path(contact), class: "text-indigo-600 hover:text-indigo-900 font-semibold" %>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 truncate max-w-xs">
+              <%= contact.memo.presence || "メモなし" %>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+              <%= link_to "編集", edit_contact_path(contact), class: "text-indigo-600 hover:text-indigo-900" %>
+              <%= button_to "削除", contact_path(contact), method: :delete, data: { turbo_confirm: "#{contact.name} を削除してもよろしいですか？" }, class: "text-red-600 hover:text-red-900 inline-block bg-transparent border-none p-0 cursor-pointer" %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% else %>
+    <p class="p-6 text-gray-500">
+      まだ会う人が登録されていません。「新しく会う人を登録」から追加してください。
+    </p>
+  <% end %>
+</div>

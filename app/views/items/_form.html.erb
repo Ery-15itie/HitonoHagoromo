@@ -10,7 +10,6 @@
 
 <%# === カテゴリ (Category ID) === %>
 <%# ラベルから「(必須)」を削除 %> <%= f.label :category_id, "カテゴリ", class: "block text-sm font-semibold text-gray-700 mb-1" %> <%# @categories (ItemsControllerで取得済み) を使用 %> <%= f.collection_select :category_id, @categories, :id, :name, { prompt: "カテゴリを選択してください (任意)" }, { class: "w-full border-gray-300 rounded-lg shadow-sm focus:border-amber-600 focus:ring-amber-600 p-3 bg-white appearance-none transition duration-150" } %>
-（カテゴリの追加は別途画面で行う必要があります）
 
 <%# === 価格と色 (横並び) === %>
 <%# 価格 %>

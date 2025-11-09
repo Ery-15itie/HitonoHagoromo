@@ -12,25 +12,33 @@ Rails.application.routes.draw do
     resources :actual_outfits, only: [:create]
   end
 
+  # --- 会う人の管理 (Contact) のルーティング ---
+  resources :contacts, only: [:index, :new, :create, :show, :edit, :update, :destroy] do
+    # Contact 詳細ページから、その人との着用実績履歴を追えるようにする
+    member do
+      get 'history'
+    end
+  end
+
   # --- 着用実績記録 (ActualOutfit) のカスタムルーティング ---
   # 'outfits' パス全体を ActualOutfitsController に割り当て、名前の競合を回避
 
-  # 1. actual_outfits_path (タイムラインビュー: /outfits)
+  # actual_outfits_path (タイムラインビュー: /outfits)
   get 'outfits', to: 'actual_outfits#timeline', as: :actual_outfits
 
-  # 2. new_actual_outfit_path (/actual_outfits/new)
+  # new_actual_outfit_path (/actual_outfits/new)
   get 'actual_outfits/new', to: 'actual_outfits#new', as: :new_actual_outfit
   
-  # 3. create (POST /actual_outfits)
-  post 'actual_outfits', to: 'actual_outfits#create'
+  # create (POST /actual_outfits) - ヘルパー名を明示的に指定してフォームと連携
+  post 'actual_outfits', to: 'actual_outfits#create', as: :create_actual_outfits
 
-  # 4. destroy (DELETE /actual_outfits/:id)
+  # destroy (DELETE /actual_outfits/:id)
   delete 'actual_outfits/:id', to: 'actual_outfits#destroy', as: :actual_outfit
 
-  # 5. calendar (/outfits/calendar)
+  # calendar (/outfits/calendar)
   get 'outfits/calendar', to: 'actual_outfits#index', as: :actual_outfits_calendar
   
-  # 6. timeline (/outfits/timeline) (元のパスを維持)
+  # timeline (/outfits/timeline) (元のパスを維持)
   get 'outfits/timeline', to: 'actual_outfits#timeline', as: :timeline_actual_outfits
 
   # --- 着用予定記録 (PlannedOutfit) のルーティング ---
@@ -45,6 +53,6 @@ Rails.application.routes.draw do
     root to: "items#index", as: :authenticated_root
   end
 
-  # 未認証ユーザーの場合のルート (カスタムLPへ)
-  root to: "home#index"
+  # 未認証ユーザーの場合のルートを、カスタムLPではなくログインページにリダイレクト
+  root to: redirect("/users/sign_in")
 end

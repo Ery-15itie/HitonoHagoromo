@@ -1,7 +1,28 @@
 class Users::SessionsController < Devise::SessionsController
-  # サインインページを表示しようとしたときに実行
-  # 認証は/ (root_path) の home#index で行うため、ここではルートにリダイレクト
-  def new
-    redirect_to root_path and return
-  end
+  # newアクションのオーバーライドを削除し、Devise標準の動作に戻す
+  # （Deviseが自動でnew.html.erbをレンダリングします）
+
+  # before_action :configure_sign_in_params, only: [:create]
+
+  # GET /resource/sign_in
+  # def new
+  #   super
+  # end
+
+  # POST /resource/sign_in
+  # def create
+  #   super
+  # end
+
+  # DELETE /resource/sign_out
+  # def destroy
+  #   super
+  # end
+
+  # protected
+
+  # If you have extra params to permit, append them to the sanitizer.
+  # def configure_sign_in_params
+  #   devise_parameter_sanitizer.permit(:sign_in, keys: [:attribute])
+  # end
 end

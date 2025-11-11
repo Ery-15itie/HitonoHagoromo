@@ -31,7 +31,8 @@ end
 
 # 開発環境でのみ使用
 group :development do
-  # 開発用データベースをPostgreSQLに統一しているため、sqlite3は削除
+  gem "letter_opener"
+  gem "letter_opener_web"
 end
 
 # テスト環境でのみ使用

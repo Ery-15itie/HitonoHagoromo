@@ -7,8 +7,10 @@ services:
     # サーバー起動コマンドを直接指定
     command: bundle exec rails server -p 3000 -b '0.0.0.0'
     volumes:
-      # ボリュームマウントパスを hitonohagoromo に統一
+      # アプリケーションコードのみマウント
       - .:/hitonohagoromo
+      # gemのインストールパスはボリュームとして保護（上書きされないようにする）
+      - bundle_data:/usr/local/bundle
     ports:
       - "3000:3000"
     depends_on:
@@ -35,3 +37,4 @@ services:
 # データを永続化するためのボリューム
 volumes:
   postgres_data:
+  bundle_data:  # gemのインストールパスを保護するボリューム

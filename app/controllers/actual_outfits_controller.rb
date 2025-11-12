@@ -4,6 +4,7 @@ class ActualOutfitsController < ApplicationController
   before_action :set_actual_outfit, only: [:destroy]
   
   # 時間帯選択肢を定義 (3時間区切り、タイムテーブルの行に使用)
+  # [DB保存値, 表示名]
   TIME_SLOTS = {
     't00_03' => '深夜 (00:00 - 02:59)',
     't03_06' => '早朝 (03:00 - 05:59)',
@@ -70,47 +71,40 @@ class ActualOutfitsController < ApplicationController
     @time_slot_options = TIME_SLOTS.map { |k, v| [v, k] }
   end
 
-# POST /actual_outfits
-def create
-  @actual_outfit = current_user.actual_outfits.build(actual_outfit_params)
+  # POST /actual_outfits
+  def create
+    @actual_outfit = current_user.actual_outfits.build(actual_outfit_params)
 
-  # バリデーションを実行
-  if @actual_outfit.valid?
-    @actual_outfit.save
-    redirect_to actual_outfits_path(start_date: @actual_outfit.worn_on.beginning_of_week(:monday)), 
-                notice: "着用を記録しました！"
-  else
-    # バリデーションエラーがある場合
-    
-    # :base のエラー（警告メッセージ）があり、かつ ignore_duplication が '1' の場合は保存を許可
-    if @actual_outfit.errors[:base].present? && params[:actual_outfit][:ignore_duplication] == '1'
-      @actual_outfit.save(validate: false)
-      redirect_to actual_outfits_path(start_date: @actual_outfit.worn_on.beginning_of_week(:monday)), 
-                  notice: "着用を記録しました！ (警告を無視して登録)"
-    else
-      # エラーメッセージをフラッシュに表示
-      flash.now[:alert] = @actual_outfit.errors.full_messages.join("、")
+    # モデル側で重複チェックが行われる
+    if @actual_outfit.save
+      # 警告メッセージがあれば取得し、noticeに結合
+      flash[:notice] = "着用を記録しました!"
+      if @actual_outfit.errors.details[:base].present?
+        # エラーメッセージをアラートとして表示
+        flash[:alert] = @actual_outfit.errors.details[:base].map { |e| e[:message] }.join(' / ')
+      end
       
-      # フォーム再描画のための準備
-      @items = current_user.items.order(:name)
-      @contacts = current_user.contacts.order(:name)
+      # 成功したら、記録した日付を含む週の**タイムラインビュー**に戻る
+      redirect_to timeline_actual_outfits_path(start_date: @actual_outfit.worn_on.beginning_of_week(:monday))
+    else
+      flash.now[:alert] = "着用記録の作成に失敗しました。"
+      # フォーム再描画のためにアイテム一覧と時間帯選択肢を準備
       @time_slot_options = TIME_SLOTS.map { |k, v| [v, k] }
       render :new, status: :unprocessable_entity
     end
   end
-end
 
   # DELETE /actual_outfits/:id
   def destroy
     unless @actual_outfit.user_id == current_user.id
       # リダイレクト先をタイムラインビューに統一
-      redirect_to actual_outfits_path, alert: "権限がありません。", status: :unauthorized
+      redirect_to timeline_actual_outfits_path, alert: "権限がありません。", status: :unauthorized
       return
     end
     
     # 削除後、**タイムラインビュー**の現在表示週に戻る
     @actual_outfit.destroy
-    redirect_to actual_outfits_path(start_date: @actual_outfit.worn_on.beginning_of_week(:monday)), notice: "着用記録を削除しました。", status: :see_other
+    redirect_to timeline_actual_outfits_path(start_date: @actual_outfit.worn_on.beginning_of_week(:monday)), notice: "着用記録を削除しました。", status: :see_other
   end
 
   private
@@ -126,11 +120,11 @@ end
     @actual_outfit = ActualOutfit.find(params[:id])
   rescue ActiveRecord::RecordNotFound
     # 記録が見つからなかった場合、タイムラインビューにリダイレクト
-    redirect_to actual_outfits_path, alert: "指定された着用記録が見つかりません。"
+    redirect_to timeline_actual_outfits_path, alert: "指定された着用記録が見つかりません。"
   end
 
   def actual_outfit_params
-    # worn_on, item_id, time_slot, impression に加えて、contact_id と ignore_duplication を許可する 
-    params.require(:actual_outfit).permit(:worn_on, :item_id, :time_slot, :impression, :contact_id, :ignore_duplication) 
+    # force_create パラメータを追加
+    params.require(:actual_outfit).permit(:worn_on, :item_id, :time_slot, :impression, :contact_id, :force_create) 
   end
 end

@@ -34,8 +34,14 @@ Rails.application.routes.draw do
   # new_actual_outfit_path (/actual_outfits/new)
   get 'actual_outfits/new', to: 'actual_outfits#new', as: :new_actual_outfit
   
+  # edit_actual_outfit_path (/actual_outfits/:id/edit) ← 追加
+  get 'actual_outfits/:id/edit', to: 'actual_outfits#edit', as: :edit_actual_outfit
+  
   # create (POST /actual_outfits) - ヘルパー名を明示的に指定してフォームと連携
   post 'actual_outfits', to: 'actual_outfits#create', as: :create_actual_outfits
+  
+  # update (PATCH /actual_outfits/:id) ← 追加
+  patch 'actual_outfits/:id', to: 'actual_outfits#update', as: :update_actual_outfit
 
   # destroy (DELETE /actual_outfits/:id)
   delete 'actual_outfits/:id', to: 'actual_outfits#destroy', as: :actual_outfit
@@ -50,6 +56,9 @@ Rails.application.routes.draw do
   # CRUD処理は全てresourcesで定義
   resources :planned_outfits 
 
+  # --- 静的ページ ---
+  get 'terms', to: 'pages#terms', as: :terms
+  get 'privacy', to: 'pages#privacy', as: :privacy
 
   # --- ルートパスの設定 ---
   
@@ -58,6 +67,6 @@ Rails.application.routes.draw do
     root to: "items#index", as: :authenticated_root
   end
 
-  # 未認証ユーザーの場合のルートを、カスタムLPではなくログインページにリダイレクト
-  root to: redirect("/users/sign_in")
+  # 未認証ユーザーの場合のルート (LPページ)
+  root to: "pages#landing"
 end

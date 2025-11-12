@@ -22,7 +22,10 @@
             </div>
             
             <!-- アクション -->
-            <%= button_to "実績を削除", actual_outfit_path(outfit), method: :delete, data: { turbo_confirm: "この着用実績を削除してもよろしいですか?" }, class: "text-sm text-red-600 hover:text-red-900 transition duration-150 bg-transparent border-none p-0 cursor-pointer" %>
+            <div class="flex gap-2">
+              <%= link_to "編集", edit_actual_outfit_path(outfit), class: "text-sm text-indigo-600 hover:text-indigo-900 transition duration-150" %>
+              <%= button_to "削除", actual_outfit_path(outfit), method: :delete, data: { turbo_confirm: "この着用実績を削除してもよろしいですか?" }, class: "text-sm text-red-600 hover:text-red-900 transition duration-150 bg-transparent border-none p-0 cursor-pointer" %>
+            </div>
           </div>
 
           <!-- アイテム情報 -->

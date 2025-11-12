@@ -1,7 +1,7 @@
 class ActualOutfitsController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_form_data, only: [:new, :create] 
-  before_action :set_actual_outfit, only: [:destroy]
+  before_action :set_form_data, only: [:new, :create, :edit, :update] 
+  before_action :set_actual_outfit, only: [:edit, :update, :destroy]
   
   # 時間帯選択肢を定義 (3時間区切り、タイムテーブルの行に使用)
   # [DB保存値, 表示名]
@@ -71,6 +71,18 @@ class ActualOutfitsController < ApplicationController
     @time_slot_options = TIME_SLOTS.map { |k, v| [v, k] }
   end
 
+  # GET /actual_outfits/:id/edit
+  def edit
+    # 権限チェック
+    unless @actual_outfit.user_id == current_user.id
+      redirect_to timeline_actual_outfits_path, alert: "権限がありません。"
+      return
+    end
+    
+    # フォーム用に時間帯の選択肢を準備
+    @time_slot_options = TIME_SLOTS.map { |k, v| [v, k] }
+  end
+
   # POST /actual_outfits
   def create
     @actual_outfit = current_user.actual_outfits.build(actual_outfit_params)
@@ -94,6 +106,24 @@ class ActualOutfitsController < ApplicationController
     end
   end
 
+  # PATCH/PUT /actual_outfits/:id
+  def update
+    # 権限チェック
+    unless @actual_outfit.user_id == current_user.id
+      redirect_to timeline_actual_outfits_path, alert: "権限がありません。"
+      return
+    end
+
+    if @actual_outfit.update(actual_outfit_params)
+      flash[:notice] = "着用記録を更新しました!"
+      redirect_to timeline_actual_outfits_path(start_date: @actual_outfit.worn_on.beginning_of_week(:monday))
+    else
+      flash.now[:alert] = "着用記録の更新に失敗しました。"
+      @time_slot_options = TIME_SLOTS.map { |k, v| [v, k] }
+      render :edit, status: :unprocessable_entity
+    end
+  end
+
   # DELETE /actual_outfits/:id
   def destroy
     unless @actual_outfit.user_id == current_user.id
@@ -109,7 +139,7 @@ class ActualOutfitsController < ApplicationController
 
   private
 
-  # new/create アクションで使用するアイテム一覧とContact一覧を準備する
+  # new/create/edit/update アクションで使用するアイテム一覧とContact一覧を準備する
   def set_form_data
     @items = current_user.items.order(:name)
     # Contact一覧を取得

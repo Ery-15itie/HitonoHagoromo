@@ -25,22 +25,16 @@
     
     <div class="space-x-4 flex items-center">
       <%# --- 表示形式切り替えドロップダウン --- %>
-      <%# 親の .dropdown に垂直パディング (py-2) を追加し、ボタンとメニューの間の隙間を埋める (重要) %>
-      <%# IDを付与し、JSでターゲットしやすくする %>
       <div class="relative py-2" id="dropdown-toggle">
         <button class="bg-white hover:bg-gray-100 text-gray-600 font-medium px-3 py-2 border border-gray-300 rounded-md text-sm transition duration-150 inline-flex items-center">
           <span class="mr-2"><%= current_mode == 'timeline' ? '詳細タイムテーブル' : '週間カレンダー' %></span>
           <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
         </button>
         
-        <%# ドロップダウンメニュー本体 - 初期状態は Tailwind の 'hidden' で非表示、JSで操作 %>
         <div class="dropdown-menu absolute right-0 top-full py-1 w-48 bg-white rounded-md shadow-xl z-20 border border-gray-200 hidden js-dropdown-menu" style="opacity: 0;">
-          
-          <%# タイムテーブルへのリンク %>
           <%= link_to '詳細タイムテーブル ', timeline_actual_outfits_path(display_mode: 'timeline', start_date: @week_start), 
               class: "block px-4 py-2 text-sm text-gray-700 hover:bg-amber-50 #{'font-bold text-amber-700' if current_mode == 'timeline'}" %>
               
-          <%# カレンダー  へのリンク %>
           <%= link_to '週間カレンダー ', actual_outfits_calendar_path(display_mode: 'monthly', start_date: @week_start), 
               class: "block px-4 py-2 text-sm text-gray-700 hover:bg-amber-50 #{'font-bold text-amber-700' if current_mode == 'monthly'}" %>
         </div>
@@ -106,21 +100,24 @@
                   <p class="font-bold text-amber-800 truncate">
                     着用: <%= outfit.item&.name %>
                   </p>
-                  <%# ★★★ 会う相手の情報追加 ★★★ %>
+                  <%# 会う相手の情報 %>
                   <% if outfit.contact.present? %>
                     <p class="text-xs text-red-700 font-medium truncate">
                       相手: <%= outfit.contact.name %>
                     </p>
                   <% end %>
-                  <%# ★★★ ここまで ★★★ %>
 
                   <% if outfit.impression.present? %>
                     <p class="text-gray-700 truncate">
                       メモ: <%= outfit.impression.truncate(10) %>
                     </p>
                   <% end %>
-                  <%# 削除ボタン %>
-                  <%= button_to "削除", actual_outfit_path(outfit), method: :delete, data: { turbo_confirm: "この記録を削除しますか？" }, class: "text-xs text-red-500 hover:text-red-700 inline-block bg-transparent border-none p-0 cursor-pointer mt-1" %>
+                  
+                  <%# 編集・削除ボタン %>
+                  <div class="mt-1 flex gap-2">
+                    <%= link_to "編集", edit_actual_outfit_path(outfit), class: "text-xs text-indigo-600 hover:text-indigo-800" %>
+                    <%= button_to "削除", actual_outfit_path(outfit), method: :delete, data: { turbo_confirm: "この記録を削除しますか？" }, class: "text-xs text-red-500 hover:text-red-700 bg-transparent border-none p-0 cursor-pointer" %>
+                  </div>
                 </div>
               <% end %>
             <% else %>

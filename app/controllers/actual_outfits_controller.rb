@@ -78,7 +78,7 @@ class ActualOutfitsController < ApplicationController
     # モデル側で重複チェックが行われる
     if @actual_outfit.save
       # 警告メッセージがあれば取得し、noticeに結合
-      flash[:notice] = "着用を記録しました！"
+      flash[:notice] = "着用を記録しました!"
       if @actual_outfit.errors.details[:base].present?
         # エラーメッセージをアラートとして表示
         flash[:alert] = @actual_outfit.errors.details[:base].map { |e| e[:message] }.join(' / ')
@@ -124,7 +124,7 @@ class ActualOutfitsController < ApplicationController
   end
 
   def actual_outfit_params
-    # worn_on, item_id, time_slot, impression に加えて、contact_id を許可する 
-    params.require(:actual_outfit).permit(:worn_on, :item_id, :time_slot, :impression, :contact_id) 
+    # force_create パラメータを追加
+    params.require(:actual_outfit).permit(:worn_on, :item_id, :time_slot, :impression, :contact_id, :force_create) 
   end
 end

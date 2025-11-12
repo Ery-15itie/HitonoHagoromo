@@ -1,11 +1,21 @@
-# 静的ページ（トップページなど）を扱うためのコントローラー
 class PagesController < ApplicationController
-  # 認証機能が未実装のため、一時的にDeviseの認証をスキップ
-  # 認証実装後、必要に応じて修正
-  # skip_before_action :authenticate_user!, only: [:index]
+  skip_before_action :authenticate_user!, only: [:landing, :terms, :privacy]
 
-  # ルートパス（/）でアクセスされるトップページ
+  # ルートパス用(既存のindex)
   def index
-    # ここではビューを表示する以外のロジックは不要
+    redirect_to authenticated_root_path if user_signed_in?
+  end
+
+  # ランディングページ
+  def landing
+    redirect_to authenticated_root_path if user_signed_in?
+  end
+
+  def terms
+    # 利用規約ページ
+  end
+
+  def privacy
+    # プライバシーポリシーページ
   end
 end

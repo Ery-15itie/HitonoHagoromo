@@ -5,7 +5,7 @@
   </div>
 
   <p class="text-gray-600 mb-6">
-    **<%= @contact.name %>** さんと会った時の、過去のアイテム着用実績一覧です。
+    <%= @contact.name %> さんと会った時の、過去のアイテム着用実績一覧です。
   </p>
 
   <% if @history_outfits.any? %>
@@ -22,7 +22,7 @@
             </div>
             
             <!-- アクション -->
-            <%= link_to "実績を編集/削除", actual_outfit_path(outfit), class: "text-sm text-gray-500 hover:text-gray-700 transition duration-150" %>
+            <%= button_to "実績を削除", actual_outfit_path(outfit), method: :delete, data: { turbo_confirm: "この着用実績を削除してもよろしいですか?" }, class: "text-sm text-red-600 hover:text-red-900 transition duration-150 bg-transparent border-none p-0 cursor-pointer" %>
           </div>
 
           <!-- アイテム情報 -->
@@ -32,7 +32,7 @@
               <%= outfit.item.name %>
             </span>
             <span class="text-sm text-gray-600">
-              (<%= outfit.item.category.present? ? outfit.item.category : 'カテゴリー不明' %>)
+              (<%= outfit.item.category.name if outfit.item.category.present? %>)
             </span>
           </div>
           
@@ -49,8 +49,8 @@
   <% else %>
     <div class="p-6 bg-yellow-50 border border-yellow-200 rounded-lg">
       <p class="text-gray-700">
-        まだ **<%= @contact.name %>** さんと会った時の着用実績は登録されていません。
-        実績を登録する際に、会った人として **<%= @contact.name %>** さんを選択してください。
+        まだ <%= @contact.name %> さんと会った時の着用実績は登録されていません。
+        実績を登録する際に、会った人として <%= @contact.name %> さんを選択してください。
       </p>
     </div>
   <% end %>

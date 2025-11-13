@@ -33,10 +33,10 @@
           <%# アイテム一覧（クローゼット）へのリンク %>
           <%= link_to "アイテム一覧", authenticated_root_path, class: "text-gray-600 hover:text-amber-700 px-3 py-2 rounded-md font-medium transition duration-150" %>
           
-          <%# === ログアウトボタン (button_toで確実なDELETEリクエストを送信) === %>
+          <%# === ログアウトボタン (data: { turbo: false } を追加) === %>
           <%= button_to "ログアウト", destroy_user_session_path, 
                         method: :delete,
-                        data: { confirm: "ログアウトしますか？" },
+                        data: { turbo: false, confirm: "ログアウトしますか？" },
                         class: "text-white bg-red-500 hover:bg-red-600 px-3 py-2 rounded-md font-medium ml-4 transition duration-150 shadow-md cursor-pointer border-none" %>
         </nav>
       </div>

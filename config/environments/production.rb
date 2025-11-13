@@ -1,4 +1,3 @@
-# Require "active_support/core_ext/integer/time" はファイル先頭にそのまま残します
 Require "active_support/core_ext/integer/time"
 
 Rails.application.configure do
@@ -65,23 +64,21 @@ Rails.application.configure do
 
   config.action_mailer.perform_caching = false
   
-  # --- Action Mailer 設定  ---
+  # --- Action Mailer 設定 ---
   
-  # メール送信時のエラーを発生させる（本番環境でのデバッグと確実なエラー把握のため）
+  # メール送信時のエラーを発生させる
   config.action_mailer.raise_delivery_errors = true 
   
   config.action_mailer.delivery_method = :smtp
   
-  # メール内のURL生成に必要なホスト名とプロトコルを設定
-  # アプリケーションのURL: https://hitonohagoromo.onrender.com を設定
-  # 環境変数（MAIL_HOST, MAIL_PROTOCOL）を優先し、ない場合はRenderのURLをデフォルト値として使用
+  # 【FATALエラー解消】メール内のURL生成に必要なホスト名とプロトコルを設定
   config.action_mailer.default_url_options = { 
+    # RenderのURL: https://hitonohagoromo.onrender.com を使用
     host: ENV.fetch('MAIL_HOST', 'hitonohagoromo.onrender.com'),
     protocol: ENV.fetch('MAIL_PROTOCOL', 'https')
   }
 
   # SMTPサーバーの設定（環境変数から認証情報を取得）
-  # これらの環境変数は、Render側の設定で定義が必要です。
   config.action_mailer.smtp_settings = {
     address:              ENV.fetch('SMTP_ADDRESS'),
     port:                 ENV.fetch('MAIL_PORT', 587).to_i,

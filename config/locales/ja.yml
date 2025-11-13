@@ -1,13 +1,12 @@
 ja:
-  # --- 日付/時刻のフォーマットを追加 ---
+  # --- 日付/時刻のフォーマット ---
   date:
     formats:
       default: "%Y/%m/%d"
       short: "%m/%d"
       long: "%Y年%m月%d日(%a)"
-      short_date: "%m/%d" # カレンダーの範囲表示用 (例: 11/03)
-      # ★★★ ビューのエラー回避のためのあえて追加記載 ★★★
-      abbr_day_names: [日, 月, 火, 水, 木, 金, 土] # ビューがこのキーを直接参照しているため追加
+      short_date: "%m/%d"
+      abbr_day_names: [日, 月, 火, 水, 木, 金, 土]
 
     day_names: [日曜日, 月曜日, 火曜日, 水曜日, 木曜日, 金曜日, 土曜日]
     abbr_day_names: [日, 月, 火, 水, 木, 金, 土]
@@ -70,9 +69,50 @@ ja:
       password_confirmation: "パスワード (確認)"
       remember_me: "ログイン情報を記憶する"
 
-  # ActiveModel の日本語翻訳 (バリデーションエラーなど)
+  # --- ActiveModel/ActiveRecord の日本語翻訳 (バリデーションエラー) ---
   activerecord:
     attributes:
-      user:
+      user: # Userモデルの属性名
         email: "メールアドレス"
         password: "パスワード"
+        password_confirmation: "パスワード（確認）" # 属性名が正しく翻訳されます
+
+    errors:
+      messages: 
+        # ユーザー登録で発生しやすいエラーメッセージ
+        too_short: "は%{count}文字以上で入力してください"
+        blank: "を入力してください"
+        taken: "はすでに使用されています"
+        confirmation: "と%{attribute}の入力が一致しません"
+        
+        # その他の一般的なバリデーションエラーメッセージ
+        inclusion: "は一覧にありません"
+        exclusion: "は予約されています"
+        invalid: "は不正な値です"
+        accepted: "を承認してください"
+        empty: "を入力してください"
+        too_long: "は%{count}文字以内で入力してください"
+        wrong_length: "は%{count}文字で入力してください"
+        not_a_number: "は数値で入力してください"
+        not_an_integer: "は整数で入力してください"
+        greater_than: "は%{count}より大きい値にしてください"
+        greater_than_or_equal_to: "は%{count}以上の値にしてください"
+        equal_to: "は%{count}にしてください"
+        less_than: "は%{count}より小さい値にしてください"
+        less_than_or_equal_to: "は%{count}以下の値にしてください"
+        other_than: "は%{count}以外の値にしてください"
+        odd: "は奇数にしてください"
+        even: "は偶数にしてください"
+        record_invalid: "バリデーションに失敗しました: %{errors}"
+        restrict_dependent_destroy:
+          one: "参照している%{record}があるため削除できません"
+          other: "参照している%{record}があるため削除できません"
+
+
+  # --- エラーの表示フォーマット ---
+  errors:
+    format: "%{attribute}%{message}" # ★ 'パスワードは6文字以上で...'という形式にするための設定★
+    messages:
+      not_saved:
+        one: "1件のエラーが発生したため、%{resource}を保存できませんでした"
+        other: "%{count}件のエラーが発生したため、%{resource}を保存できませんでした"

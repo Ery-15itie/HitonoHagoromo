@@ -1,4 +1,5 @@
-require "active_support/core_ext/integer/time"
+# Require "active_support/core_ext/integer/time" はファイル先頭にそのまま残します
+Require "active_support/core_ext/integer/time"
 
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
@@ -20,7 +21,7 @@ Rails.application.configure do
   # or in config/master.key. This key is used to decrypt credentials (and other encrypted files).
   # config.require_master_key = true
 
-  # Disable serving static files from the `/public` folder by default since
+  # Disable serving static files from the /public folder by default since
   # Apache or NGINX already handles this.
   config.public_file_server.enabled = ENV["RAILS_SERVE_STATIC_FILES"].present?
 
@@ -63,10 +64,38 @@ Rails.application.configure do
   # config.active_job.queue_name_prefix = "qol_closet_production"
 
   config.action_mailer.perform_caching = false
+  
+  # --- Action Mailer 設定  ---
+  
+  # メール送信時のエラーを発生させる（本番環境でのデバッグと確実なエラー把握のため）
+  config.action_mailer.raise_delivery_errors = true 
+  
+  config.action_mailer.delivery_method = :smtp
+  
+  # メール内のURL生成に必要なホスト名とプロトコルを設定
+  # アプリケーションのURL: https://hitonohagoromo.onrender.com を設定
+  # 環境変数（MAIL_HOST, MAIL_PROTOCOL）を優先し、ない場合はRenderのURLをデフォルト値として使用
+  config.action_mailer.default_url_options = { 
+    host: ENV.fetch('MAIL_HOST', 'hitonohagoromo.onrender.com'),
+    protocol: ENV.fetch('MAIL_PROTOCOL', 'https')
+  }
 
-  # Ignore bad email addresses and do not raise email delivery errors.
-  # Set this to true and configure the email server for immediate delivery to raise delivery errors.
-  # config.action_mailer.raise_delivery_errors = false
+  # SMTPサーバーの設定（環境変数から認証情報を取得）
+  # これらの環境変数は、Render側の設定で定義が必要です。
+  config.action_mailer.smtp_settings = {
+    address:              ENV.fetch('SMTP_ADDRESS'),
+    port:                 ENV.fetch('MAIL_PORT', 587).to_i,
+    domain:               ENV.fetch('SMTP_DOMAIN'),
+    user_name:            ENV.fetch('SMTP_USERNAME'),
+    password:             ENV.fetch('SMTP_PASSWORD'),
+    authentication:       :plain,
+    enable_starttls_auto: true,
+    open_timeout:         5,
+    read_timeout:         5
+  }
+  
+  # --- Action Mailer 設定 終わり ---
+
 
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
   # the I18n.default_locale when a translation cannot be found).

@@ -13,7 +13,6 @@ Rails.application.routes.draw do
   # アイテム管理のCRUDルーティング
   resources :items do
     # アイテムにネストされた着用実績の作成処理
-    # :actual_outfits の create アクションのみをネストで定義
     resources :actual_outfits, only: [:create]
   end
 
@@ -34,13 +33,13 @@ Rails.application.routes.draw do
   # new_actual_outfit_path (/actual_outfits/new)
   get 'actual_outfits/new', to: 'actual_outfits#new', as: :new_actual_outfit
   
-  # edit_actual_outfit_path (/actual_outfits/:id/edit) ← 追加
+  # edit_actual_outfit_path (/actual_outfits/:id/edit)
   get 'actual_outfits/:id/edit', to: 'actual_outfits#edit', as: :edit_actual_outfit
   
   # create (POST /actual_outfits) - ヘルパー名を明示的に指定してフォームと連携
   post 'actual_outfits', to: 'actual_outfits#create', as: :create_actual_outfits
   
-  # update (PATCH /actual_outfits/:id) ← 追加
+  # update (PATCH /actual_outfits/:id)
   patch 'actual_outfits/:id', to: 'actual_outfits#update', as: :update_actual_outfit
 
   # destroy (DELETE /actual_outfits/:id)
@@ -49,7 +48,7 @@ Rails.application.routes.draw do
   # calendar (/outfits/calendar)
   get 'outfits/calendar', to: 'actual_outfits#index', as: :actual_outfits_calendar
   
-  # timeline (/outfits/timeline) (元のパスを維持)
+  # timeline (/outfits/timeline)
   get 'outfits/timeline', to: 'actual_outfits#timeline', as: :timeline_actual_outfits
 
   # --- 着用予定記録 (PlannedOutfit) のルーティング ---
@@ -67,6 +66,7 @@ Rails.application.routes.draw do
     root to: "items#index", as: :authenticated_root
   end
 
-  # 未認証ユーザーの場合のルート (LPページ)
-  root to: "pages#landing"
+  # 未認証ユーザーの場合のルート
+  # PagesController#landingや直接のDeviseコントローラー指定によるエラーを回避するため、Deviseのサインインパスへリダイレクト
+  root to: redirect('/users/sign_in')
 end

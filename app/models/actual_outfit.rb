@@ -3,7 +3,9 @@ class ActualOutfit < ApplicationRecord
   belongs_to :item # どのアイテムを着用したか
   belongs_to :user # 誰が着用記録を作成したか
   # 会った人 (Contact) との関連付け。contact_id は任意のため optional: true
-  belongs_to :contact, optional: true 
+  belongs_to :contact, optional: true
+
+  has_one_attached :snapshot
 
   # force_create フラグを一時的に保持する属性
   attr_accessor :force_create

@@ -12,8 +12,12 @@ class ItemsController < ApplicationController
   # アイテム一覧の表示
   def index
     # 現在ログインしているユーザーのアイテムのみを取得
-    # .includes(:category) でN+1問題を回避し、効率的にカテゴリ名も取得
-    @items = current_user.items.includes(:category).order(created_at: :desc)
+    # .includes(:category) でカテゴリ情報のN+1問題を回避
+    # .with_attached_image で画像データのN+1問題を回避（★インスタ風表示に必須）
+    @items = current_user.items
+                         .with_attached_image
+                         .includes(:category)
+                         .order(created_at: :desc)
   end
 
   # GET /items/1 (Show)
@@ -52,6 +56,7 @@ class ItemsController < ApplicationController
   # アイテムの更新処理
   def update
     if @item.update(item_params)
+      # 更新後は詳細画面へリダイレクト
       redirect_to @item, notice: "アイテム情報が正常に更新されました。", status: :see_other
     else
       # バリデーションエラー時はeditテンプレートを再描画
@@ -83,6 +88,7 @@ class ItemsController < ApplicationController
 
     # ストロングパラメータ (許可された属性のみを許可)
     def item_params
-      params.require(:item).permit(:name, :category_id, :description, :price, :color)
+      # image を追加
+      params.require(:item).permit(:name, :image, :category_id, :description, :price, :color)
     end
 end

@@ -1,24 +1,249 @@
-<%# === エラーメッセージ表示 === %>
-<% if item.errors.any? %>
-入力エラーが<%= item.errors.count %>件あります:
+<%# --- アイテム登録・編集フォーム --- %>
+<%= form_with(model: item, local: true, class: "space-y-8") do |form| %>
 
-<% item.errors.full_messages.each do |message| %>
-<%= message %>
+  <%# --- エラーメッセージ表示 --- %>
+  <% if item.errors.any? %>
+    <div class="bg-red-50 text-red-700 p-5 rounded-2xl border border-red-100 animate-pulse">
+      <div class="flex items-center gap-2 mb-2 font-bold">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        <span>入力内容を確認してください</span>
+      </div>
+      <ul class="list-disc list-inside text-sm space-y-1 pl-1">
+        <% item.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <%# --- 1. 画像アップロードエリア (プレビュー機能付き) --- %>
+  <div class="space-y-3">
+    <%= form.label :image, "写真 (タップして選択)", class: "block text-base font-bold text-indigo-950" %>
+    
+    <div class="relative w-full aspect-square md:aspect-[4/3] bg-stone-100 rounded-2xl border-2 border-dashed border-stone-300 hover:bg-stone-50 hover:border-amber-400 transition cursor-pointer overflow-hidden group" onclick="document.getElementById('item_image').click()">
+      
+      <%# プレビュー画像表示エリア %>
+      <% if item.image.attached? %>
+        <%= image_tag item.image, id: "preview-target", class: "w-full h-full object-cover" %>
+      <% else %>
+        <img id="preview-target" class="w-full h-full object-cover hidden">
+        <%# 未選択時のアイコン %>
+        <div id="upload-placeholder" class="absolute inset-0 flex flex-col items-center justify-center text-stone-400 group-hover:text-amber-500 transition">
+          <svg class="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+          <span class="text-sm font-bold">写真を撮る / 選ぶ</span>
+        </div>
+      <% end %>
+
+      <%# オーバーレイ（画像がある時にホバーで表示） %>
+      <div class="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300">
+        <span class="text-white font-bold border border-white px-4 py-2 rounded-full backdrop-blur-sm">変更する</span>
+      </div>
+    </div>
+
+    <%= form.file_field :image, class: "hidden", accept: "image/*", onchange: "previewImage(this);" %>
+  </div>
+
+  <%# --- 2. アイテム情報入力 --- %>
+  <div class="space-y-8">
+    
+    <%# アイテム名 %>
+    <div class="space-y-2">
+      <%= form.label :name, "アイテム名(重複チェックに使用されます)", class: "block text-sm font-bold text-slate-600" %>
+      <%= form.text_field :name, placeholder: "例：白いTシャツ、お気に入りの〇〇デニム", class: "w-full rounded-xl border-stone-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 py-3 px-4 text-base bg-white" %>
+    </div>
+
+    <%# カテゴリ選択 %>
+    <div class="space-y-2">
+      <%= form.label :category_id, "カテゴリ", class: "block text-sm font-bold text-slate-600" %>
+      <div class="relative">
+        <%= form.collection_select :category_id, Category.all, :id, :name, { include_blank: "選択してください" }, { class: "w-full rounded-xl border-stone-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 py-3 px-4 text-base bg-white appearance-none" } %>
+        <div class="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-stone-500">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+        </div>
+      </div>
+    </div>
+
+    <%# --- カラーパレット選択 (複数選択・追記対応) --- %>
+    <div class="space-y-3">
+      <%= form.label :color, "カラー（複数選択可）", class: "block text-sm font-bold text-slate-600" %>
+      
+      <%# テキスト入力欄 %>
+      <%= form.text_field :color, id: "color-input", placeholder: "色を選択、または「花柄」など手入力", class: "w-full rounded-xl border-stone-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 py-3 px-4 text-base bg-white mb-2" %>
+
+      <%# パレットボタン %>
+      <div class="flex flex-wrap gap-3 p-1">
+        <% 
+          colors = [
+            { name: 'ホワイト', bg: 'bg-white border-stone-200' },
+            { name: 'ブラック', bg: 'bg-black border-black' },
+            { name: 'グレー',   bg: 'bg-gray-500 border-gray-500' },
+            { name: 'ベージュ', bg: 'bg-[#E8DCC4] border-[#D8CCB4]' },
+            { name: 'ブラウン', bg: 'bg-[#78350F] border-[#78350F]' },
+            { name: 'ネイビー', bg: 'bg-[#1e3a8a] border-[#1e3a8a]' },
+            { name: 'ブルー',   bg: 'bg-blue-500 border-blue-500' },
+            { name: 'グリーン', bg: 'bg-green-600 border-green-600' },
+            { name: 'レッド',   bg: 'bg-red-500 border-red-500' },
+            { name: 'イエロー', bg: 'bg-yellow-400 border-yellow-400' }
+          ]
+        %>
+        <% colors.each do |c| %>
+          <button type="button" 
+                  onclick="toggleColor(this, '<%= c[:name] %>')" 
+                  class="color-btn w-10 h-10 rounded-full border-2 shadow-sm transition-all duration-200 hover:scale-105 <%= c[:bg] %>" 
+                  data-color="<%= c[:name] %>"
+                  title="<%= c[:name] %>"
+                  aria-label="<%= c[:name] %>">
+          </button>
+        <% end %>
+      </div>
+      <p class="text-xs text-stone-400 text-right">※ボタンを押すと色が追記・解除されます</p>
+    </div>
+
+    <%# 詳細情報 %>
+    <div class="grid grid-cols-2 gap-4">
+      
+      <%# ブランド/購入店 %>
+      <div class="col-span-2 space-y-2">
+        <%= form.label :description, "ブランド・メモ", class: "block text-sm font-bold text-slate-600" %>
+        <%= form.text_area :description, rows: 2, placeholder: "2025年購入など", class: "w-full rounded-xl border-stone-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 py-3 px-4 text-base bg-white" %>
+      </div>
+
+      <%# --- 価格 (補助ボタン付き) --- %>
+      <div class="col-span-2 space-y-2">
+        <%= form.label :price, "購入価格", class: "block text-sm font-bold text-slate-600" %>
+        
+        <div class="flex items-center gap-3">
+          <div class="relative flex-1">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-stone-400">¥</div>
+            <%= form.number_field :price, id: "item_price", placeholder: "0", class: "w-full rounded-xl border-stone-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 py-3 pl-8 pr-4 text-base bg-white" %>
+          </div>
+        </div>
+
+        <%# 金額加算ボタン %>
+        <div class="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
+          <button type="button" onclick="addPrice(10000)" class="flex-shrink-0 px-4 py-2 bg-stone-100 text-stone-600 text-sm font-bold rounded-lg hover:bg-stone-200 active:bg-stone-300 transition">
+            +10,000
+          </button>
+          <button type="button" onclick="addPrice(1000)" class="flex-shrink-0 px-4 py-2 bg-stone-100 text-stone-600 text-sm font-bold rounded-lg hover:bg-stone-200 active:bg-stone-300 transition">
+            +1,000
+          </button>
+          <button type="button" onclick="addPrice(100)" class="flex-shrink-0 px-4 py-2 bg-stone-100 text-stone-600 text-sm font-bold rounded-lg hover:bg-stone-200 active:bg-stone-300 transition">
+            +100
+          </button>
+          <button type="button" onclick="clearPrice()" class="flex-shrink-0 px-3 py-2 text-red-500 text-xs font-bold rounded-lg hover:bg-red-50 transition ml-auto">
+            クリア
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <%# --- 3. アクションボタン --- %>
+  <div class="pt-6 flex flex-col sm:flex-row gap-4">
+    <%= form.submit "登録する", class: "w-full sm:w-auto flex-1 bg-amber-600 text-white font-bold py-4 px-8 rounded-xl shadow-lg hover:bg-amber-700 hover:shadow-xl transition transform active:scale-95 cursor-pointer text-center" %>
+    
+    <%= link_to "キャンセル", items_path, class: "w-full sm:w-auto flex-none bg-stone-100 text-stone-600 font-bold py-4 px-8 rounded-xl hover:bg-stone-200 transition text-center" %>
+  </div>
+
 <% end %>
-<% end %> <%# === アイテム名 === %>
-<%= f.label :name, "アイテム名 (必須)", class: "block text-sm font-semibold text-gray-700 mb-1" %> <%= f.text_field :name, class: "w-full border-gray-300 rounded-lg shadow-sm focus:border-amber-600 focus:ring-amber-600 p-3 transition duration-150", placeholder: "例: 白のオーバーサイズシャツ" %>
 
-<%# === カテゴリ (Category ID) === %>
-<%# ラベルから「(必須)」を削除 %> <%= f.label :category_id, "カテゴリ", class: "block text-sm font-semibold text-gray-700 mb-1" %> <%# @categories (ItemsControllerで取得済み) を使用 %> <%= f.collection_select :category_id, @categories, :id, :name, { prompt: "カテゴリを選択してください (任意)" }, { class: "w-full border-gray-300 rounded-lg shadow-sm focus:border-amber-600 focus:ring-amber-600 p-3 bg-white appearance-none transition duration-150" } %>
+<%# --- スクリプト --- %>
+<script>
+  // ==========================================
+  // 1. カラー選択ロジック (追記・トグル・ハイライト)
+  // ==========================================
+  
+  // 初期ロード時に、入力済みの色に合わせてボタンをアクティブにする
+  document.addEventListener("DOMContentLoaded", function() {
+    updateButtonStates();
+  });
 
-<%# === 価格と色 (横並び) === %>
-<%# 価格 %>
-<%= f.label :price, "価格 (円)", class: "block text-sm font-semibold text-gray-700 mb-1" %> <%= f.number_field :price, class: "w-full border-gray-300 rounded-lg shadow-sm focus:border-amber-600 focus:ring-amber-600 p-3 transition duration-150", placeholder: "例: 5000", min: 0 %>
-<%# 色 %>
-<%= f.label :color, "色", class: "block text-sm font-semibold text-gray-700 mb-1" %> <%= f.text_field :color, class: "w-full border-gray-300 rounded-lg shadow-sm focus:border-amber-600 focus:ring-amber-600 p-3 transition duration-150", placeholder: "例: 白" %>
+  // テキストボックスが直接編集された場合もボタン状態を更新
+  document.getElementById('color-input').addEventListener('input', updateButtonStates);
 
-<%# === 説明 === %>
-<%= f.label :description, "説明・メモ", class: "block text-sm font-semibold text-gray-700 mb-1" %> <%= f.text_area :description, rows: 4, class: "w-full border-gray-300 rounded-lg shadow-sm focus:border-amber-600 focus:ring-amber-600 p-3 transition duration-150", placeholder: "購入した場所、ブランド、管理方法など" %>
+  function toggleColor(btn, colorName) {
+    const input = document.getElementById('color-input');
+    let text = input.value;
+    
+    // 全角スペースを半角にして分割し、空文字を除去
+    let parts = text.replace(/　/g, ' ').split(' ').filter(p => p.trim() !== '');
+    
+    if (parts.includes(colorName)) {
+      // 既に含まれている場合は削除
+      parts = parts.filter(p => p !== colorName);
+    } else {
+      // 含まれていない場合は追加
+      parts.push(colorName);
+    }
+    
+    // スペース区切りで再結合
+    input.value = parts.join(' ');
+    
+    // ボタンの見た目を更新
+    updateButtonStates();
+  }
 
-<%# === 送信ボタン === %>
-<%# f.object.new_record? で新規作成か編集かを判断し、ボタンのテキストを切り替える %> <%= f.submit f.object.new_record? ? "アイテムを登録" : "アイテム情報を更新", class: "w-full bg-amber-800 text-white py-3 px-4 rounded-xl font-bold text-lg hover:bg-amber-900 transition duration-300 cursor-pointer shadow-lg shadow-amber-200/50" %>
+  function updateButtonStates() {
+    const input = document.getElementById('color-input');
+    const text = input.value;
+    const parts = text.replace(/　/g, ' ').split(' ').map(p => p.trim());
+    
+    const buttons = document.querySelectorAll('.color-btn');
+    buttons.forEach(btn => {
+      const color = btn.getAttribute('data-color');
+      if (parts.includes(color)) {
+        // 選択中スタイル: 枠線を強調、少し拡大、影を強く
+        btn.classList.add('ring-4', 'ring-amber-400', 'ring-offset-2', 'scale-110');
+      } else {
+        // 未選択スタイル
+        btn.classList.remove('ring-4', 'ring-amber-400', 'ring-offset-2', 'scale-110');
+      }
+    });
+  }
+
+  // ==========================================
+  // 2. 金額入力ロジック (+1000円など)
+  // ==========================================
+  function addPrice(amount) {
+    const input = document.getElementById('item_price');
+    // 空の場合は0として扱う
+    let current = parseInt(input.value) || 0;
+    input.value = current + amount;
+  }
+  
+  function clearPrice() {
+    document.getElementById('item_price').value = "";
+  }
+
+  // ==========================================
+  // 3. 画像プレビューロジック
+  // ==========================================
+  function previewImage(input) {
+    const target = document.getElementById('preview-target');
+    const placeholder = document.getElementById('upload-placeholder');
+    
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+      
+      reader.onload = function (e) {
+        target.src = e.target.result;
+        target.classList.remove('hidden');
+        if (placeholder) placeholder.classList.add('hidden');
+      };
+      
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
+</script>
+
+<style>
+  /* 横スクロールバーを隠す (スマホでの見た目のため) */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+</style>

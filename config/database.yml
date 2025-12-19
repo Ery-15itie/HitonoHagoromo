@@ -2,10 +2,10 @@ default: &default
   adapter: postgresql
   encoding: unicode
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
-  # Dockerコンテナ間の通信設定をdefaultに統一
+  # Dockerサービス名 'db' を指定
   host: db
   username: postgres
-  password: <%= ENV["POSTGRES_PASSWORD"] %> 
+  password: <%= ENV.fetch("POSTGRES_PASSWORD") { 'password' } %>
 
 development:
   <<: *default
@@ -16,7 +16,6 @@ test:
   database: hitonohagoromo_test
 
 production:
-  <<: *default 
+  <<: *default
   url: <%= ENV['DATABASE_URL'] %>
-  # クラウド環境ではSSL接続が必須
   sslmode: 'require'

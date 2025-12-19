@@ -1,0 +1,170 @@
+<%# app/views/actual_outfits/_form.html.erb %>
+
+<%# フォーム全体を中央寄せ %>
+<div class="max-w-lg mx-auto">
+  
+  <%# カードデザイン：LPと同じ白背景・角丸・優しい影 %>
+  <div class="bg-white rounded-2xl shadow-xl shadow-stone-200 border border-stone-100 overflow-hidden">
+    
+    <%# --- ヘッダー部分 --- %>
+    <div class="bg-[#FDFBF7] px-6 py-4 border-b border-stone-100 flex items-center justify-between">
+      <h2 class="text-xl font-bold text-indigo-950 flex items-center gap-2">
+        <span>👕</span> 着用を記録
+      </h2>
+      <span class="text-xs font-bold text-amber-700 bg-amber-50 px-2 py-1 rounded-full border border-amber-100">
+        STEP 1/1
+      </span>
+    </div>
+
+    <div class="p-6 md:p-8">
+      <%= form_with(model: actual_outfit, local: true, class: "space-y-8") do |f| %>
+
+        <%# --- ⚠️ 重複警告エリア (バリデーションエラー時のみ表示) --- %>
+        <% if actual_outfit.errors[:base].present? %>
+          <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-r animate-pulse">
+            <div class="flex">
+              <div class="flex-shrink-0 text-red-400">
+                <%# アイコン: Alert %>
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <div class="ml-3">
+                <p class="text-sm text-red-800 font-bold mb-2">
+                  <%= actual_outfit.errors[:base].first %>
+                </p>
+                <div class="flex items-center bg-white p-2 rounded border border-red-100">
+                  <%= f.check_box :force_create, class: "h-5 w-5 text-red-600 border-gray-300 rounded focus:ring-red-500" %>
+                  <%= f.label :force_create, "構わずに記録する", class: "ml-3 block text-sm font-bold text-red-700 cursor-pointer" %>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% end %>
+
+        <%# --- 1. 日付と時間 --- %>
+        <div class="grid grid-cols-1 gap-6">
+          <div>
+            <%= f.label :worn_on, "📅 日付", class: "block text-sm font-bold text-indigo-900 mb-2" %>
+            <%= f.date_field :worn_on, class: "block w-full rounded-xl border-stone-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 text-lg py-3 px-4 bg-[#FDFBF7]" %>
+          </div>
+
+          <div>
+            <%= f.label :time_slot, "⏰ 時間帯", class: "block text-sm font-bold text-indigo-900 mb-2" %>
+            <div class="relative">
+              <%= f.select :time_slot, 
+                  @time_slot_options, 
+                  { prompt: "選択してください" }, 
+                  { class: "block w-full rounded-xl border-stone-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 text-lg py-3 px-4 bg-[#FDFBF7] appearance-none" } 
+              %>
+              <%# セレクトボックスの矢印アイコン %>
+              <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-stone-500">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <hr class="border-stone-100">
+
+        <%# --- 2. コーディネート選択 (カード型UI) --- %>
+        <div>
+          <label class="block text-lg font-bold text-indigo-950 mb-1">
+            👕 今日の服を選ぶ
+          </label>
+          <p class="text-xs text-stone-500 mb-4">着用したアイテムをタップして選択（複数可）</p>
+          
+          <div class="bg-[#FDFBF7] rounded-xl border border-stone-200 max-h-96 overflow-y-auto p-4 custom-scrollbar">
+            <% if @items.present? %>
+              <%# カテゴリごとに表示 %>
+              <% @items.group_by { |i| i.category&.name || "未分類" }.each do |category_name, items| %>
+                <div class="mb-6 last:mb-0">
+                  <h3 class="text-xs font-bold text-amber-700 uppercase tracking-widest mb-3 flex items-center">
+                    <span class="w-2 h-2 bg-amber-400 rounded-full mr-2"></span>
+                    <%= category_name %>
+                  </h3>
+                  
+                  <div class="grid grid-cols-2 gap-3">
+                    <%= f.collection_check_boxes(:item_ids, items, :id, :name) do |b| %>
+                      <div class="relative">
+                        <%= b.check_box(class: "peer sr-only") %>
+                        <%= b.label(class: "flex items-center justify-center p-3 text-sm font-medium text-stone-600 bg-white border border-stone-200 rounded-lg cursor-pointer peer-checked:border-indigo-600 peer-checked:bg-indigo-50 peer-checked:text-indigo-700 transition-all shadow-sm hover:shadow-md h-full text-center break-words") do %>
+                          <%= b.text %>
+                        <% end %>
+                        <%# チェックマーク装飾 %>
+                        <div class="absolute top-[-6px] right-[-6px] hidden peer-checked:block bg-indigo-600 text-white rounded-full p-0.5 shadow-sm">
+                          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                        </div>
+                      </div>
+                    <% end %>
+                  </div>
+                </div>
+              <% end %>
+            <% else %>
+               <div class="text-center py-8 text-stone-400">
+                 <p class="text-sm">服が登録されていません</p>
+                 <%= link_to "アイテムを登録する", new_item_path, class: "text-amber-600 underline mt-2 block" %>
+               </div>
+            <% end %>
+          </div>
+        </div>
+
+        <%# --- 3. 人と会ったか --- %>
+        <div>
+          <%= f.label :contact_id, "🤝 会った人 (任意)", class: "block text-sm font-bold text-indigo-900 mb-2" %>
+          <div class="relative">
+            <%= f.collection_select :contact_id, @contacts, :id, :name, { include_blank: "誰とも会っていない" }, { class: "block w-full rounded-xl border-stone-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 text-lg py-3 px-4 bg-[#FDFBF7] appearance-none" } %>
+            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-stone-500">
+               <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+            </div>
+          </div>
+        </div>
+
+        <hr class="border-stone-100">
+
+        <%# --- 4. 写真投稿 (主役機能) --- %>
+        <div class="bg-indigo-50/50 p-5 rounded-xl border border-indigo-100">
+          <%= f.label :snapshot, class: "block text-base font-bold text-indigo-900 mb-3 flex items-center gap-2" do %>
+            <span>📷</span> 写真を残す
+            <span class="text-xs font-normal text-indigo-500 bg-white px-2 py-0.5 rounded-full border border-indigo-100">QOL向上</span>
+          <% end %>
+          
+          <div class="relative w-full">
+             <label class="flex flex-col items-center justify-center w-full h-40 border-2 border-indigo-300 border-dashed rounded-xl cursor-pointer bg-white hover:bg-indigo-50 transition group overflow-hidden">
+                
+                <%# プレビュー表示エリア (JSがあれば動的表示できますが、まずはサーバー側画像があれば表示) %>
+                <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                    <% if actual_outfit.snapshot.attached? %>
+                      <%# Cloudinaryの画像を表示 %>
+                      <%= cl_image_tag actual_outfit.snapshot.key, height: 100, crop: :fill, class: "rounded-lg shadow-sm mb-2" %>
+                      <p class="text-xs text-indigo-600 font-bold">選択済み（変更可能）</p>
+                    <% else %>
+                      <svg class="w-10 h-10 mb-3 text-indigo-300 group-hover:text-indigo-500 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                      <p class="mb-2 text-sm text-indigo-700 font-bold">写真を撮る / 選ぶ</p>
+                      <p class="text-xs text-stone-400">今日の一枚を記録しましょう</p>
+                    <% end %>
+                </div>
+                <%= f.file_field :snapshot, accept: "image/*", class: "absolute inset-0 w-full h-full opacity-0 cursor-pointer" %>
+            </label>
+          </div>
+        </div>
+
+        <%# --- 5. ひとこと日記 --- %>
+        <div>
+          <%= f.label :impression, "📝 ひとこと日記", class: "block text-sm font-bold text-indigo-900 mb-2" %>
+          <%= f.text_area :impression, rows: 3, class: "block w-full rounded-xl border-stone-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 text-lg py-3 px-4 bg-[#FDFBF7]", placeholder: "今日はどんな気分でしたか？" %>
+        </div>
+
+        <%# --- アクションボタン --- %>
+        <div class="pt-4 space-y-4">
+          <%= f.submit "記録を保存する", class: "w-full py-4 px-6 rounded-xl shadow-lg text-lg font-bold text-white bg-amber-700 hover:bg-amber-800 focus:outline-none focus:ring-4 focus:ring-amber-200 transition transform active:scale-[0.98]" %>
+          
+          <%= link_to "キャンセル", timeline_actual_outfits_path(start_date: actual_outfit.worn_on || Date.current), class: "block text-center text-stone-500 hover:text-stone-700 text-sm font-medium py-2" %>
+        </div>
+
+      <% end %>
+    </div>
+  </div>
+</div>

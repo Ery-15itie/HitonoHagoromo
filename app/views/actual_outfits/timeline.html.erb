@@ -1,175 +1,262 @@
-<%# カレンダー表示の切り替え機能を追加し、会う相手の情報を表示 %>
-
 <%# 現在の表示モードを決定 %>
 <% current_mode = params[:display_mode].presence || 'timeline' %>
 
-<%# Tailwind CSS の hidden クラスを使って表示/非表示を制御するスタイルに変更 %>
+<%# CSS: ドロップダウンアニメーションとスクロールバー調整 %>
 <style>
-  /* ドロップダウンメニュー用のスタイルを改善 */
   .dropdown-menu {
-    /* JavaScriptで操作するため、display:none; や opacity:0; は Tailwind の 'hidden' クラスに任せる */
     transition: opacity 0.2s ease-out, transform 0.2s ease-out; 
     transform: translateY(5px);
   }
-
-  /* JavaScriptで 'is-active' クラスが付与されたときに表示 */
   .dropdown-menu.is-active {
     opacity: 1;
     transform: translateY(0);
   }
+  /* 横スクロール時の見た目調整 */
+  .custom-scrollbar::-webkit-scrollbar {
+    height: 8px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: #f1f1f1; 
+    border-radius: 4px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #d1d5db; 
+    border-radius: 4px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af; 
+  }
 </style>
 
 <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-  <div class="pb-6 flex justify-between items-center">
-    <h1 class="text-3xl font-bold text-gray-900">着用タイムテーブル</h1>
+  <%# --- ヘッダーエリア --- %>
+  <div class="pb-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+    <h1 class="text-3xl font-bold text-gray-900 flex items-center">
+      <svg class="w-8 h-8 mr-2 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+      着用タイムテーブル
+    </h1>
     
     <div class="space-x-4 flex items-center">
       <%# --- 表示形式切り替えドロップダウン --- %>
       <div class="relative py-2" id="dropdown-toggle">
-        <button class="bg-white hover:bg-gray-100 text-gray-600 font-medium px-3 py-2 border border-gray-300 rounded-md text-sm transition duration-150 inline-flex items-center">
+        <button class="bg-white hover:bg-gray-50 text-gray-700 font-medium px-4 py-2 border border-gray-300 rounded-lg text-sm transition shadow-sm inline-flex items-center">
           <span class="mr-2"><%= current_mode == 'timeline' ? '詳細タイムテーブル' : '週間カレンダー' %></span>
-          <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+          <svg class="fill-current h-4 w-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
         </button>
         
-        <div class="dropdown-menu absolute right-0 top-full py-1 w-48 bg-white rounded-md shadow-xl z-20 border border-gray-200 hidden js-dropdown-menu" style="opacity: 0;">
-          <%= link_to '詳細タイムテーブル ', timeline_actual_outfits_path(display_mode: 'timeline', start_date: @week_start), 
-              class: "block px-4 py-2 text-sm text-gray-700 hover:bg-amber-50 #{'font-bold text-amber-700' if current_mode == 'timeline'}" %>
-              
-          <%= link_to '週間カレンダー ', actual_outfits_calendar_path(display_mode: 'monthly', start_date: @week_start), 
-              class: "block px-4 py-2 text-sm text-gray-700 hover:bg-amber-50 #{'font-bold text-amber-700' if current_mode == 'monthly'}" %>
+        <div class="dropdown-menu absolute right-0 top-full mt-1 w-56 bg-white rounded-lg shadow-xl z-50 border border-gray-100 hidden js-dropdown-menu" style="opacity: 0;">
+          <div class="py-1">
+            <%= link_to timeline_actual_outfits_path(display_mode: 'timeline', start_date: @week_start), 
+                class: "flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-amber-50 #{'bg-amber-50 font-bold text-amber-800' if current_mode == 'timeline'}" do %>
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
+                詳細タイムテーブル (4区分)
+            <% end %>
+            
+            <%# ★修正箇所: パスを正しい timeline_actual_outfits_path に変更しました %>
+            <%= link_to timeline_actual_outfits_path(display_mode: 'monthly', start_date: @week_start), 
+                class: "flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-amber-50 #{'bg-amber-50 font-bold text-amber-800' if current_mode == 'monthly'}" do %>
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                月間/週間カレンダー
+            <% end %>
+          </div>
         </div>
       </div>
       
       <%# クローゼットに戻るボタン %>
-      <%= link_to "クローゼット", authenticated_root_path, class: "text-gray-600 hover:text-amber-700 px-3 py-2 rounded-md text-sm font-medium transition duration-150 border border-gray-300" %>
+      <%= link_to authenticated_root_path, class: "group flex items-center text-gray-600 hover:text-amber-700 px-4 py-2 rounded-lg text-sm font-medium transition duration-150 border border-gray-300 hover:border-amber-300 bg-white shadow-sm" do %>
+        <svg class="w-4 h-4 mr-2 group-hover:text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+        クローゼット
+      <% end %>
     </div>
   </div>
   
-  <%# 週のナビゲーション %>
-  <div class="flex justify-between items-center mb-4">
-    <div class="flex items-center space-x-2">
+  <%# --- 週ナビゲーション --- %>
+  <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 mb-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+    <div class="flex items-center space-x-4 bg-gray-50 rounded-lg p-1">
       <%# 前週へ %>
-      <%= link_to timeline_actual_outfits_path(start_date: @week_start - 7.days, display_mode: current_mode), class: "text-gray-500 hover:text-gray-700 transition duration-150" do %>
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+      <%= link_to timeline_actual_outfits_path(start_date: @week_start - 7.days, display_mode: current_mode), class: "p-2 rounded-md text-gray-500 hover:text-amber-700 hover:bg-white shadow-sm transition" do %>
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
       <% end %>
       
       <%# 現在の週の範囲 %>
-      <h2 class="text-2xl font-semibold text-amber-800">
-        <%= l @week_start, format: :short_date %> - <%= l @week_end, format: :short_date %>
+      <h2 class="text-xl font-bold text-gray-800 tracking-wide px-2">
+        <%= @week_start.strftime("%Y年 %-m月 %-d日") %> <span class="text-gray-400 text-sm font-normal">〜</span> <%= @week_end.strftime("%-m月 %-d日") %>
       </h2>
       
       <%# 翌週へ %>
-      <%= link_to timeline_actual_outfits_path(start_date: @week_start + 7.days, display_mode: current_mode), class: "text-gray-500 hover:text-gray-700 transition duration-150" do %>
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+      <%= link_to timeline_actual_outfits_path(start_date: @week_start + 7.days, display_mode: current_mode), class: "p-2 rounded-md text-gray-500 hover:text-amber-700 hover:bg-white shadow-sm transition" do %>
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
       <% end %>
     </div>
 
     <%# 今日の記録ボタン %>
-    <%= link_to "今日の記録を追加", new_actual_outfit_path(worn_on: Date.current), class: "bg-green-600 text-white hover:bg-green-700 px-3 py-2 rounded-md text-sm font-medium transition duration-150 shadow-md" %>
+    <%= link_to new_actual_outfit_path(worn_on: Date.current), class: "w-full sm:w-auto flex items-center justify-center bg-amber-600 text-white hover:bg-amber-700 px-5 py-2.5 rounded-lg text-sm font-bold transition duration-150 shadow-md transform active:scale-95" do %>
+      <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+      今日の記録を追加
+    <% end %>
   </div>
 
   <%# ==== タイムテーブル本体 (グリッドレイアウト) ==== %>
-  <div class="bg-white p-2 rounded-xl shadow-xl overflow-x-auto">
-    <div class="grid grid-cols-8 min-w-[1000px]"> 
-      
-      <%# 1行目: 曜日ヘッダー %>
-      <div class="col-span-1 bg-gray-50 text-gray-700 font-bold py-3 px-2 border-b-2 border-r-2 border-gray-200">時間帯</div>
-      <% (@week_start..@week_end).each do |date| %>
-        <% day_class = if date.today?; 'bg-amber-50 border-amber-400'; elsif date.sunday?; 'text-red-600'; elsif date.saturday?; 'text-blue-600'; else; 'text-gray-700'; end %>
-        <div class="col-span-1 text-center font-bold py-3 border-b-2 border-gray-200 <%= day_class %>">
-          <%= date.day %> (<%= I18n.t('date.abbr_day_names')[date.wday] %>)
-        </div>
-      <% end %>
-      
-      <%# 2行目以降: 時間帯ごとのセル %>
-      <% @time_slots.each do |slot_key, slot_name| %>
+  <div class="bg-white p-1 rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+    <div class="overflow-x-auto custom-scrollbar pb-2">
+      <div class="grid grid-cols-8 min-w-[1000px] border-l border-gray-200"> 
         
-        <%# 時間帯ラベル列 %>
-        <div class="col-span-1 bg-gray-50 text-gray-800 font-medium py-4 px-2 border-r-2 border-gray-200 border-t border-dashed">
-          <%= slot_name %>
+        <%# --- 1行目: 曜日ヘッダー --- %>
+        <div class="col-span-1 bg-gray-100 text-gray-500 text-xs font-bold uppercase tracking-wider py-4 px-2 border-b border-gray-200 flex items-center justify-center">
+          TIME
         </div>
-
-        <%# 7日分の着用記録セル %>
         <% (@week_start..@week_end).each do |date| %>
-          <% daily_outfits = @timeline_data[date][slot_key] %>
-          
-          <div class="col-span-1 p-2 border-t border-dashed border-gray-200 hover:bg-gray-100 transition duration-100 min-h-[100px]">
-            <% if daily_outfits.present? %>
-              <% daily_outfits.each do |outfit| %>
-                <div class="bg-amber-100 border border-amber-300 rounded-lg p-2 mb-1 text-xs shadow-sm">
-                  <p class="font-bold text-amber-800 truncate">
-                    着用: <%= outfit.item&.name %>
-                  </p>
-                  <%# 会う相手の情報 %>
-                  <% if outfit.contact.present? %>
-                    <p class="text-xs text-red-700 font-medium truncate">
-                      相手: <%= outfit.contact.name %>
-                    </p>
-                  <% end %>
-
-                  <% if outfit.impression.present? %>
-                    <p class="text-gray-700 truncate">
-                      メモ: <%= outfit.impression.truncate(10) %>
-                    </p>
-                  <% end %>
-                  
-                  <%# 編集・削除ボタン %>
-                  <div class="mt-1 flex gap-2">
-                    <%= link_to "編集", edit_actual_outfit_path(outfit), class: "text-xs text-indigo-600 hover:text-indigo-800" %>
-                    <%= button_to "削除", actual_outfit_path(outfit), method: :delete, data: { turbo_confirm: "この記録を削除しますか？" }, class: "text-xs text-red-500 hover:text-red-700 bg-transparent border-none p-0 cursor-pointer" %>
-                  </div>
-                </div>
-              <% end %>
-            <% else %>
-              <p class="text-gray-400 text-xs">記録なし</p>
-            <% end %>
-            
-            <%# 新規記録追加ボタン (日付と時間帯をプリセット) %>
-            <div class="mt-2 text-right">
-              <%= link_to new_actual_outfit_path(worn_on: date, time_slot: slot_key), class: "text-green-600 hover:text-green-800" do %>
-                <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-              <% end %>
-            </div>
+          <% 
+            is_today = date == Date.current
+            bg_class = is_today ? 'bg-amber-50' : 'bg-gray-50'
+            text_class = if date.sunday?; 'text-red-600'; elsif date.saturday?; 'text-blue-600'; else; 'text-gray-700'; end 
+            border_class = is_today ? 'border-b-4 border-amber-500' : 'border-b border-gray-200'
+          %>
+          <div class="col-span-1 text-center py-3 <%= bg_class %> <%= border_class %> border-r border-gray-100">
+            <div class="text-xs text-gray-500 font-medium"><%= date.month %>月</div>
+            <div class="text-xl font-bold <%= text_class %>"><%= date.day %></div>
+            <div class="text-xs font-bold <%= text_class %> uppercase"><%= I18n.t('date.abbr_day_names')[date.wday] %></div>
           </div>
         <% end %>
-      <% end %>
+        
+        <%# --- 2行目以降: 時間帯ごとのセル (朝・昼・夕・夜) --- %>
+        <%# @time_slots はコントローラーで { morning: '朝', day: '昼', evening: '夕方', night: '夜' } のように定義されている前提 %>
+        <% @time_slots.each do |slot_key, slot_name| %>
+          
+          <%# 左端: 時間帯ラベル %>
+          <div class="col-span-1 bg-gray-50 flex flex-col items-center justify-center p-2 border-r border-b border-gray-200">
+            <%# 時間帯ごとのアイコン切り替え %>
+            <% icon_color = case slot_key.to_s
+               when 'morning'; 'text-yellow-500'
+               when 'day'; 'text-orange-500'
+               when 'evening'; 'text-purple-500'
+               when 'night'; 'text-indigo-500'
+               else; 'text-gray-400'
+               end %>
+            
+            <svg class="w-6 h-6 <%= icon_color %> mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <% case slot_key.to_s %>
+              <% when 'morning' %>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+              <% when 'day' %>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+              <% when 'evening' %>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+              <% when 'night' %>
+                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+              <% end %>
+            </svg>
+            <span class="text-sm font-bold text-gray-700"><%= slot_name %></span>
+          </div>
+
+          <%# 7日分のデータセル %>
+          <% (@week_start..@week_end).each do |date| %>
+            <% daily_outfits = @timeline_data[date][slot_key] %>
+            <% is_past = date < Date.current %>
+            
+            <div class="col-span-1 p-2 border-b border-r border-gray-100 min-h-[140px] relative group hover:bg-gray-50 transition duration-150 flex flex-col">
+              
+              <% if daily_outfits.present? %>
+                <div class="flex-1 space-y-2">
+                  <% daily_outfits.each do |outfit| %>
+                    <div class="bg-white border border-gray-200 rounded-lg p-2 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+                      <%# 左側のカラーバー（アクセント） %>
+                      <div class="absolute left-0 top-0 bottom-0 w-1 bg-amber-400"></div>
+                      
+                      <div class="pl-2">
+                        <%# 画像表示 (with_attached_snapshot が効いていればN+1なしで表示) %>
+                        <% if outfit.snapshot.attached? %>
+                          <div class="mb-2 w-full h-24 bg-gray-100 rounded-md overflow-hidden">
+                             <%# 画像を表示。リサイズ処理などはActiveStorageの設定に依存 %>
+                             <%= image_tag outfit.snapshot, class: "w-full h-full object-cover" %>
+                          </div>
+                        <% end %>
+
+                        <%# アイテム名 %>
+                        <p class="font-bold text-gray-800 text-xs truncate mb-1">
+                          <%= outfit.item&.name %>
+                        </p>
+                        
+                        <%# 会う相手の情報 %>
+                        <% if outfit.contact.present? %>
+                          <div class="flex items-center text-xs text-rose-600 font-bold mb-1 bg-rose-50 px-1 py-0.5 rounded w-fit">
+                            <svg class="w-3 h-3 mr-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                            <%= outfit.contact.name %>
+                          </div>
+                        <% end %>
+
+                        <%# メモ %>
+                        <% if outfit.impression.present? %>
+                          <p class="text-xs text-gray-500 truncate border-t border-gray-100 pt-1 mt-1">
+                            <%= outfit.impression %>
+                          </p>
+                        <% end %>
+                        
+                        <%# アクションボタン %>
+                        <div class="mt-2 flex justify-end items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <%= link_to edit_actual_outfit_path(outfit), class: "text-indigo-500 hover:text-indigo-700 bg-indigo-50 p-1 rounded hover:bg-indigo-100" do %>
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                          <% end %>
+                          <%= button_to actual_outfit_path(outfit), method: :delete, data: { turbo_confirm: "本当に削除しますか？" }, class: "bg-transparent border-none p-0 cursor-pointer text-rose-400 hover:text-rose-600 bg-rose-50 p-1 rounded hover:bg-rose-100" do %>
+                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                          <% end %>
+                        </div>
+                      </div>
+                    </div>
+                  <% end %>
+                </div>
+              <% else %>
+                <div class="h-full flex items-center justify-center">
+                   <% if is_past %>
+                     <span class="text-gray-200 text-3xl font-light">-</span>
+                   <% end %>
+                </div>
+              <% end %>
+              
+              <%# 新規追加ボタン（空きスペースをクリックしやすいように配置） %>
+              <div class="mt-auto pt-2 flex justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <%= link_to new_actual_outfit_path(worn_on: date, time_slot: slot_key), class: "w-full text-center border border-dashed border-gray-300 rounded hover:border-green-500 hover:bg-green-50 text-gray-300 hover:text-green-600 text-xs py-1 transition" do %>
+                  + 追加
+                <% end %>
+              </div>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
     </div>
   </div>
 </div>
 
-<%# JavaScript/jQuery を使ってホバー時にディレイを実装 %>
+<%# JavaScript: ドロップダウン制御 %>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script>
   $(function() {
     let hideTimer;
-    const delay = 300; // 0.3秒の遅延
+    const delay = 300; 
 
     const $dropdownToggle = $('#dropdown-toggle');
     const $dropdownMenu = $dropdownToggle.find('.js-dropdown-menu');
 
-    // マウスがドロップダウンエリアに乗った時
     $dropdownToggle.on('mouseenter', function() {
-      clearTimeout(hideTimer); // 非表示タイマーを解除
-      $dropdownMenu.removeClass('hidden').addClass('is-active');
-      $dropdownMenu.css('opacity', 1); // transitionが効くようにCSSを上書き
+      clearTimeout(hideTimer);
+      $dropdownMenu.removeClass('hidden');
+      requestAnimationFrame(() => {
+        $dropdownMenu.addClass('is-active');
+        $dropdownMenu.css('opacity', 1);
+      });
     });
 
-    // マウスがドロップダウンエリアから離れた時
     $dropdownToggle.on('mouseleave', function() {
-      // 遅延を設定
       hideTimer = setTimeout(function() {
-        // transitionが終わるのを待たずに hidden に戻す
-        $dropdownMenu.removeClass('is-active').addClass('hidden');
+        $dropdownMenu.removeClass('is-active');
         $dropdownMenu.css('opacity', 0);
       }, delay);
     });
     
-    // トランジションが終了したら hidden に戻す (念のため)
     $dropdownMenu.on('transitionend', function() {
       if (!$dropdownMenu.hasClass('is-active')) {
         $dropdownMenu.addClass('hidden');
       }
     });
-
   });
 </script>

@@ -3,6 +3,9 @@ class Item < ApplicationRecord
   belongs_to :user
   belongs_to :category, optional: true # category_idがnilを許容するように設定
   
+  # 画像を添付できるようにする設定
+  has_one_attached :image
+
   # アイテムは複数の着用記録を持つ (1:多)
   has_many :actual_outfits, dependent: :destroy
 

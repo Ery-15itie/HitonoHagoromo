@@ -1,15 +1,12 @@
 version: '3.8'
 
 services:
-  # Railsアプリケーションのサービス定義
   web:
     build: .
-    # サーバー起動コマンドを直接指定
+    # 初回は安定稼働のため rails server で起動
     command: bundle exec rails server -p 3000 -b '0.0.0.0'
     volumes:
-      # アプリケーションコードのみマウント
       - .:/hitonohagoromo
-      # gemのインストールパスはボリュームとして保護（上書きされないようにする）
       - bundle_data:/usr/local/bundle
     ports:
       - "3000:3000"
@@ -22,7 +19,6 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
 
-  # PostgreSQLデータベースのサービス定義
   db:
     image: postgres:14-alpine
     volumes:
@@ -30,11 +26,11 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: qol_closet_development
+      # Railsの database.yml と名前を一致させる
+      POSTGRES_DB: hitonohagoromo_development
     ports:
       - "5432:5432"
 
-# データを永続化するためのボリューム
 volumes:
   postgres_data:
-  bundle_data:  # gemのインストールパスを保護するボリューム
+  bundle_data:

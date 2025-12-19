@@ -1,15 +1,20 @@
 <div class="elegant-font py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
   <div class="flex flex-col sm:flex-row justify-between items-center mb-8 border-b border-amber-100 pb-4">
-    <h1 class="text-4xl font-bold text-gray-800">
+    <h1 class="text-4xl font-bold text-gray-800 tracking-tight">
       私のクローゼット
     </h1>
     
     <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3 mt-4 sm:mt-0">
-      <%# === 着用カレンダーへのリンク  === %>
-      <%= link_to "着用カレンダーへ", actual_outfits_path, class: "flex items-center space-x-2 bg-amber-600 text-white py-2 px-4 rounded-xl font-semibold hover:bg-amber-700 transition duration-150 shadow-lg text-sm" %>
+      <%# === 着用カレンダーへのリンク === %>
+      <%= link_to actual_outfits_path, class: "flex items-center space-x-2 bg-white text-amber-600 border border-amber-600 py-2 px-4 rounded-xl font-semibold hover:bg-amber-50 transition duration-150 shadow-sm text-sm" do %>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+        <span>着用カレンダー</span>
+      <% end %>
       
       <%# 新規アイテム登録ボタン %>
-      <%= link_to new_item_path, class: "flex items-center space-x-2 bg-amber-800 text-white py-2 px-4 rounded-xl font-semibold hover:bg-amber-900 transition duration-150 shadow-lg text-sm" do %>
+      <%= link_to new_item_path, class: "flex items-center space-x-2 bg-amber-600 text-white py-2 px-4 rounded-xl font-semibold hover:bg-amber-700 transition duration-150 shadow-lg text-sm" do %>
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
           <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
         </svg>
@@ -20,62 +25,71 @@
 
   <%# === アイテムリストの表示 === %>
   <% if @items.empty? %>
-    <div class="text-center py-20 bg-gray-50 rounded-xl shadow-inner">
-      <p class="text-xl text-gray-500 mb-4">まだアイテムが登録されていません。</p>
-      <%= link_to "最初のアイテムを登録しましょう！", new_item_path, class: "text-amber-700 font-semibold hover:text-amber-900 transition duration-150" %>
+    <div class="flex flex-col items-center justify-center py-20 bg-amber-50 rounded-3xl border-2 border-dashed border-amber-200">
+      <div class="bg-white p-4 rounded-full shadow-sm mb-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+        </svg>
+      </div>
+      <p class="text-xl text-gray-600 font-medium mb-2">まだアイテムがありません</p>
+      <p class="text-gray-500 mb-6">お気に入りの服を登録して管理しましょう！</p>
+      <%= link_to "最初のアイテムを登録する", new_item_path, class: "text-amber-700 font-bold hover:text-amber-900 underline decoration-2 underline-offset-4 transition" %>
     </div>
   <% else %>
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 lg:gap-8">
       <% @items.each do |item| %>
         <%# Item Card %>
-        <div class="bg-white rounded-xl shadow-xl overflow-hidden hover:shadow-2xl transition duration-300 transform hover:scale-[1.02] border border-gray-100">
+        <div class="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 flex flex-col h-full overflow-hidden">
           
-          <%# 画像の代わりにプレースホルダー %>
-          <div class="h-48 bg-gray-200 flex items-center justify-center text-gray-500 font-medium text-sm border-b border-gray-300">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd" />
-            </svg>
-          </div>
-
-          <div class="p-5">
-            <%# アイテム名 %>
-            <h2 class="text-xl font-bold text-gray-800 truncate mb-1">
-              <%= link_to item.name, item_path(item), class: "hover:text-amber-800 transition duration-150" %>
-            </h2>
+          <%# 画像エリア（クリックで詳細へ） %>
+          <%= link_to item_path(item), class: "block relative h-56 w-full bg-gray-100 overflow-hidden" do %>
+            <% if item.image.attached? %>
+              <%= image_tag item.image, class: "w-full h-full object-cover group-hover:scale-105 transition duration-500" %>
+            <% else %>
+              <div class="w-full h-full flex items-center justify-center text-gray-300 bg-gray-50">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+            <% end %>
             
-            <%# カテゴリと価格 %>
-            <div class="flex justify-between items-center text-sm text-gray-500 mb-3">
-              <%# カテゴリが存在する場合のみバッジを表示。安全ナビゲーション演算子を使用 %>
+            <%# 価格バッジ（画像の上に表示） %>
+            <% if item.price.present? %>
+              <div class="absolute bottom-2 right-2 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-gray-700 shadow-sm">
+                ¥<%= number_with_delimiter(item.price) %>
+              </div>
+            <% end %>
+          <% end %>
+
+          <div class="p-4 flex-1 flex flex-col">
+            <%# カテゴリ %>
+            <div class="mb-2">
               <% if item.category.present? %>
-                <span class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-semibold text-xs">
-                  <%= item.category&.name %>
+                <span class="inline-block bg-amber-50 text-amber-700 px-2 py-1 rounded-md text-[10px] font-bold tracking-wide uppercase">
+                  <%= item.category.name %>
                 </span>
               <% else %>
-                <span class="text-xs text-gray-400 italic">
-                  カテゴリなし
-                </span>
+                <span class="text-[10px] text-gray-300">NO CATEGORY</span>
               <% end %>
+            </div>
 
-              <span class="font-medium">
-                <% if item.price.present? %>
-                  ¥<%= number_with_delimiter(item.price) %>
-                <% end %>
-              </span>
-            </div>
+            <%# アイテム名 %>
+            <h2 class="text-lg font-bold text-gray-800 leading-snug mb-1 group-hover:text-amber-700 transition-colors">
+              <%= link_to item.name, item_path(item) %>
+            </h2>
             
-            <%# 色と説明のプレビュー %>
-            <p class="text-xs text-gray-500 truncate mb-4">
-              色: <%= item.color.presence || '未設定' %>
+            <%# 色などのメタ情報 %>
+            <p class="text-sm text-gray-500 mt-auto pt-2 border-t border-gray-50 flex items-center gap-2">
+              <% if item.color.present? %>
+                <span class="w-2 h-2 rounded-full bg-gray-300"></span>
+                <span><%= item.color %></span>
+              <% else %>
+                <span class="text-gray-300 text-xs">色未設定</span>
+              <% end %>
             </p>
-            
-            <%# 詳細リンク %>
-            <div class="text-center">
-              <%= link_to "詳細を見る", item_path(item), class: "text-sm font-semibold text-amber-700 hover:text-amber-900 transition duration-150" %>
-            </div>
           </div>
         </div>
       <% end %>
     </div>
   <% end %>
-
 </div>

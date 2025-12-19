@@ -1,95 +1,132 @@
-<div class="elegant-font py-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-  <div class="flex flex-col sm:flex-row justify-between items-center mb-8 border-b border-amber-100 pb-4">
-    <h1 class="text-4xl font-bold text-gray-800 tracking-tight">
-      私のクローゼット
-    </h1>
+<%# --- Global Styles & Fonts Import --- %>
+<%# しっぽり明朝フォントの読み込み %>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@600&display=swap" rel="stylesheet">
+
+<%# 全体のラッパー：LPと同じ背景色とフォント設定 %>
+<div class="min-h-screen bg-[#FDFBF7] text-slate-700 font-sans selection:bg-amber-100 selection:text-amber-900">
+  
+  <%# --- Header (LPスタイル) --- %>
+  <header class="w-full py-6 px-6 flex justify-between items-center max-w-6xl mx-auto z-50 relative">
     
-    <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3 mt-4 sm:mt-0">
-      <%# === 着用カレンダーへのリンク === %>
-      <%= link_to actual_outfits_path, class: "flex items-center space-x-2 bg-white text-amber-600 border border-amber-600 py-2 px-4 rounded-xl font-semibold hover:bg-amber-50 transition duration-150 shadow-sm text-sm" do %>
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-        </svg>
-        <span>着用カレンダー</span>
-      <% end %>
+    <%# ロゴ部分: 👘 + しっぽり明朝 %>
+    <%= link_to root_path, class: "flex items-center gap-3 text-indigo-950 hover:opacity-80 transition duration-300" do %>
+      <span class="text-3xl filter drop-shadow-sm">👘</span>
+      <span class="text-3xl font-bold tracking-widest" style="font-family: 'Shippori Mincho', serif;">
+        ヒトノハゴロモ
+      </span>
+    <% end %>
+
+    <%# ナビゲーション %>
+    <nav class="flex items-center gap-6 text-sm font-bold text-indigo-900">
+      <%# カレンダーへの正しいパスを設定 %>
+      <%= link_to "カレンダー", actual_outfits_path, class: "hover:text-amber-700 transition" %>
       
-      <%# 新規アイテム登録ボタン %>
-      <%= link_to new_item_path, class: "flex items-center space-x-2 bg-amber-600 text-white py-2 px-4 rounded-xl font-semibold hover:bg-amber-700 transition duration-150 shadow-lg text-sm" do %>
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
-        </svg>
-        <span>新規アイテム登録</span>
+      <%# 会う人の管理への正しいパスを設定 %>
+      <%= link_to "会う人の管理", contacts_path, class: "hover:text-amber-700 transition" %>
+      
+      <%# アイテム一覧（現在地） %>
+      <%= link_to "クローゼット", items_path, class: "text-amber-700 border-b-2 border-amber-700" %>
+      
+      <% if user_signed_in? %>
+        <%= button_to "ログアウト", destroy_user_session_path, method: :delete, class: "bg-red-400 text-white px-4 py-2 rounded-full hover:bg-red-500 transition shadow-sm cursor-pointer border-none text-sm font-bold" %>
+      <% else %>
+        <%= link_to "ログイン", new_user_session_path, class: "bg-indigo-600 text-white px-4 py-2 rounded-full hover:bg-indigo-700 transition" %>
       <% end %>
-    </div>
-  </div>
+    </nav>
+  </header>
 
-  <%# === アイテムリストの表示 === %>
-  <% if @items.empty? %>
-    <div class="flex flex-col items-center justify-center py-20 bg-amber-50 rounded-3xl border-2 border-dashed border-amber-200">
-      <div class="bg-white p-4 rounded-full shadow-sm mb-4">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-        </svg>
+  <%# --- Main Content (Dashboard Layout) --- %>
+  <main class="max-w-6xl mx-auto px-6 py-8">
+    
+    <%# フラッシュメッセージ (通知) %>
+    <% if notice %>
+      <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded shadow-sm" role="alert">
+        <p class="font-bold">お知らせ</p>
+        <p><%= notice %></p>
       </div>
-      <p class="text-xl text-gray-600 font-medium mb-2">まだアイテムがありません</p>
-      <p class="text-gray-500 mb-6">お気に入りの服を登録して管理しましょう！</p>
-      <%= link_to "最初のアイテムを登録する", new_item_path, class: "text-amber-700 font-bold hover:text-amber-900 underline decoration-2 underline-offset-4 transition" %>
-    </div>
-  <% else %>
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 lg:gap-8">
-      <% @items.each do |item| %>
-        <%# Item Card %>
-        <div class="group bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 flex flex-col h-full overflow-hidden">
+    <% end %>
+    <% if alert %>
+      <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded shadow-sm" role="alert">
+        <p class="font-bold">注意</p>
+        <p><%= alert %></p>
+      </div>
+    <% end %>
+
+    <div class="flex flex-col lg:flex-row gap-8">
+      
+      <%# --- Left Sidebar (検索・メニュー) --- %>
+      <aside class="w-full lg:w-1/4 space-y-6">
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+          <h2 class="text-xl font-bold text-indigo-950 mb-4" style="font-family: 'Shippori Mincho', serif;">私のクローゼット</h2>
           
-          <%# 画像エリア（クリックで詳細へ） %>
-          <%= link_to item_path(item), class: "block relative h-56 w-full bg-gray-100 overflow-hidden" do %>
-            <% if item.image.attached? %>
-              <%= image_tag item.image, class: "w-full h-full object-cover group-hover:scale-105 transition duration-500" %>
-            <% else %>
-              <div class="w-full h-full flex items-center justify-center text-gray-300 bg-gray-50">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-              </div>
-            <% end %>
-            
-            <%# 価格バッジ（画像の上に表示） %>
-            <% if item.price.present? %>
-              <div class="absolute bottom-2 right-2 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-gray-700 shadow-sm">
-                ¥<%= number_with_delimiter(item.price) %>
-              </div>
-            <% end %>
+          <%= link_to new_item_path, class: "block w-full text-center bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 px-4 rounded-xl transition shadow-md mb-4" do %>
+            + 新しく登録する
           <% end %>
-
-          <div class="p-4 flex-1 flex flex-col">
-            <%# カテゴリ %>
-            <div class="mb-2">
-              <% if item.category.present? %>
-                <span class="inline-block bg-amber-50 text-amber-700 px-2 py-1 rounded-md text-[10px] font-bold tracking-wide uppercase">
-                  <%= item.category.name %>
-                </span>
-              <% else %>
-                <span class="text-[10px] text-gray-300">NO CATEGORY</span>
-              <% end %>
-            </div>
-
-            <%# アイテム名 %>
-            <h2 class="text-lg font-bold text-gray-800 leading-snug mb-1 group-hover:text-amber-700 transition-colors">
-              <%= link_to item.name, item_path(item) %>
-            </h2>
-            
-            <%# 色などのメタ情報 %>
-            <p class="text-sm text-gray-500 mt-auto pt-2 border-t border-gray-50 flex items-center gap-2">
-              <% if item.color.present? %>
-                <span class="w-2 h-2 rounded-full bg-gray-300"></span>
-                <span><%= item.color %></span>
-              <% else %>
-                <span class="text-gray-300 text-xs">色未設定</span>
-              <% end %>
-            </p>
-          </div>
+          
+          <%# ▼サイドバーのカレンダーリンクも修正しました %>
+          <%= link_to actual_outfits_path, class: "block w-full text-center bg-white border-2 border-slate-200 text-slate-600 font-bold py-3 px-4 rounded-xl hover:bg-slate-50 transition" do %>
+            📅 着用カレンダー
+          <% end %>
         </div>
-      <% end %>
+
+        <%# 並べ替え・フィルタ %>
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+          <h3 class="font-bold text-slate-500 mb-4 text-sm">並べ替え</h3>
+          <ul class="space-y-2 text-sm">
+            <li><%= link_to "新しい順", "#", class: "block p-2 bg-amber-50 text-amber-800 font-bold rounded" %></li>
+            <li><%= link_to "古い順", "#", class: "block p-2 text-slate-600 hover:bg-slate-50 rounded" %></li>
+            <li><%= link_to "価格が安い順", "#", class: "block p-2 text-slate-600 hover:bg-slate-50 rounded" %></li>
+            <li><%= link_to "価格が高い順", "#", class: "block p-2 text-slate-600 hover:bg-slate-50 rounded" %></li>
+          </ul>
+        </div>
+      </aside>
+
+      <%# --- Right Content (Grid Items) --- %>
+      <div class="w-full lg:w-3/4">
+        <div class="flex justify-between items-end mb-6">
+          <h2 class="text-2xl font-bold text-indigo-950" style="font-family: 'Shippori Mincho', serif;">すべてのアイテム</h2>
+          <span class="text-slate-500 text-sm">全 <%= @items.count %> 件</span>
+        </div>
+
+        <%# アイテムグリッド %>
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-6">
+          <% @items.each do |item| %>
+            <div class="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition border border-slate-100 flex flex-col h-full">
+              <%# 画像エリア %>
+              <div class="relative aspect-[3/4] bg-slate-200 overflow-hidden">
+                <% if item.image.attached? %>
+                  <%= image_tag item.image, class: "w-full h-full object-cover group-hover:scale-105 transition duration-500" %>
+                <% else %>
+                  <div class="flex items-center justify-center h-full text-slate-400">
+                    <span class="text-xs">画像なし</span>
+                  </div>
+                <% end %>
+
+                <%# ホバー時の「詳細を見る」オーバーレイ %>
+                <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                  <%= link_to "詳細を見る", item_path(item), class: "bg-white text-xs font-bold px-4 py-2 rounded-full shadow-lg transform translate-y-2 group-hover:translate-y-0 transition" %>
+                </div>
+              </div>
+
+              <%# テキスト情報 %>
+              <div class="p-4 flex flex-col flex-grow">
+                <h3 class="font-bold text-indigo-950 mb-1"><%= item.name %></h3>
+                <div class="mt-auto">
+                  <span class="inline-block bg-amber-100 text-amber-800 text-[10px] px-2 py-1 rounded-md font-bold">
+                    <%= item.category.presence || "カテゴリなし" %>
+                  </span>
+                  <p class="text-xs text-slate-400 mt-2 text-right">
+                    <%= item.created_at.strftime('%Y.%m.%d') %>
+                  </p>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+        
+      </div>
     </div>
-  <% end %>
+  </main>
 </div>

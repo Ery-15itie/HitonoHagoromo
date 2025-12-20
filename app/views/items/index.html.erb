@@ -1,46 +1,38 @@
 <%# --- Global Styles & Fonts Import --- %>
-<%# しっぽり明朝フォントの読み込み %>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@600&display=swap" rel="stylesheet">
 
-<%# 全体のラッパー：LPと同じ背景色とフォント設定 %>
 <div class="min-h-screen bg-[#FDFBF7] text-slate-700 font-sans selection:bg-amber-100 selection:text-amber-900">
   
-  <%# --- Header (LPスタイル) --- %>
-  <header class="w-full py-6 px-6 flex flex-col md:flex-row justify-between items-center max-w-6xl mx-auto z-50 relative gap-4 md:gap-0">
+  <%# --- Header --- %>
+  <header class="w-full py-4 px-4 sm:py-6 sm:px-6 flex flex-col md:flex-row justify-between items-center max-w-6xl mx-auto z-50 relative gap-4 md:gap-0 bg-[#FDFBF7]/90 backdrop-blur-sm sticky top-0 md:static border-b md:border-none border-stone-100">
     
-    <%# ロゴ部分: 👘 + しっぽり明朝 %>
-    <%= link_to root_path, class: "flex items-center gap-3 text-indigo-950 hover:opacity-80 transition duration-300" do %>
-      <span class="text-3xl filter drop-shadow-sm">👘</span>
-      <span class="text-3xl font-bold tracking-widest" style="font-family: 'Shippori Mincho', serif;">
+    <%# ロゴ %>
+    <%= link_to root_path, class: "flex items-center gap-2 text-indigo-950 hover:opacity-80 transition duration-300" do %>
+      <span class="text-2xl sm:text-3xl filter drop-shadow-sm">👘</span>
+      <span class="text-2xl sm:text-3xl font-bold tracking-widest" style="font-family: 'Shippori Mincho', serif;">
         ヒトノハゴロモ
       </span>
     <% end %>
 
     <%# ナビゲーション %>
-    <nav class="flex items-center gap-4 sm:gap-6 text-sm font-bold text-indigo-900 overflow-x-auto w-full md:w-auto justify-center md:justify-end py-2 no-scrollbar">
-      <%# カレンダーへの正しいパスを設定 %>
+    <nav class="flex items-center gap-4 sm:gap-6 text-xs sm:text-sm font-bold text-indigo-900 overflow-x-auto w-full md:w-auto justify-center md:justify-end py-2 no-scrollbar">
       <%= link_to "カレンダー", actual_outfits_path, class: "whitespace-nowrap hover:text-amber-700 transition" %>
-      
-      <%# 会う人の管理への正しいパスを設定 %>
       <%= link_to "会う人の管理", contacts_path, class: "whitespace-nowrap hover:text-amber-700 transition" %>
-      
-      <%# アイテム一覧（現在地） %>
       <%= link_to "クローゼット", items_path, class: "whitespace-nowrap text-amber-700 border-b-2 border-amber-700" %>
       
       <% if user_signed_in? %>
-        <%= button_to "ログアウト", destroy_user_session_path, method: :delete, class: "whitespace-nowrap bg-red-400 text-white px-4 py-2 rounded-full hover:bg-red-500 transition shadow-sm cursor-pointer border-none text-sm font-bold" %>
+        <%= button_to "ログアウト", destroy_user_session_path, method: :delete, class: "whitespace-nowrap bg-red-400 text-white px-3 py-1.5 rounded-full hover:bg-red-500 transition shadow-sm cursor-pointer border-none font-bold" %>
       <% else %>
-        <%= link_to "ログイン", new_user_session_path, class: "whitespace-nowrap bg-indigo-600 text-white px-4 py-2 rounded-full hover:bg-indigo-700 transition" %>
+        <%= link_to "ログイン", new_user_session_path, class: "whitespace-nowrap bg-indigo-600 text-white px-3 py-1.5 rounded-full hover:bg-indigo-700 transition" %>
       <% end %>
     </nav>
   </header>
 
-  <%# --- Main Content (Dashboard Layout) --- %>
-  <main class="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
     
-    <%# フラッシュメッセージ (通知) %>
+    <%# フラッシュメッセージ %>
     <% if notice %>
       <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6 rounded shadow-sm animate-fade-in-down" role="alert">
         <p class="font-bold">お知らせ</p>
@@ -54,132 +46,145 @@
       </div>
     <% end %>
 
-    <div class="flex flex-col lg:flex-row gap-8">
+    <div class="flex flex-col lg:flex-row gap-6 lg:gap-8">
       
-      <%# --- Left Sidebar (検索・メニュー) --- %>
-      <aside class="w-full lg:w-1/4 space-y-6">
+      <%# --- Left Sidebar (メニュー・検索) --- %>
+      <aside class="w-full lg:w-1/4 space-y-4 lg:space-y-6">
         
-        <%# メニュー %>
-        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-          <h2 class="text-xl font-bold text-indigo-950 mb-4" style="font-family: 'Shippori Mincho', serif;">私のクローゼット</h2>
-          
-          <%= link_to new_item_path, class: "block w-full text-center bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 px-4 rounded-xl transition shadow-md mb-4 flex items-center justify-center gap-2" do %>
-             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-             新しく登録する
+        <%# [スマホ用] 新規登録ボタンだけは常に一番上に表示 %>
+        <div class="flex gap-2 lg:block">
+          <%= link_to new_item_path, class: "flex-1 block w-full text-center bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 px-4 rounded-xl transition shadow-md flex items-center justify-center gap-2" do %>
+             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+             新しく登録
           <% end %>
-          
+
+          <%# [スマホ用] フィルタートグルボタン (PCでは非表示) %>
+          <button type="button" onclick="toggleMobileFilter()" class="lg:hidden flex-none bg-white text-slate-600 border border-slate-200 font-bold py-3 px-4 rounded-xl shadow-sm flex items-center gap-2 hover:bg-slate-50">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
+            <span class="text-xs">条件</span>
+          </button>
+        </div>
+
+        <%# カレンダーリンク (PCではサイドバー、スマホではトグル内に移動しても良いが、今回はメインアクションとして表示) %>
+        <div class="hidden lg:block">
           <%= link_to actual_outfits_path, class: "block w-full text-center bg-white border-2 border-slate-200 text-slate-600 font-bold py-3 px-4 rounded-xl hover:bg-slate-50 transition" do %>
             📅 着用カレンダー
           <% end %>
         </div>
 
-        <%# 並べ替え・フィルタ（ここを修正しました） %>
-        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-          <h3 class="font-bold text-slate-500 mb-4 text-sm flex items-center gap-2">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"></path></svg>
-            並べ替え
-          </h3>
-          <ul class="space-y-2 text-sm">
-            <% 
-              sort_options = {
-                'newest' => '新しい順',
-                'oldest' => '古い順',
-                'price_low' => '価格が安い順',
-                'price_high' => '価格が高い順'
-              }
-            %>
-            <% sort_options.each do |key, label| %>
-              <% is_active = (params[:sort] == key) || (params[:sort].nil? && key == 'newest') %>
-              <li>
-                <%= link_to request.params.merge(sort: key), class: "block p-2 rounded transition #{is_active ? 'bg-amber-50 text-amber-800 font-bold ring-1 ring-amber-200' : 'text-slate-600 hover:bg-slate-50'}" do %>
-                  <div class="flex items-center justify-between">
-                    <span><%= label %></span>
-                    <% if is_active %>
-                      <span class="text-amber-500">●</span>
-                    <% end %>
-                  </div>
-                <% end %>
-              </li>
-            <% end %>
-          </ul>
-        </div>
+        <%# ▼▼▼ フィルタ・並び替えエリア (スマホでは初期非表示) ▼▼▼ %>
+        <div id="filter-section" class="hidden lg:block space-y-4 lg:space-y-6">
+          
+          <%# 並べ替え %>
+          <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+            <h3 class="font-bold text-slate-500 mb-3 text-sm flex items-center gap-2 border-b border-slate-100 pb-2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"></path></svg>
+              並べ替え
+            </h3>
+            <ul class="space-y-1 text-sm">
+              <% 
+                sort_options = {
+                  'newest' => '新しい順',
+                  'oldest' => '古い順',
+                  'price_low' => '価格が安い順',
+                  'price_high' => '価格が高い順'
+                }
+              %>
+              <% sort_options.each do |key, label| %>
+                <% is_active = (params[:sort] == key) || (params[:sort].nil? && key == 'newest') %>
+                <li>
+                  <%= link_to request.params.merge(sort: key), class: "block p-2 rounded transition #{is_active ? 'bg-amber-50 text-amber-800 font-bold ring-1 ring-amber-200' : 'text-slate-600 hover:bg-slate-50'}" do %>
+                    <div class="flex items-center justify-between">
+                      <span><%= label %></span>
+                      <% if is_active %>
+                        <span class="text-amber-500">●</span>
+                      <% end %>
+                    </div>
+                  <% end %>
+                </li>
+              <% end %>
+            </ul>
+          </div>
 
-        <%# カテゴリフィルタ（追加） %>
-        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hidden lg:block">
-           <h3 class="font-bold text-slate-500 mb-4 text-sm flex items-center gap-2">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path></svg>
-            カテゴリで絞り込む
-          </h3>
-          <ul class="space-y-1 text-sm">
-             <li>
-               <%= link_to "すべて表示", request.params.merge(category_id: nil), class: "block px-2 py-1.5 rounded #{params[:category_id].blank? ? 'text-amber-800 font-bold bg-amber-50' : 'text-slate-600 hover:text-amber-700'}" %>
-             </li>
-             <% Category.all.each do |cat| %>
+          <%# カテゴリフィルタ %>
+          <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100">
+             <h3 class="font-bold text-slate-500 mb-3 text-sm flex items-center gap-2 border-b border-slate-100 pb-2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path></svg>
+              カテゴリ
+            </h3>
+            <ul class="space-y-1 text-sm">
                <li>
-                 <%= link_to cat.name, request.params.merge(category_id: cat.id), class: "block px-2 py-1.5 rounded #{params[:category_id].to_s == cat.id.to_s ? 'text-amber-800 font-bold bg-amber-50' : 'text-slate-600 hover:text-amber-700'}" %>
+                 <%= link_to "すべて表示", request.params.merge(category_id: nil), class: "block px-2 py-2 rounded #{params[:category_id].blank? ? 'text-amber-800 font-bold bg-amber-50' : 'text-slate-600 hover:text-amber-700 hover:bg-slate-50'}" %>
                </li>
-             <% end %>
-          </ul>
+               <% Category.all.each do |cat| %>
+                 <li>
+                   <%= link_to cat.name, request.params.merge(category_id: cat.id), class: "block px-2 py-2 rounded #{params[:category_id].to_s == cat.id.to_s ? 'text-amber-800 font-bold bg-amber-50' : 'text-slate-600 hover:text-amber-700 hover:bg-slate-50'}" %>
+                 </li>
+               <% end %>
+            </ul>
+          </div>
         </div>
       </aside>
 
       <%# --- Right Content (Grid Items) --- %>
       <div class="w-full lg:w-3/4">
-        <div class="flex justify-between items-end mb-6">
-          <h2 class="text-2xl font-bold text-indigo-950" style="font-family: 'Shippori Mincho', serif;">
+        
+        <%# タイトルエリア %>
+        <div class="flex justify-between items-end mb-4 sm:mb-6">
+          <h2 class="text-xl sm:text-2xl font-bold text-indigo-950" style="font-family: 'Shippori Mincho', serif;">
             <% if params[:category_id] && cat = Category.find_by(id: params[:category_id]) %>
               <%= cat.name %>
             <% else %>
-              すべてのアイテム
+              アイテム一覧
             <% end %>
           </h2>
-          <span class="text-slate-500 text-sm bg-white px-3 py-1 rounded-full shadow-sm border border-slate-100">
+          <span class="text-slate-500 text-xs sm:text-sm bg-white px-3 py-1 rounded-full shadow-sm border border-slate-100">
             全 <span class="font-bold text-indigo-900"><%= @items.count %></span> 件
           </span>
         </div>
 
         <% if @items.any? %>
-          <%# アイテムグリッド %>
-          <div class="grid grid-cols-2 md:grid-cols-3 gap-6">
+          <%# アイテムグリッド：スマホ(デフォルト)は grid-cols-1 で1列表示 %>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
             <% @items.each do |item| %>
-              <div class="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:shadow-indigo-100 transition duration-300 border border-slate-100 flex flex-col h-full ring-1 ring-transparent hover:ring-amber-200">
-                <%# 画像エリア %>
-                <div class="relative aspect-[3/4] bg-slate-100 overflow-hidden">
+              <%# スマホで見やすいよう、shadowを少し強めにし、マージンを確保 %>
+              <div class="group bg-white rounded-3xl overflow-hidden shadow-md hover:shadow-xl transition duration-300 border border-slate-100 flex flex-col h-full ring-1 ring-transparent hover:ring-amber-200">
+                
+                <%# 画像エリア：スマホでも大きく見せる %>
+                <div class="relative aspect-[3/4] sm:aspect-[3/4] bg-slate-100 overflow-hidden">
                   <% if item.image.attached? %>
-                    <%= image_tag item.image, class: "w-full h-full object-cover group-hover:scale-110 transition duration-700 ease-out" %>
+                    <%= image_tag item.image, class: "w-full h-full object-cover group-hover:scale-105 transition duration-700 ease-out" %>
                   <% else %>
                     <div class="flex flex-col items-center justify-center h-full text-slate-300">
-                      <svg class="w-12 h-12 mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                      <span class="text-xs font-bold tracking-widest">NO IMAGE</span>
+                      <svg class="w-16 h-16 mb-2 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                      <span class="text-xs font-bold tracking-widest opacity-50">NO IMAGE</span>
                     </div>
                   <% end %>
 
-                  <%# ホバー時の「詳細を見る」オーバーレイ %>
-                  <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition flex items-center justify-center backdrop-blur-[1px]">
-                    <%= link_to item_path(item), class: "bg-white text-indigo-950 text-xs font-bold px-5 py-2.5 rounded-full shadow-lg transform translate-y-4 group-hover:translate-y-0 transition duration-300 hover:bg-amber-50" do %>
-                      詳細を見る
-                    <% end %>
-                  </div>
+                  <%# リンク（画像全体をクリック可能に） %>
+                  <%= link_to "", item_path(item), class: "absolute inset-0 z-10" %>
 
                   <%# 左上のカテゴリラベル %>
                   <% if item.category %>
-                    <div class="absolute top-2 left-2">
-                       <span class="inline-block bg-white/90 backdrop-blur-sm text-slate-600 text-[10px] px-2 py-1 rounded-md font-bold shadow-sm">
+                    <div class="absolute top-3 left-3 z-20 pointer-events-none">
+                       <span class="inline-block bg-white/95 backdrop-blur-sm text-slate-700 text-xs px-3 py-1 rounded-full font-bold shadow-sm">
                         <%= item.category.name %>
                       </span>
                     </div>
                   <% end %>
                 </div>
 
-                <%# テキスト情報 %>
-                <div class="p-4 flex flex-col flex-grow">
-                  <h3 class="font-bold text-indigo-950 mb-1 line-clamp-1 group-hover:text-amber-700 transition"><%= item.name %></h3>
+                <%# テキスト情報エリア %>
+                <div class="p-5 flex flex-col flex-grow relative">
+                  <%# 詳細リンク（タイトル用） %>
+                  <%= link_to item.name, item_path(item), class: "block font-bold text-lg text-indigo-950 mb-2 line-clamp-1 hover:text-amber-700 transition stretched-link" %>
+                  
                   <div class="mt-auto flex justify-between items-end border-t border-slate-50 pt-3">
-                    <p class="text-[10px] text-slate-400">
+                    <p class="text-xs text-slate-400">
                       <%= item.created_at.strftime('%Y.%m.%d') %>
                     </p>
                     <% if item.price.present? %>
-                      <p class="text-sm font-bold text-slate-700 font-mono">
+                      <p class="text-lg font-bold text-slate-700 font-mono">
                         ¥<%= item.price.to_fs(:delimited) %>
                       </p>
                     <% end %>
@@ -200,6 +205,18 @@
     </div>
   </main>
 </div>
+
+<%# --- Script for Mobile Filter Toggle --- %>
+<script>
+  function toggleMobileFilter() {
+    const filterSection = document.getElementById('filter-section');
+    if (filterSection.classList.contains('hidden')) {
+      filterSection.classList.remove('hidden');
+    } else {
+      filterSection.classList.add('hidden');
+    }
+  }
+</script>
 
 <style>
 /* スマホでのナビゲーション横スクロールバーを隠す */

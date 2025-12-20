@@ -1,11 +1,30 @@
 class ContactsController < ApplicationController
   before_action :authenticate_user! # ログイン必須
-  before_action :set_contact, only: [:show, :edit, :update, :destroy, :history]
+  before_action :set_contact, only: [:show, :edit, :update, :destroy, :history, :toggle_favorite]
 
   # GET /contacts
   def index
-    # ログインユーザーの連絡先を名前順に取得
-    @contacts = current_user.contacts.order(:name)
+    # 1. 基本の取得
+    scope = current_user.contacts.with_attached_avatar.order(:name)
+
+    # 2. 検索機能
+    if params[:query].present?
+      search_term = "%#{params[:query]}%"
+      # 名前 または メモ に一致するものを探す (LOWERで大文字小文字無視)
+      scope = scope.where("LOWER(name) LIKE LOWER(?) OR LOWER(memo) LIKE LOWER(?)", search_term, search_term)
+    end
+
+    # 3. データを配列として確定させる
+    all_contacts = scope.to_a
+
+    # 4. お気に入りとグループ分け
+    @favorites = all_contacts.select(&:is_favorite)
+    @grouped_contacts = all_contacts.reject(&:is_favorite).group_by(&:group)
+    
+    # 5. グループの表示順序設定
+    # モデルのEnum定義順 (10, 20, 30, ..., 99) がそのまま適用されるようにする
+    # その他(99)は一番最後
+    @groups_order = Contact.groups.keys
   end
 
   # GET /contacts/new
@@ -18,10 +37,8 @@ class ContactsController < ApplicationController
     @contact = current_user.contacts.build(contact_params)
 
     if @contact.save
-      # 成功したら、連絡先一覧へリダイレクト
-      redirect_to contacts_path, notice: "会う人（#{@contact.name}）を登録しました。"
+      redirect_to contacts_path, notice: "ご縁のある人（#{@contact.name}）を登録しました。"
     else
-      # 失敗したら、フォームを再表示
       flash.now[:alert] = "登録に失敗しました。"
       render :new, status: :unprocessable_entity
     end
@@ -40,10 +57,8 @@ class ContactsController < ApplicationController
   # PATCH/PUT /contacts/:id
   def update
     if @contact.update(contact_params)
-      # 成功したら、詳細ページへリダイレクト
-      redirect_to @contact, notice: "会う人（#{@contact.name}）の情報を更新しました。"
+      redirect_to @contact, notice: "ご縁のある人（#{@contact.name}）の情報を更新しました。"
     else
-      # 失敗したら、フォームを再表示
       flash.now[:alert] = "更新に失敗しました。"
       render :edit, status: :unprocessable_entity
     end
@@ -53,34 +68,32 @@ class ContactsController < ApplicationController
   def destroy
     contact_name = @contact.name
     @contact.destroy
-    # 成功したら、連絡先一覧へリダイレクト
-    redirect_to contacts_url, notice: "会う人（#{contact_name}）を削除しました。", status: :see_other
+    redirect_to contacts_url, notice: "ご縁のある人（#{contact_name}）を削除しました。", status: :see_other
   end
   
   # GET /contacts/:id/history
-  # 特定の会う人と会った時の着用実績履歴を表示する
   def history
-    # ログインユーザーの、このContact_idを持つ着用実績を新しい順に取得
     @history_outfits = @contact.actual_outfits
                                .includes(:item)
                                .order(worn_on: :desc, time_slot: :desc)
-    
-    # history.html.erb にて、@contact, @history_outfits を利用
   end
 
+  # PATCH /contacts/:id/toggle_favorite
+  def toggle_favorite
+    @contact.update(is_favorite: !@contact.is_favorite)
+    redirect_back(fallback_location: contacts_path)
+  end
 
   private
 
-  # URLの:idに基づいてContactを取得し、権限チェックを行う
   def set_contact
     @contact = current_user.contacts.find(params[:id])
   rescue ActiveRecord::RecordNotFound
-    # 存在しない、または他のユーザーのContactの場合
     redirect_to contacts_path, alert: "指定された連絡先が見つかりません。", status: :not_found
   end
 
   # ストロングパラメータ
   def contact_params
-    params.require(:contact).permit(:name, :memo)
+    params.require(:contact).permit(:name, :memo, :group, :avatar, :is_favorite)
   end
 end

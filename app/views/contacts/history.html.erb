@@ -1,64 +1,124 @@
-<div class="max-w-3xl mx-auto p-4 sm:p-6 lg:p-8 bg-white shadow-xl rounded-xl">
-  <div class="flex justify-between items-center mb-6 border-b pb-3">
-    <h1 class="text-3xl font-extrabold text-gray-900"><%= @contact.name %> との着用履歴</h1>
-    <%= link_to "会う人の詳細に戻る", contact_path(@contact), class: "text-indigo-600 hover:text-indigo-900 font-medium transition duration-150" %>
-  </div>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700&display=swap" rel="stylesheet">
 
-  <p class="text-gray-600 mb-6">
-    <%= @contact.name %> さんと会った時の、過去のアイテム着用実績一覧です。
-  </p>
-
-  <% if @history_outfits.any? %>
-    <div class="space-y-6">
-      <% @history_outfits.each do |outfit| %>
-        <div class="bg-gray-50 p-4 rounded-lg shadow-sm border border-gray-200">
-          <div class="flex justify-between items-start mb-2">
-            <!-- 着用日と時間帯 -->
-            <div class="text-lg font-semibold text-gray-800">
-              <%= l(outfit.worn_on, format: :long) %>
-              <span class="text-sm font-normal text-indigo-600 ml-2">
-                (<%= ActualOutfitsController::TIME_SLOTS[outfit.time_slot] || '時間帯不明' %>)
-              </span>
-            </div>
-            
-            <!-- アクション -->
-            <div class="flex gap-2">
-              <%= link_to "編集", edit_actual_outfit_path(outfit), class: "text-sm text-indigo-600 hover:text-indigo-900 transition duration-150" %>
-              <%= button_to "削除", actual_outfit_path(outfit), method: :delete, data: { turbo_confirm: "この着用実績を削除してもよろしいですか?" }, class: "text-sm text-red-600 hover:text-red-900 transition duration-150 bg-transparent border-none p-0 cursor-pointer" %>
-            </div>
-          </div>
-
-          <!-- アイテム情報 -->
-          <div class="flex items-center space-x-3 mt-1">
-            <span class="text-xs font-medium text-gray-500">着用アイテム:</span>
-            <span class="text-base font-bold text-gray-900">
-              <%= outfit.item.name %>
-            </span>
-            <span class="text-sm text-gray-600">
-              (<%= outfit.item.category.name if outfit.item.category.present? %>)
-            </span>
-          </div>
-          
-          <!-- 感想/メモ -->
-          <% if outfit.impression.present? %>
-            <div class="mt-3 p-3 bg-white rounded border border-gray-100">
-              <span class="text-xs font-medium text-gray-500">メモ・感想:</span>
-              <p class="text-sm text-gray-700 whitespace-pre-wrap mt-1"><%= outfit.impression %></p>
-            </div>
-          <% end %>
+<div class="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-6xl mx-auto">
+    
+    <%# --- 1. ヘッダーエリア --- %>
+    <div class="flex flex-col sm:flex-row justify-between items-center mb-8 border-b border-gray-200 pb-4 gap-4">
+      <div class="flex items-center">
+        <%# アイコン表示 (アバターがあれば) %>
+        <% if @contact.avatar.attached? %>
+          <%= image_tag @contact.avatar, class: "w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm mr-4 hidden sm:block" %>
+        <% end %>
+        <div>
+          <h1 class="text-2xl font-bold text-gray-800 flex items-center">
+            <%= @contact.name %> <span class="text-sm font-normal text-gray-500 ml-2">との着用ヒストリー</span>
+          </h1>
+          <p class="text-xs text-gray-400 mt-1">
+            全 <%= @history_outfits.count %> 回の記録
+          </p>
         </div>
+      </div>
+
+      <%= link_to contact_path(@contact), class: "text-sm font-bold text-gray-500 hover:text-indigo-600 flex items-center transition" do %>
+        <i class="fas fa-arrow-left mr-2"></i> プロフィールに戻る
       <% end %>
     </div>
-  <% else %>
-    <div class="p-6 bg-yellow-50 border border-yellow-200 rounded-lg">
-      <p class="text-gray-700">
-        まだ <%= @contact.name %> さんと会った時の着用実績は登録されていません。
-        実績を登録する際に、会った人として <%= @contact.name %> さんを選択してください。
-      </p>
-    </div>
-  <% end %>
 
-  <div class="mt-8 text-center">
-    <%= link_to "会う人一覧に戻る", contacts_path, class: "text-sm text-gray-500 hover:text-gray-700 font-medium transition duration-150" %>
+    <%# --- 2. メインコンテンツ (アルバムグリッド) --- %>
+    <% if @history_outfits.any? %>
+      
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        
+        <% @history_outfits.each do |outfit| %>
+          <div class="bg-white rounded-2xl shadow-sm hover:shadow-lg transition-shadow duration-300 overflow-hidden border border-gray-100 flex flex-col group relative">
+            
+            <div class="absolute top-3 left-3 z-10">
+              <div class="bg-white/90 backdrop-blur-sm text-gray-800 px-3 py-1 rounded-full text-xs font-bold shadow-sm border border-gray-100 flex items-center">
+                <i class="far fa-calendar-alt text-indigo-500 mr-2"></i>
+                <%= outfit.worn_on.strftime("%Y.%m.%d") %>
+                <span class="ml-1 text-[10px] text-gray-400">
+                  (<%= %w(日 月 火 水 木 金 土)[outfit.worn_on.wday] %>)
+                </span>
+              </div>
+            </div>
+
+            <% if outfit.time_slot.present? %>
+              <div class="absolute top-3 right-3 z-10">
+                <span class="bg-indigo-600/90 backdrop-blur-sm text-white px-2 py-0.5 rounded text-[10px] font-bold shadow-sm">
+                  <%= ActualOutfitsController::TIME_SLOTS[outfit.time_slot] || '時間帯不明' %>
+                </span>
+              </div>
+            <% end %>
+
+            <div class="relative aspect-[4/3] bg-gray-100 overflow-hidden">
+              <% if outfit.item.image.attached? %>
+                <%= image_tag outfit.item.image, class: "w-full h-full object-cover transform group-hover:scale-105 transition duration-500" %>
+              <% else %>
+                <div class="w-full h-full flex flex-col items-center justify-center text-gray-300">
+                  <i class="fas fa-image text-4xl mb-2"></i>
+                  <span class="text-xs">No Image</span>
+                </div>
+              <% end %>
+              
+              <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent p-4 pt-10">
+                <p class="text-white font-bold text-sm truncate text-shadow">
+                  <%= outfit.item.name %>
+                </p>
+                <p class="text-white/80 text-[10px]">
+                  <%= outfit.item.category.name if outfit.item.category.present? %>
+                </p>
+              </div>
+            </div>
+
+            <div class="p-4 flex flex-col flex-grow">
+              
+              <% if outfit.impression.present? %>
+                <div class="bg-gray-50 rounded-lg p-3 mb-3 relative flex-grow">
+                  <i class="fas fa-quote-left text-gray-200 absolute top-2 left-2 text-xs"></i>
+                  <p class="text-xs text-gray-600 relative z-10 pl-3 line-clamp-3">
+                    <%= outfit.impression %>
+                  </p>
+                </div>
+              <% else %>
+                <div class="flex-grow"></div> <% end %>
+
+              <div class="flex justify-end items-center pt-2 border-t border-gray-100 mt-auto space-x-3">
+                <%= link_to edit_actual_outfit_path(outfit), class: "text-gray-400 hover:text-indigo-600 transition text-xs flex items-center" do %>
+                  <i class="fas fa-pen mr-1"></i> 編集
+                <% end %>
+                
+                <%= button_to actual_outfit_path(outfit), method: :delete, data: { turbo_confirm: "この記録を削除しますか？" }, class: "text-gray-400 hover:text-red-500 transition text-xs flex items-center bg-transparent border-none cursor-pointer" do %>
+                  <i class="fas fa-trash mr-1"></i> 削除
+                <% end %>
+              </div>
+            </div>
+
+          </div>
+        <% end %>
+      </div>
+
+    <% else %>
+      <%# --- データがない場合 (エンプティステート) --- %>
+      <div class="max-w-lg mx-auto bg-white rounded-3xl p-10 text-center shadow-sm border border-gray-100 mt-10">
+        <div class="w-20 h-20 bg-indigo-50 text-indigo-300 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl">
+          <i class="fas fa-tshirt"></i>
+        </div>
+        <h3 class="text-xl font-bold text-gray-800 mb-2">まだ記録がありません</h3>
+        <p class="text-sm text-gray-500 mb-8 leading-relaxed">
+          <%= @contact.name %>さんと会った時の記録はまだありません。<br>
+          カレンダーから「着用記録」をつける時に、<br>
+          <span class="font-bold text-indigo-600">会う人</span> として選択するとここにアルバムが作られます。
+        </p>
+        
+        <%# link_to "カレンダーへ行く", calendar_path, class: "bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-full shadow transition" %>
+        
+        <%= link_to contact_path(@contact), class: "text-gray-500 hover:text-gray-700 underline text-sm" do %>
+          プロフィールに戻る
+        <% end %>
+      </div>
+    <% end %>
+
   </div>
 </div>

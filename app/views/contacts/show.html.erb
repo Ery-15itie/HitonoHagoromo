@@ -1,34 +1,223 @@
-<div class="max-w-xl mx-auto p-4 sm:p-6 lg:p-8 bg-white shadow-xl rounded-xl">
-  <div class="flex justify-between items-center mb-6 border-b pb-3">
-    <h1 class="text-3xl font-extrabold text-gray-900"><%= @contact.name %></h1>
-    <div class="flex space-x-2">
-      <%= link_to "編集", edit_contact_path(@contact), class: "text-indigo-600 hover:text-indigo-900 font-medium text-sm transition duration-150" %>
-      <%= button_to "削除", contact_path(@contact), method: :delete, data: { turbo_confirm: "#{@contact.name} を削除してもよろしいですか?" }, class: "text-red-600 hover:text-red-900 font-medium text-sm transition duration-150 bg-transparent border-none p-0 cursor-pointer" %>
-    </div>
-  </div>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
-  <div class="space-y-4">
-    <div class="bg-gray-50 p-4 rounded-lg">
-      <h2 class="text-lg font-semibold text-gray-700 mb-2">メモ・備考</h2>
-      <p class="text-gray-800 whitespace-pre-wrap"><%= @contact.memo.presence || "メモは登録されていません。" %></p>
-    </div>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700&display=swap" rel="stylesheet">
 
-    <div class="pt-4 border-t border-gray-200">
-      <h2 class="text-lg font-semibold text-gray-700 mb-3">この人との着用実績</h2>
-      <p class="text-gray-600 mb-4">
-        過去に <%= @contact.name %> さんと会った時のアイテム着用履歴を確認します。
-      </p>
-      
-      <% if @contact.actual_outfits.exists? %>
-        <% outfit_count = @contact.actual_outfits.count %>
-        <%= link_to "全ての着用履歴を見る (#{outfit_count}回)", history_contact_path(@contact), class: "w-full block text-center bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg shadow transition duration-150 ease-in-out" %>
-      <% else %>
-        <p class="text-sm text-gray-500">まだ <%= @contact.name %> さんと会った実績が記録されていません。</p>
+<div class="min-h-screen bg-gray-100 flex items-center justify-center p-4 md:p-8">
+
+  <%# ==========================================
+      【スマホ表示】 メッセアプリ風デザイン (md:hidden)
+      ========================================== %>
+  <div class="md:hidden w-full max-w-md bg-white shadow-2xl rounded-3xl overflow-hidden relative border border-gray-100">
+    
+    <%# --- カバー画像 --- %>
+    <% header_gradient = case @contact.group
+       when '家族' then 'from-orange-100 to-orange-200'
+       when '友達' then 'from-green-100 to-green-200'
+       when '仕事' then 'from-blue-100 to-blue-200'
+       when '学校' then 'from-pink-100 to-pink-200'
+       else 'from-gray-200 to-gray-300'
+       end %>
+    
+    <div class="h-48 bg-gradient-to-br <%= header_gradient %> relative">
+      <%= link_to contacts_path, class: "absolute top-4 right-4 bg-black/20 hover:bg-black/40 text-white rounded-full w-8 h-8 flex items-center justify-center transition backdrop-blur-md z-20" do %>
+        <i class="fas fa-times"></i>
       <% end %>
     </div>
+
+    <%# --- アイコン --- %>
+    <div class="relative px-6 -mt-20 text-center z-10">
+      <div class="inline-block relative">
+        <% if @contact.avatar.attached? %>
+          <%= image_tag @contact.avatar, class: "w-36 h-36 rounded-full object-cover border-[6px] border-white shadow-xl bg-white" %>
+        <% else %>
+          <% bg_color = case @contact.group
+             when '家族' then 'bg-orange-400'
+             when '友達' then 'bg-green-400'
+             when '仕事' then 'bg-blue-400'
+             when '学校' then 'bg-pink-400'
+             else 'bg-gray-300'
+             end %>
+          <div class="<%= bg_color %> w-36 h-36 rounded-full flex items-center justify-center text-white font-bold text-5xl border-[6px] border-white shadow-xl">
+            <%= @contact.name.to_s.first&.upcase || "?" %>
+          </div>
+        <% end %>
+
+        <div class="absolute bottom-1 right-1">
+          <%= button_to toggle_favorite_contact_path(@contact), method: :patch, class: "bg-white text-yellow-400 p-2 rounded-full shadow-md hover:bg-gray-50 transition border border-gray-100 w-10 h-10 flex items-center justify-center" do %>
+            <% if @contact.is_favorite? %>
+              <i class="fas fa-star text-lg"></i>
+            <% else %>
+              <i class="far fa-star text-gray-400 hover:text-yellow-400 text-lg"></i>
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <%# --- 名前・情報 --- %>
+    <div class="text-center px-6 mt-3">
+      <h1 class="text-2xl font-extrabold text-gray-800 mb-2"><%= @contact.name %></h1>
+      <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-500 border border-gray-200 mb-4">
+        <%= @contact.group_label %>
+      </span>
+      <div class="relative">
+        <p class="text-sm text-gray-600 bg-gray-50 py-3 px-5 rounded-2xl inline-block max-w-full break-words border border-gray-100 shadow-sm relative">
+          <%= @contact.memo.presence || "ステータスメッセージはありません" %>
+          <span class="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-gray-50 border-t border-l border-gray-100 transform rotate-45"></span>
+        </p>
+      </div>
+    </div>
+
+    <%# --- メニューボタン --- %>
+    <div class="px-8 py-8">
+      <div class="grid grid-cols-3 gap-6 border-t border-gray-100 pt-8">
+        <div class="flex flex-col items-center">
+          <%= link_to history_contact_path(@contact), class: "group flex flex-col items-center w-full" do %>
+            <div class="w-14 h-14 rounded-full bg-indigo-600 text-white flex items-center justify-center shadow-lg shadow-indigo-200 group-hover:bg-indigo-700 transition duration-200 mb-2">
+              <i class="fas fa-tshirt text-xl"></i>
+            </div>
+            <span class="text-xs text-gray-700 font-bold">服装チェック</span>
+          <% end %>
+        </div>
+        <div class="flex flex-col items-center">
+          <%= link_to edit_contact_path(@contact), class: "group flex flex-col items-center w-full" do %>
+            <div class="w-14 h-14 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center shadow-sm group-hover:bg-gray-200 transition duration-200 mb-2">
+              <i class="fas fa-pen text-lg"></i>
+            </div>
+            <span class="text-xs text-gray-600 font-medium">編集</span>
+          <% end %>
+        </div>
+        <div class="flex flex-col items-center">
+          <%= button_to contact_path(@contact), method: :delete, data: { turbo_confirm: "削除しますか？" }, class: "group flex flex-col items-center w-full bg-transparent border-none p-0 cursor-pointer" do %>
+            <div class="w-14 h-14 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center shadow-sm group-hover:bg-red-50 group-hover:text-red-500 transition duration-200 mb-2">
+              <i class="fas fa-trash-alt text-lg"></i>
+            </div>
+            <span class="text-xs text-gray-600 font-medium group-hover:text-red-500">削除</span>
+          <% end %>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <div class="mt-8 text-center">
-    <%= link_to "会う人一覧に戻る", contacts_path, class: "text-sm text-gray-500 hover:text-gray-700 font-medium transition duration-150" %>
+
+  <%# ==========================================
+      【PC表示】 プロフ帳風デザイン (md:flex)
+      ========================================== %>
+  <div class="hidden md:flex w-full max-w-5xl bg-white shadow-2xl rounded-[30px] overflow-hidden min-h-[550px]" style="font-family: 'Zen Maru Gothic', sans-serif;">
+    
+    <%# --- 左側: プロフ帳の「表紙・写真」エリア (40%) --- %>
+    <% side_bg_color = case @contact.group
+       when '家族' then 'bg-orange-100 text-orange-800'
+       when '友達' then 'bg-green-100 text-green-800'
+       when '仕事' then 'bg-blue-100 text-blue-800'
+       when '学校' then 'bg-pink-100 text-pink-800'
+       else 'bg-gray-100 text-gray-800'
+       end 
+       border_color = case @contact.group
+       when '家族' then 'border-orange-200'
+       when '友達' then 'border-green-200'
+       when '仕事' then 'border-blue-200'
+       when '学校' then 'border-pink-200'
+       else 'border-gray-200'
+       end
+    %>
+    <div class="<%= side_bg_color %> w-2/5 flex flex-col items-center justify-center p-10 relative border-r-4 border-dashed border-white/50">
+      
+      <div class="absolute right-[-14px] top-10 bottom-10 flex flex-col justify-between z-10 space-y-8">
+        <% 8.times do %>
+          <div class="w-6 h-6 rounded-full bg-gray-100 shadow-inner border border-gray-300"></div>
+        <% end %>
+      </div>
+
+      <div class="relative mb-6 group">
+        <% if @contact.avatar.attached? %>
+          <%= image_tag @contact.avatar, class: "w-48 h-48 rounded-full object-cover border-8 border-white shadow-lg transform group-hover:scale-105 transition duration-300" %>
+        <% else %>
+          <div class="w-48 h-48 rounded-full flex items-center justify-center bg-white/50 text-current font-bold text-6xl border-8 border-white shadow-lg">
+            <%= @contact.name.to_s.first&.upcase || "?" %>
+          </div>
+        <% end %>
+        
+        <div class="absolute -bottom-2 -right-2">
+           <%= button_to toggle_favorite_contact_path(@contact), method: :patch, class: "bg-white p-3 rounded-full shadow-md hover:scale-110 transition text-yellow-400" do %>
+             <% if @contact.is_favorite? %>
+               <i class="fas fa-star text-2xl drop-shadow-sm"></i>
+             <% else %>
+               <i class="far fa-star text-2xl text-gray-300 hover:text-yellow-400"></i>
+             <% end %>
+           <% end %>
+        </div>
+      </div>
+
+      <h1 class="text-3xl font-bold mb-3 tracking-widest text-center"><%= @contact.name %></h1>
+      
+      <span class="px-4 py-1 rounded-full bg-white/60 font-bold text-sm tracking-wider border border-white">
+        <%= @contact.group_label %>
+      </span>
+
+      <%= link_to contacts_path, class: "absolute top-6 left-6 w-10 h-10 rounded-full bg-white/50 hover:bg-white flex items-center justify-center transition shadow-sm text-current" do %>
+        <i class="fas fa-arrow-left"></i>
+      <% end %>
+    </div>
+
+
+    <%# --- 右側: プロフ帳の「データ記入」エリア (60%) --- %>
+    <div class="w-3/5 bg-white p-10 relative flex flex-col">
+      
+      <div class="absolute inset-0 pointer-events-none opacity-10" 
+           style="background-image: linear-gradient(#9ca3af 1px, transparent 1px); background-size: 100% 2rem; margin-top: 3.5rem;">
+      </div>
+
+      <div class="relative z-0 h-full flex flex-col">
+        <div class="flex items-center mb-8 border-b-2 border-gray-200 pb-2">
+          <i class="fas fa-address-card text-2xl text-gray-400 mr-3"></i>
+          <h2 class="text-xl font-bold text-gray-600 tracking-widest">PROFILE</h2>
+        </div>
+
+        <div class="mb-8">
+          <label class="block text-sm font-bold text-gray-400 mb-1 pl-2">ひとことメモ</label>
+          <div class="text-lg text-gray-700 leading-8 px-4 py-2 min-h-[4rem]" style="font-family: 'Zen Maru Gothic', sans-serif;">
+            <%= @contact.memo.presence || "（まだ書かれていません）" %>
+          </div>
+        </div>
+
+        <div class="mb-8">
+          <label class="block text-sm font-bold text-gray-400 mb-1 pl-2">最後に会った日</label>
+          <div class="text-lg text-gray-700 px-4 flex items-center">
+            <% if @contact.actual_outfits.exists? %>
+               <% last_outfit = @contact.actual_outfits.order(worn_on: :desc).first %>
+               <span class="font-bold mr-4"><%= last_outfit.worn_on.strftime("%Y.%m.%d") %></span>
+               <span class="text-sm bg-gray-100 px-2 py-1 rounded text-gray-500">
+                 <i class="fas fa-tshirt mr-1"></i> <%= last_outfit.item.name %>
+               </span>
+            <% else %>
+               <span class="text-gray-400">まだ記録なし</span>
+            <% end %>
+          </div>
+        </div>
+
+        <div class="mt-auto pt-6 grid grid-cols-2 gap-4">
+          <%= link_to history_contact_path(@contact), class: "col-span-2 bg-indigo-50 border-2 border-indigo-200 hover:bg-indigo-100 text-indigo-700 rounded-xl p-4 flex items-center justify-center transition group shadow-sm" do %>
+            <div class="bg-white p-2 rounded-full mr-3 text-indigo-500 shadow-sm group-hover:scale-110 transition">
+              <i class="fas fa-history text-xl"></i>
+            </div>
+            <div class="text-left">
+              <div class="font-bold text-lg">服装履歴をみる</div>
+              <div class="text-xs opacity-70">被りチェック！ (<%= @contact.actual_outfits.count %>回)</div>
+            </div>
+          <% end %>
+
+          <%= link_to edit_contact_path(@contact), class: "bg-gray-50 border-2 border-gray-200 hover:bg-gray-100 text-gray-600 rounded-xl p-3 flex items-center justify-center transition font-bold" do %>
+            <i class="fas fa-pen mr-2"></i> 編集する
+          <% end %>
+
+          <%= button_to contact_path(@contact), method: :delete, data: { turbo_confirm: "本当に削除しますか？" }, class: "w-full bg-white border-2 border-red-100 hover:bg-red-50 text-red-500 rounded-xl p-3 flex items-center justify-center transition font-bold cursor-pointer" do %>
+            <i class="fas fa-trash-alt mr-2"></i> 削除
+          <% end %>
+        </div>
+
+      </div>
+    </div>
   </div>
+
 </div>

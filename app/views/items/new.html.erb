@@ -1,21 +1,19 @@
-<div class="elegant-font py-10 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
-  <div class="bg-white p-8 rounded-xl shadow-2xl border border-gray-100">
+<div class="elegant-font py-10 px-4 sm:px-6 lg:px-8 max-w-3xl mx-auto">
+  <div class="bg-white p-8 sm:p-10 rounded-3xl shadow-2xl shadow-stone-200 border border-white ring-1 ring-stone-100">
 
-    <h1 class="text-3xl font-bold text-gray-800 border-b border-amber-100 pb-4 mb-8 text-center">
+    <h1 class="text-2xl sm:text-3xl font-bold text-stone-800 border-b-2 border-amber-100 pb-4 mb-8 text-center tracking-wide">
       新しいアイテムを登録
     </h1>
 
-    <%# form_with の中でパーシャルを呼び出す %>
-    <%= form_with model: @item, url: items_path, local: true, class: "space-y-6" do |f| %>
-      
-      <%# _form.html.erb を呼び出し、f (FormBuilder) と item (@item) を渡す %>
-      <%= render 'form', f: f, item: @item %>
+    <%# パーシャル呼び出し %>
+    <%= render 'form', item: @item %>
 
-    <% end %>
-
-    <%# === 戻るリンク === %>
-    <div class="mt-8 text-center">
-      <%= link_to "アイテム一覧に戻る", items_path, class: "text-amber-700 hover:text-amber-900 text-sm font-medium transition duration-150" %>
+    <%# 戻るリンク %>
+    <div class="mt-10 text-center">
+      <%= link_to items_path, class: "inline-flex items-center text-amber-700 hover:text-amber-900 text-sm font-medium transition duration-150 group" do %>
+        <svg class="w-4 h-4 mr-1 transform group-hover:-translate-x-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+        アイテム一覧に戻る
+      <% end %>
     </div>
   </div>
 </div>

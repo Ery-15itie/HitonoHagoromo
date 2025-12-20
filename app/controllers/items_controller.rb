@@ -6,7 +6,6 @@ class ItemsController < ApplicationController
   before_action :set_item, only: [:show, :edit, :update, :destroy]
   
   # フォームおよび一覧画面のサイドバーで必要なカテゴリ一覧を事前に取得
-  # index を追加（サイドメニュー表示用）
   before_action :set_categories, only: [:index, :new, :create, :edit, :update]
 
   # GET /items
@@ -64,7 +63,15 @@ class ItemsController < ApplicationController
 
   # PATCH/PUT /items/1 (Update)
   def update
-    if @item.update(item_params)
+    # ---  画像未選択時のエラー対策 ---
+    # パラメータを操作可能な変数に格納
+    update_params = item_params
+
+    # 画像データが空文字("")として送られてきた場合、更新対象から削除する
+    # これにより ActiveSupport::MessageVerifier::InvalidSignature を防ぐ
+    update_params.delete(:image) if update_params[:image].blank?
+
+    if @item.update(update_params)
       redirect_to @item, notice: "アイテム情報が正常に更新されました。", status: :see_other
     else
       render :edit, status: :unprocessable_entity
@@ -80,7 +87,7 @@ class ItemsController < ApplicationController
   private
     # Categoryモデルからカテゴリ一覧を取得する
     def set_categories
-      @categories = Category.all.order(:id) # または order(:name) などお好みで
+      @categories = Category.all.order(:id)
     end
     
     # URLのIDからアイテムを特定し、かつユーザーの所有権を確認する

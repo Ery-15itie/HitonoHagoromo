@@ -33,7 +33,8 @@ Rails.application.routes.draw do
   # --- 6. 会った人管理 ---
   resources :contacts do
     member do
-      get 'history'
+      get :history           # 会った履歴
+      patch :toggle_favorite # お気に入り切り替え
     end
   end
 

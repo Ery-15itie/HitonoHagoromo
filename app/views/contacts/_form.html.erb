@@ -1,26 +1,93 @@
-<%= form_with(model: contact, class: "space-y-6") do |form| %>
+<%= form_with(model: contact, class: "space-y-6 max-w-lg mx-auto") do |form| %>
+  
+  <%# --- エラーメッセージ表示 --- %>
   <% if contact.errors.any? %>
-    <div id="error_explanation" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
-      <p class="font-bold"><%= contact.errors.count %>件のエラーがあります:</p>
-      <ul class="list-disc ml-5 mt-2">
-        <% contact.errors.full_messages.each do |message| %>
-          <li><%= message %></li>
-        <% end %>
-      </ul>
+    <div id="error_explanation" class="bg-red-50 border-l-4 border-red-500 p-4 rounded mb-6">
+      <div class="flex">
+        <div class="flex-shrink-0">
+          <i class="fas fa-exclamation-circle text-red-500 mt-0.5"></i>
+        </div>
+        <div class="ml-3">
+          <p class="text-sm font-bold text-red-700">
+            <%= contact.errors.count %>件のエラーがあります:
+          </p>
+          <ul class="mt-1 list-disc list-inside text-sm text-red-700">
+            <% contact.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+        </div>
+      </div>
     </div>
   <% end %>
 
+  <%# --- 1. アイコン画像 (アバター) --- %>
+  <div class="field">
+    <%= form.label :avatar, "アイコン画像", class: "block text-sm font-medium text-gray-700 mb-2" %>
+    <div class="flex flex-col sm:flex-row items-center gap-4">
+      <div class="flex-shrink-0">
+        <% if contact.avatar.attached? %>
+          <%= image_tag contact.avatar, class: "w-20 h-20 rounded-full object-cover border border-gray-200 shadow-sm" %>
+        <% else %>
+          <div class="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 border border-gray-200">
+            <i class="fas fa-camera text-2xl"></i>
+          </div>
+        <% end %>
+      </div>
+      <div class="w-full">
+        <%= form.file_field :avatar, class: "block w-full text-sm text-gray-500
+          file:mr-4 file:py-2 file:px-4
+          file:rounded-full file:border-0
+          file:text-sm file:font-semibold
+          file:bg-indigo-50 file:text-indigo-700
+          hover:file:bg-indigo-100
+          cursor-pointer" %>
+        <p class="text-xs text-gray-500 mt-1">※ JPG, PNG, GIF (推奨: 正方形)</p>
+      </div>
+    </div>
+  </div>
+
+  <%# --- 2. 名前 (必須) --- %>
   <div class="field">
     <%= form.label :name, "名前 (必須)", class: "block text-sm font-medium text-gray-700" %>
-    <%= form.text_field :name, class: "mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500", placeholder: "例：羽衣さん" %>
+    <%= form.text_field :name, required: true, class: "mt-1 block w-full border border-gray-300 rounded-lg shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm", placeholder: "例：羽衣 太郎" %>
   </div>
 
+  <%# --- 3. グループ選択 --- %>
   <div class="field">
-    <%= form.label :memo, "メモ・備考", class: "block text-sm font-medium text-gray-700" %>
-    <%= form.text_area :memo, rows: 4, class: "mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500", placeholder: "例：会社の同期、よく会う" %>
+    <%= form.label :group, "グループ", class: "block text-sm font-medium text-gray-700" %>
+    <div class="mt-1 relative rounded-md shadow-sm">
+      <%= form.select :group, 
+          Contact.groups.keys.map { |k| [I18n.t("enums.contact.group.#{k}", default: k.titleize), k] }, 
+          {}, 
+          class: "block w-full border border-gray-300 rounded-lg py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm appearance-none" %>
+      <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+        <i class="fas fa-chevron-down text-xs"></i>
+      </div>
+    </div>
   </div>
 
-  <div class="actions pt-4">
-    <%= form.submit (contact.new_record? ? "登録する" : "更新する"), class: "w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg shadow transition duration-150 ease-in-out cursor-pointer" %>
+  <%# --- 4. メモ (ひとこと) --- %>
+  <div class="field">
+    <%= form.label :memo, "ひとこと (ステータスメッセージ)", class: "block text-sm font-medium text-gray-700" %>
+    <%= form.text_area :memo, rows: 3, class: "mt-1 block w-full border border-gray-300 rounded-lg shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm", placeholder: "例：ゴルフ友達 / 会社の同期" %>
+    <p class="text-xs text-gray-500 mt-1 text-right">一覧画面で名前の下に表示されます</p>
   </div>
+
+  <%# --- 5. お気に入り設定 --- %>
+  <div class="field bg-yellow-50 rounded-lg p-3 border border-yellow-100 flex items-center">
+    <div class="flex items-center h-5">
+      <%= form.check_box :is_favorite, class: "h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded cursor-pointer" %>
+    </div>
+    <div class="ml-3 text-sm">
+      <%= form.label :is_favorite, "大切な人に登録する", class: "font-medium text-gray-700 cursor-pointer select-none" %>
+      <span class="block text-gray-500 text-xs">リストの一番上に固定表示されます</span>
+    </div>
+  </div>
+
+  <%# --- 送信ボタン --- %>
+  <div class="actions pt-6">
+    <%= form.submit (contact.new_record? ? "ご縁を登録する" : "情報を更新する"), class: "w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out cursor-pointer" %>
+  </div>
+
 <% end %>

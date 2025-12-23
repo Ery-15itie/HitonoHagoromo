@@ -10,9 +10,19 @@ class ActualOutfit < ApplicationRecord
   # force_create フラグを一時的に保持する属性
   attr_accessor :force_create
 
+  # --- Enum定義 (時間帯) ---
+  # DBのカラムが文字列(string)なので、右側も文字列を指定します
+  enum time_slot: {
+    morning: 'morning',       # 朝 (06:00-11:59)
+    day: 'day',               # 昼 (12:00-17:59)
+    night: 'night',           # 夜 (18:00-23:59)
+    late_night: 'late_night'  # 深夜 (00:00-05:59)
+  }
+
   # --- バリデーション ---
-  # 着用日 (worn_on) は必須
+  # 着用日と時間帯は必須
   validates :worn_on, presence: true
+  validates :time_slot, presence: true
 
   # 同じユーザーが、同じ着用日、同じ時間帯で、同じアイテムを二重登録できないようにする
   validates :item_id, uniqueness: { scope: [:worn_on, :time_slot, :user_id] }

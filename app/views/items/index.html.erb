@@ -18,7 +18,7 @@
 
     <%# ナビゲーション %>
     <nav class="flex items-center gap-4 sm:gap-6 text-xs sm:text-sm font-bold text-indigo-900 overflow-x-auto w-full md:w-auto justify-center md:justify-end py-2 no-scrollbar">
-      <%= link_to "カレンダー", actual_outfits_path, class: "whitespace-nowrap hover:text-amber-700 transition" %>
+      <%= link_to "カレンダー", calendar_path, class: "whitespace-nowrap hover:text-amber-700 transition" %>
       <%= link_to "会う人の管理", contacts_path, class: "whitespace-nowrap hover:text-amber-700 transition" %>
       <%= link_to "クローゼット", items_path, class: "whitespace-nowrap text-amber-700 border-b-2 border-amber-700" %>
       
@@ -67,7 +67,7 @@
 
         <%# カレンダーリンク (PCではサイドバー、スマホではトグル内に移動しても良いが、今回はメインアクションとして表示) %>
         <div class="hidden lg:block">
-          <%= link_to actual_outfits_path, class: "block w-full text-center bg-white border-2 border-slate-200 text-slate-600 font-bold py-3 px-4 rounded-xl hover:bg-slate-50 transition" do %>
+          <%= link_to calendar_path, class: "block w-full text-center bg-white border-2 border-slate-200 text-slate-600 font-bold py-3 px-4 rounded-xl hover:bg-slate-50 transition" do %>
             📅 着用カレンダー
           <% end %>
         </div>

@@ -5,10 +5,14 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 gem "rails", "~> 7.0.8"
 # PostgreSQLデータベースアダプタ
 gem "pg", "~> 1.5"
+# 日本語化などの多言語対応
+gem 'rails-i18n', '~> 7.0'
 
 # --- Webアプリ実行に必要な標準Gem ---
 gem "puma", "~> 5.0"
 gem "tzinfo-data" # タイムゾーンデータ (Docker環境で必要)
+# 画像加工(variant)を使う場合に必要
+gem "image_processing", "~> 1.2"
 
 # --- フロントエンド技術 ---
 gem "tailwindcss-rails"
@@ -27,6 +31,10 @@ gem "propshaft"
 # 開発/テスト環境でのみ使用
 group :development, :test do
   gem "debug", platforms: %i[ mri windows ]
+  
+  # テストフレームワーク (generatorを使えるようにdevelopmentにも入れます)
+  gem "rspec-rails"
+  gem "factory_bot_rails"
 end
 
 # 開発環境でのみ使用
@@ -37,7 +45,12 @@ end
 
 # テスト環境でのみ使用
 group :test do
-  gem "rspec-rails"
+  # ダミーデータ生成 (名前やメアドなど)
+  gem "faker"
+  
+  # ブラウザ操作シミュレーション (System Spec用)
+  gem "capybara"
+  gem "selenium-webdriver"
 end
 
 # Production環境用：ProductionではPumaを使用

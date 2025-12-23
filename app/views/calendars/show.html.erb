@@ -1,0 +1,271 @@
+<div class="max-w-7xl mx-auto px-2 sm:px-4 py-4 sm:py-6">
+
+  <%# --- クローゼットに戻るボタン --- %>
+  <div class="mb-4">
+    <%= link_to root_path, class: "inline-flex items-center gap-2 text-sm font-bold text-stone-400 hover:text-indigo-600 transition group" do %>
+      <span class="w-8 h-8 rounded-full bg-white border border-stone-200 flex items-center justify-center group-hover:border-indigo-300 group-hover:bg-indigo-50 transition">
+        <i class="fas fa-arrow-left text-xs"></i>
+      </span>
+      <span>クローゼットへ戻る</span>
+    <% end %>
+  </div>
+
+  <%# --- ヘッダー：週移動ナビゲーション --- %>
+  <div class="flex items-center justify-between mb-4 sm:mb-6 bg-white p-3 rounded-xl shadow-sm border border-stone-100 relative">
+    
+    <%= link_to calendar_path(start_date: @start_date - 1.week), class: "w-10 h-10 flex items-center justify-center rounded-full hover:bg-stone-100 text-stone-400 hover:text-indigo-600 transition" do %>
+      <i class="fas fa-chevron-left"></i>
+    <% end %>
+
+    <div class="text-center flex flex-col items-center">
+      <h1 class="text-lg sm:text-2xl font-bold text-stone-700 tracking-wider font-serif">
+        <%= @start_date.strftime("%Y年 %-m月") %>
+      </h1>
+      <div class="flex items-center gap-2 mt-1">
+        <p class="text-xs text-stone-400 font-bold">
+          <%= @start_date.strftime("%-d日") %> 〜 <%= @end_date.strftime("%-d日") %>
+        </p>
+        
+        <%# 今週以外の週を見ている時だけ「今日」ボタンを表示 %>
+        <% unless Date.current.all_week.include?(@start_date) %>
+          <%= link_to "今日", calendar_path, class: "text-[10px] bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-full font-bold hover:bg-indigo-100 transition" %>
+        <% end %>
+      </div>
+    </div>
+
+    <%= link_to calendar_path(start_date: @start_date + 1.week), class: "w-10 h-10 flex items-center justify-center rounded-full hover:bg-stone-100 text-stone-400 hover:text-indigo-600 transition" do %>
+      <i class="fas fa-chevron-right"></i>
+    <% end %>
+  </div>
+
+  <%# ================================================================= %>
+  <%#  【PC用表示】 (md以上で表示)                                      %>
+  <%#   パステル調の空色グラデーション                                    %>
+  <%# ================================================================= %>
+  <div class="hidden md:grid grid-cols-7 gap-px bg-stone-100 border border-stone-100 rounded-lg overflow-hidden shadow-sm">
+    
+    <%# --- 曜日ヘッダー --- %>
+    <% @week_days.each do |date| %>
+      <div class="bg-white p-2 text-center">
+        <span class="block text-xs font-bold text-stone-400 uppercase tracking-widest <%= 'text-red-400' if date.sunday? %> <%= 'text-blue-400' if date.saturday? %>">
+          <%= %w(SUN MON TUE WED THU FRI SAT)[date.wday] %>
+        </span>
+        <span class="block text-xl font-bold font-serif text-stone-700 <%= 'bg-indigo-600 text-white rounded-full w-8 h-8 flex items-center justify-center mx-auto mt-1' if date == Date.current %>">
+          <%= date.day %>
+        </span>
+      </div>
+    <% end %>
+
+    <%# --- 時間帯グリッド --- %>
+    <% ActualOutfit.time_slots.keys.each do |slot_key| %>
+      <% 
+        # パステルカラー定義 (文字が見やすい淡い色)
+        style_config = case slot_key
+          when 'morning'    
+            # 朝: 澄んだ薄い水色
+            { bg: 'bg-gradient-to-b from-[#F0F9FF] to-[#E0F2FE]', icon: 'fa-sun', icon_color: 'text-sky-200', label: '朝' }
+          when 'day'        
+            # 昼: 明るい空色
+            { bg: 'bg-gradient-to-b from-[#E0F2FE] to-[#BAE6FD]', icon: 'fa-cloud-sun', icon_color: 'text-blue-200', label: '昼' }
+          when 'night'      
+            # 夜: 夕暮れのパステルオレンジ
+            { bg: 'bg-gradient-to-b from-[#FFF7ED] to-[#FFEDD5]', icon: 'fa-moon', icon_color: 'text-orange-200', label: '夜' }
+          when 'late_night' 
+            # 深夜: 落ち着いたラテベージュ/薄茶
+            { bg: 'bg-gradient-to-b from-[#FAFAF9] to-[#E7E5E4]', icon: 'fa-star', icon_color: 'text-stone-300', label: '深夜' }
+        end
+      %>
+
+      <% @week_days.each do |date| %>
+        <% outfit = @outfits_map[[date, slot_key]] %>
+        
+        <div class="relative h-48 group transition-all duration-300 hover:z-10 hover:shadow-lg <%= style_config[:bg] %>">
+          
+          <%# 背景アイコン (控えめに) %>
+          <div class="absolute top-2 left-2 text-4xl <%= style_config[:icon_color] %> pointer-events-none opacity-40 transform group-hover:scale-110 transition duration-500">
+            <i class="fas <%= style_config[:icon] %>"></i>
+          </div>
+          
+          <%# ラベル (すべて石色で統一して視認性確保) %>
+          <div class="absolute top-2 right-2 text-xs font-bold text-stone-400/80">
+            <%= style_config[:label] %>
+          </div>
+
+          <% if outfit %>
+            <%# --- データあり --- %>
+            <%= link_to edit_actual_outfit_path(outfit), class: "block w-full h-full p-2 relative z-10" do %>
+              <div class="w-full h-full rounded-lg overflow-hidden shadow-sm border border-white/60 hover:border-white transition transform hover:-translate-y-1 bg-white/30 backdrop-blur-sm">
+                <% if outfit.item.image.attached? %>
+                  <%= image_tag outfit.item.image, class: "w-full h-full object-cover" %>
+                <% else %>
+                  <div class="w-full h-full flex items-center justify-center">
+                    <i class="fas fa-tshirt text-2xl text-stone-400"></i>
+                  </div>
+                <% end %>
+                
+                <%# アバター %>
+                <% if outfit.contact %>
+                  <div class="absolute bottom-1 right-1 w-8 h-8 rounded-full border-2 border-white shadow bg-white overflow-hidden">
+                    <% if outfit.contact.avatar.attached? %>
+                      <%= image_tag outfit.contact.avatar, class: "w-full h-full object-cover" %>
+                    <% else %>
+                      <div class="w-full h-full flex items-center justify-center bg-stone-100 text-[10px] font-bold text-stone-500">
+                        <%= outfit.contact.name.first %>
+                      </div>
+                    <% end %>
+                  </div>
+                <% end %>
+              </div>
+            <% end %>
+
+          <% else %>
+            <%# --- データなし --- %>
+            <%= link_to new_actual_outfit_path(worn_on: date, time_slot: slot_key), class: "absolute inset-0 z-10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-200" do %>
+              <div class="w-10 h-10 rounded-full bg-white/60 backdrop-blur-md border border-white text-indigo-400 flex items-center justify-center shadow-md hover:bg-indigo-500 hover:text-white transition transform hover:scale-110">
+                <i class="fas fa-plus"></i>
+              </div>
+            <% end %>
+          <% end %>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+
+
+  <%# ================================================================= %>
+  <%#  【スマホ用表示】 リスト形式                                        %>
+  <%# ================================================================= %>
+  <div class="md:hidden space-y-3">
+    <% @week_days.each do |date| %>
+      <% is_today = (date == Date.current) %>
+      
+      <div onclick="openTimeSelector('<%= date %>')" class="bg-white rounded-2xl p-4 shadow-sm border border-stone-100 active:scale-[0.98] transition cursor-pointer relative overflow-hidden">
+        <% if is_today %>
+          <div class="absolute left-0 top-0 bottom-0 w-1.5 bg-indigo-500"></div>
+        <% end %>
+
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-4">
+             <div class="text-center w-10">
+                <div class="text-[10px] font-bold text-stone-400 uppercase tracking-wider <%= 'text-red-400' if date.sunday? %> <%= 'text-blue-400' if date.saturday? %>">
+                  <%= %w(日 月 火 水 木 金 土)[date.wday] %>
+                </div>
+                <div class="text-xl font-bold font-serif text-stone-700 <%= 'text-indigo-600' if is_today %>">
+                  <%= date.day %>
+                </div>
+             </div>
+             
+             <%# ドット表示もパステルカラーに合わせる %>
+             <div class="flex gap-2">
+               <% ActualOutfit.time_slots.keys.each do |slot| %>
+                 <% if @outfits_map[[date, slot]] %>
+                   <div class="w-2.5 h-2.5 rounded-full ring-1 ring-white shadow-sm
+                     <%= case slot 
+                         when 'morning' then 'bg-sky-200'      # 朝: 水色
+                         when 'day' then 'bg-blue-400'         # 昼: 青
+                         when 'night' then 'bg-orange-300'     # 夜: オレンジ
+                         when 'late_night' then 'bg-stone-400' # 深夜: グレー
+                         end %>"></div>
+                 <% else %>
+                   <div class="w-2.5 h-2.5 rounded-full bg-stone-100"></div>
+                 <% end %>
+               <% end %>
+             </div>
+          </div>
+
+          <div class="text-stone-300">
+            <i class="fas fa-plus-circle text-2xl text-stone-100 hover:text-stone-200 transition"></i>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+</div>
+
+<%# ================================================================= %>
+<%#  【スマホ用モーダル】 パステル時間帯選択                            %>
+<%# ================================================================= %>
+<div id="time-selector-modal" class="fixed inset-0 z-[999] hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+  <div class="fixed inset-0 bg-stone-900/40 backdrop-blur-sm transition-opacity opacity-0" id="modal-backdrop" onclick="closeTimeSelector()"></div>
+
+  <div class="fixed inset-x-0 bottom-0 z-10 transform translate-y-full transition-transform duration-300 ease-out bg-[#FDFBF7] rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.1)] overflow-hidden" id="modal-panel">
+    
+    <div class="px-6 py-4 border-b border-stone-100 flex justify-between items-center bg-white/80 backdrop-blur-sm">
+      <div>
+        <h3 class="text-lg font-bold text-stone-700 font-serif" id="modal-date-display"></h3>
+        <p class="text-xs text-stone-400 font-bold">いつの記録を追加しますか？</p>
+      </div>
+      <button type="button" onclick="closeTimeSelector()" class="bg-stone-100 text-stone-400 rounded-full w-8 h-8 flex items-center justify-center hover:bg-stone-200 transition">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <div class="p-6 grid grid-cols-2 gap-4">
+      <%# 朝: 薄水色 %>
+      <a href="#" id="link-morning" class="relative group overflow-hidden rounded-2xl aspect-square bg-gradient-to-br from-[#F0F9FF] to-[#E0F2FE] border border-white shadow-sm flex flex-col items-center justify-center text-center active:scale-95 transition">
+        <i class="fas fa-sun text-4xl text-sky-200 mb-2 group-hover:scale-110 transition duration-500"></i>
+        <span class="font-bold text-stone-600">朝</span>
+        <span class="text-[10px] text-stone-400">06:00 - 11:59</span>
+      </a>
+
+      <%# 昼: スカイブルー %>
+      <a href="#" id="link-day" class="relative group overflow-hidden rounded-2xl aspect-square bg-gradient-to-br from-[#E0F2FE] to-[#BAE6FD] border border-white shadow-sm flex flex-col items-center justify-center text-center active:scale-95 transition">
+        <i class="fas fa-cloud-sun text-4xl text-blue-300 mb-2 group-hover:scale-110 transition duration-500"></i>
+        <span class="font-bold text-stone-600">昼</span>
+        <span class="text-[10px] text-stone-500">12:00 - 17:59</span>
+      </a>
+
+      <%# 夜: パステルオレンジ %>
+      <a href="#" id="link-night" class="relative group overflow-hidden rounded-2xl aspect-square bg-gradient-to-br from-[#FFF7ED] to-[#FFEDD5] border border-white shadow-sm flex flex-col items-center justify-center text-center active:scale-95 transition">
+        <i class="fas fa-moon text-4xl text-orange-300 mb-2 group-hover:scale-110 transition duration-500"></i>
+        <span class="font-bold text-stone-600">夜</span>
+        <span class="text-[10px] text-stone-400">18:00 - 23:59</span>
+      </a>
+
+      <%# 深夜: パステルブラウン/ベージュ (黒ではない) %>
+      <a href="#" id="link-late_night" class="relative group overflow-hidden rounded-2xl aspect-square bg-gradient-to-br from-[#FAFAF9] to-[#E7E5E4] border border-white shadow-sm flex flex-col items-center justify-center text-center active:scale-95 transition">
+        <i class="fas fa-star text-4xl text-stone-300 mb-2 group-hover:scale-110 transition duration-500"></i>
+        <span class="font-bold text-stone-600">深夜</span>
+        <span class="text-[10px] text-stone-400">00:00 - 05:59</span>
+      </a>
+    </div>
+  </div>
+</div>
+
+<%# --- JSは変更なし --- %>
+<script>
+  function openTimeSelector(dateString) {
+    const modal = document.getElementById('time-selector-modal');
+    const backdrop = document.getElementById('modal-backdrop');
+    const panel = document.getElementById('modal-panel');
+    
+    const dateObj = new Date(dateString);
+    const formattedDate = `${dateObj.getFullYear()}年 ${dateObj.getMonth() + 1}月 ${dateObj.getDate()}日`;
+    document.getElementById('modal-date-display').textContent = formattedDate;
+
+    document.getElementById('link-morning').href = `<%= new_actual_outfit_path %>?worn_on=${dateString}&time_slot=morning`;
+    document.getElementById('link-day').href = `<%= new_actual_outfit_path %>?worn_on=${dateString}&time_slot=day`;
+    document.getElementById('link-night').href = `<%= new_actual_outfit_path %>?worn_on=${dateString}&time_slot=night`;
+    document.getElementById('link-late_night').href = `<%= new_actual_outfit_path %>?worn_on=${dateString}&time_slot=late_night`;
+
+    modal.classList.remove('hidden');
+    setTimeout(() => {
+      backdrop.classList.remove('opacity-0');
+      panel.classList.remove('translate-y-full');
+    }, 10);
+  }
+
+  function closeTimeSelector() {
+    const modal = document.getElementById('time-selector-modal');
+    const backdrop = document.getElementById('modal-backdrop');
+    const panel = document.getElementById('modal-panel');
+
+    backdrop.classList.add('opacity-0');
+    panel.classList.add('translate-y-full');
+
+    setTimeout(() => {
+      modal.classList.add('hidden');
+    }, 300);
+  }
+</script>

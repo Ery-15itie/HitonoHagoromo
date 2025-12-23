@@ -9,24 +9,26 @@ Rails.application.routes.draw do
     sessions: 'users/sessions',
     registrations: 'users/registrations'
   }
+
   # ログイン済みユーザーのトップページ
   authenticated :user do
     root to: "items#index", as: :authenticated_root
   end
 
-  # --- 3. トップページ (LP) ---
-  # ログインしていない人（または authenticated にマッチしなかった人）はここ
+  # ログインしていない人（LP）
   root "pages#landing"
 
+  # --- 3. カレンダー機能 (Timelineから移行・独立) ---
+  # URL: /calendar
+  # Helper: calendar_path
+  resource :calendar, only: [:show]
+
   # --- 4. メイン機能: 着用記録 (ActualOutfit) ---
-  resources :actual_outfits do
-    collection do
-      get :timeline
-    end
-  end
+  resources :actual_outfits
 
   # --- 5. アイテム管理 ---
   resources :items do
+    # アイテム詳細から「これを着た」を登録するためのネスト
     resources :actual_outfits, only: [:create]
   end
 

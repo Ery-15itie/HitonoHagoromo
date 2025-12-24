@@ -1,0 +1,139 @@
+<div class="max-w-3xl mx-auto px-4 py-6 sm:py-8">
+  
+  <%# --- ヘッダーエリア (ナビゲーション) --- %>
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+    
+    <%# 戻るボタン %>
+    <%= link_to calendar_path(start_date: @actual_outfit.worn_on), class: "inline-flex items-center gap-2 px-5 py-2.5 bg-white border border-stone-200 rounded-full text-stone-500 font-bold hover:text-indigo-600 hover:border-indigo-200 transition shadow-sm w-fit" do %>
+      <i class="fas fa-arrow-left text-sm"></i>
+      <span>カレンダーへ戻る</span>
+    <% end %>
+    
+    <%# 編集・削除メニュー %>
+    <div class="flex gap-3">
+      <%= link_to edit_actual_outfit_path(@actual_outfit), class: "inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-50 border border-indigo-100 rounded-full text-indigo-600 font-bold hover:bg-indigo-100 transition shadow-sm" do %>
+        <i class="fas fa-pen text-sm"></i>
+        <span>編集</span>
+      <% end %>
+      
+      <%# button_to で確実に削除できるように修正 %>
+      <%= button_to actual_outfit_path(@actual_outfit), 
+            method: :delete, 
+            data: { turbo_confirm: "本当にこの記録を削除しますか？" }, 
+            form: { class: "contents" }, # デザイン崩れを防ぐ設定
+            class: "inline-flex items-center gap-2 px-5 py-2.5 bg-white border border-stone-200 rounded-full text-stone-400 font-bold hover:bg-red-50 hover:text-red-600 hover:border-red-100 transition shadow-sm cursor-pointer" do %>
+        <i class="fas fa-trash text-sm"></i>
+        <span>削除</span>
+      <% end %>
+    </div>
+  </div>
+
+  <%# --- メインコンテンツ --- %>
+  <div class="bg-white rounded-[2rem] shadow-sm border border-stone-100 overflow-hidden">
+    
+    <%# --- 予定名ラベルヘッダー (ある場合のみ) --- %>
+    <% if @actual_outfit.title.present? %>
+      <div class="px-6 py-4 text-white font-bold flex items-center gap-3 text-lg" style="background-color: <%= @actual_outfit.color.presence || '#A8A29E' %>;">
+        <i class="fas fa-calendar-check opacity-80 text-xl"></i>
+        <span><%= @actual_outfit.title %></span>
+      </div>
+    <% end %>
+
+    <%# --- 日時情報 --- %>
+    <div class="p-6 border-b border-stone-100 bg-stone-50/50 flex flex-col sm:flex-row sm:items-center gap-6">
+      <%# 日付ボックス %>
+      <div class="flex items-center gap-4">
+        <div class="text-center px-5 py-3 bg-white rounded-2xl border border-stone-200 shadow-sm min-w-[80px]">
+          <span class="block text-xs font-bold text-stone-400 uppercase tracking-wider"><%= %w(SUN MON TUE WED THU FRI SAT)[@actual_outfit.worn_on.wday] %></span>
+          <span class="block text-3xl font-bold font-serif text-stone-700 leading-none mt-1"><%= @actual_outfit.worn_on.day %></span>
+        </div>
+        <div>
+           <p class="text-sm text-stone-400 font-bold mb-0.5"><%= @actual_outfit.worn_on.strftime("%Y年 %-m月") %></p>
+           <p class="text-sm font-bold text-stone-600">の記録</p>
+        </div>
+      </div>
+
+      <%# 時間帯・時間 %>
+      <div class="flex items-center gap-3">
+        <% 
+          slot_config = case @actual_outfit.time_slot
+            when 'morning' then { color: 'bg-sky-100 text-sky-700 border-sky-200', icon: 'fa-sun', label: '朝' }
+            when 'day' then { color: 'bg-blue-100 text-blue-700 border-blue-200', icon: 'fa-cloud-sun', label: '昼' }
+            when 'night' then { color: 'bg-orange-100 text-orange-700 border-orange-200', icon: 'fa-moon', label: '夕方' }
+            when 'late_night' then { color: 'bg-stone-100 text-stone-700 border-stone-200', icon: 'fa-star', label: '夜' }
+          end
+        %>
+        <span class="px-4 py-1.5 rounded-full text-sm font-bold border flex items-center gap-2 <%= slot_config[:color] %>">
+          <i class="fas <%= slot_config[:icon] %>"></i>
+          <%= slot_config[:label] %>
+        </span>
+        
+        <% if @actual_outfit.start_time %>
+          <span class="text-3xl font-bold text-stone-700 font-feature-settings-tnum tracking-tight">
+            <%= @actual_outfit.start_time.strftime("%H:%M") %>
+          </span>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="p-6 sm:p-8 space-y-10">
+      <%# --- 着た服 --- %>
+      <div>
+        <h3 class="text-sm font-bold text-stone-400 mb-4 flex items-center gap-2 uppercase tracking-wider">
+          <i class="fas fa-tshirt text-indigo-300"></i> Items
+        </h3>
+        <% if @actual_outfit.items.any? %>
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+            <% @actual_outfit.items.each do |item| %>
+              <div class="aspect-[3/4] rounded-2xl overflow-hidden relative border border-stone-200 shadow-sm group">
+                <% if item.image.attached? %>
+                  <%= image_tag item.image, class: "w-full h-full object-cover transition duration-500 group-hover:scale-110" %>
+                <% else %>
+                  <div class="w-full h-full bg-stone-50 flex items-center justify-center text-stone-300">
+                    <i class="fas fa-tshirt text-3xl"></i>
+                  </div>
+                <% end %>
+                <div class="absolute bottom-0 inset-x-0 bg-white/95 backdrop-blur-sm p-2 text-xs font-bold text-center truncate border-t border-stone-100 text-stone-600">
+                  <%= item.name %>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        <% else %>
+          <div class="p-4 bg-stone-50 rounded-xl text-stone-400 text-sm font-bold text-center">
+            登録されたアイテムはありません
+          </div>
+        <% end %>
+      </div>
+
+      <%# --- 会った人 (シンプルタグ表示) --- %>
+      <% if @actual_outfit.contacts.any? %>
+        <div>
+          <h3 class="text-sm font-bold text-stone-400 mb-4 flex items-center gap-2 uppercase tracking-wider">
+            <i class="fas fa-user-friends text-indigo-300"></i> With
+          </h3>
+          <div class="flex flex-wrap gap-2">
+            <% @actual_outfit.contacts.each do |contact| %>
+              <div class="px-4 py-2 bg-white border border-stone-200 rounded-full shadow-sm text-sm font-bold text-stone-700">
+                <%= contact.name %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+
+      <%# --- メモ --- %>
+      <% if @actual_outfit.memo.present? %>
+        <div>
+          <h3 class="text-sm font-bold text-stone-400 mb-4 flex items-center gap-2 uppercase tracking-wider">
+            <i class="fas fa-sticky-note text-indigo-300"></i> Memo
+          </h3>
+          <div class="bg-[#FFFDF5] p-6 rounded-2xl border border-stone-100 text-stone-700 text-sm leading-relaxed shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] relative">
+            <i class="fas fa-quote-left absolute top-3 left-3 text-stone-200/50 text-4xl -z-0"></i>
+            <div class="relative z-10"><%= simple_format(@actual_outfit.memo) %></div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

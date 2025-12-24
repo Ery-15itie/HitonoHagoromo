@@ -1,3 +1,26 @@
-<div class="min-h-screen bg-[#FDFBF7] py-8 px-4">
+<div class="max-w-2xl mx-auto px-4 py-8">
+  
+  <div class="mb-8 text-center">
+    <h1 class="text-2xl font-bold text-indigo-950 font-serif tracking-wide">
+      記録の編集
+    </h1>
+    <p class="text-sm text-stone-500 mt-2">
+      <%= @actual_outfit.worn_on.strftime("%Y年%-m月%-d日") %> の記録
+    </p>
+  </div>
+
+  <%# 共通フォームの呼び出し %>
   <%= render 'form', actual_outfit: @actual_outfit %>
+
+  <%# --- 削除エリア (危険なアクションなので少し離して配置) --- %>
+  <div class="mt-12 pt-8 border-t border-stone-200">
+    <div class="flex flex-col items-center justify-center gap-2">
+      <p class="text-xs text-stone-400">この記録を削除しますか？（取り消せません）</p>
+      
+      <%= button_to actual_outfit_path(@actual_outfit), method: :delete, data: { turbo_confirm: "本当に削除してもよろしいですか？" }, class: "text-red-400 hover:text-red-600 font-bold text-sm underline decoration-red-200 hover:decoration-red-600 transition bg-transparent border-none cursor-pointer" do %>
+        <i class="fas fa-trash-alt mr-1"></i> 削除する
+      <% end %>
+    </div>
+  </div>
+
 </div>

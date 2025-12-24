@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_12_20_192735) do
+ActiveRecord::Schema[7.0].define(version: 2025_12_24_001102) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -44,15 +44,15 @@ ActiveRecord::Schema[7.0].define(version: 2025_12_20_192735) do
 
   create_table "actual_outfits", force: :cascade do |t|
     t.date "worn_on", null: false
-    t.bigint "item_id", null: false
     t.bigint "user_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "time_slot"
     t.text "impression"
-    t.bigint "contact_id"
-    t.index ["contact_id"], name: "index_actual_outfits_on_contact_id"
-    t.index ["item_id"], name: "index_actual_outfits_on_item_id"
+    t.text "memo"
+    t.string "title"
+    t.string "color"
+    t.time "start_time"
     t.index ["user_id"], name: "index_actual_outfits_on_user_id"
     t.index ["worn_on"], name: "index_actual_outfits_on_worn_on"
   end
@@ -88,6 +88,24 @@ ActiveRecord::Schema[7.0].define(version: 2025_12_20_192735) do
     t.index ["user_id"], name: "index_items_on_user_id"
   end
 
+  create_table "outfit_contacts", force: :cascade do |t|
+    t.bigint "actual_outfit_id", null: false
+    t.bigint "contact_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["actual_outfit_id"], name: "index_outfit_contacts_on_actual_outfit_id"
+    t.index ["contact_id"], name: "index_outfit_contacts_on_contact_id"
+  end
+
+  create_table "outfit_items", force: :cascade do |t|
+    t.bigint "actual_outfit_id", null: false
+    t.bigint "item_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["actual_outfit_id"], name: "index_outfit_items_on_actual_outfit_id"
+    t.index ["item_id"], name: "index_outfit_items_on_item_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
@@ -102,10 +120,12 @@ ActiveRecord::Schema[7.0].define(version: 2025_12_20_192735) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
-  add_foreign_key "actual_outfits", "contacts"
-  add_foreign_key "actual_outfits", "items"
   add_foreign_key "actual_outfits", "users"
   add_foreign_key "contacts", "users"
   add_foreign_key "items", "categories"
   add_foreign_key "items", "users"
+  add_foreign_key "outfit_contacts", "actual_outfits"
+  add_foreign_key "outfit_contacts", "contacts"
+  add_foreign_key "outfit_items", "actual_outfits"
+  add_foreign_key "outfit_items", "items"
 end

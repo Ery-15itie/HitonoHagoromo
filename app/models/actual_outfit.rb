@@ -1,60 +1,34 @@
 class ActualOutfit < ApplicationRecord
-  # --- 関連付け ---
-  belongs_to :item # どのアイテムを着用したか
-  belongs_to :user # 誰が着用記録を作成したか
-  # 会った人 (Contact) との関連付け。contact_id は任意のため optional: true
-  belongs_to :contact, optional: true
+  belongs_to :user
 
-  has_one_attached :snapshot
+  # --- 関連付け (多対多へ変更) ---
+  
+  # 服 (Items) との関連
+  # 中間テーブル (outfit_items) を通じて複数の item を持つ
+  has_many :outfit_items, dependent: :destroy
+  has_many :items, through: :outfit_items
 
-  # force_create フラグを一時的に保持する属性
-  attr_accessor :force_create
+  # 会った人 (Contacts) との関連
+  # 中間テーブル (outfit_contacts) を通じて複数の contact を持つ
+  has_many :outfit_contacts, dependent: :destroy
+  has_many :contacts, through: :outfit_contacts
+
+  # 画像 (ActiveStorage)
+  has_one_attached :image
 
   # --- Enum定義 (時間帯) ---
-  # DBのカラムが文字列(string)なので、右側も文字列を指定します
+  # UIの表記に合わせてコメントを修正
   enum time_slot: {
     morning: 'morning',       # 朝 (06:00-11:59)
     day: 'day',               # 昼 (12:00-17:59)
-    night: 'night',           # 夜 (18:00-23:59)
-    late_night: 'late_night'  # 深夜 (00:00-05:59)
+    night: 'night',           # 夕方 (18:00-23:59)
+    late_night: 'late_night'  # 夜   (00:00-05:59)
   }
 
   # --- バリデーション ---
-  # 着用日と時間帯は必須
   validates :worn_on, presence: true
   validates :time_slot, presence: true
 
-  # 同じユーザーが、同じ着用日、同じ時間帯で、同じアイテムを二重登録できないようにする
-  validates :item_id, uniqueness: { scope: [:worn_on, :time_slot, :user_id] }
+  # ※「メモ」は任意入力なのでバリデーションは不要
 
-  # contact_idが指定されている場合のみ、重複チェックを実行 (force_createがtrueの場合はスキップ)
-  validate :check_contact_item_uniqueness, if: -> { contact_id.present? && !force_create_enabled? }
-
-
-  # --- カスタムバリデーションメソッド ---
-  
-  # 会った人(Contact)とアイテムの重複着用をチェックするカスタムバリデーション
-  def check_contact_item_uniqueness
-    # contact_idとitem_idが両方存在する場合のみチェック
-    return unless contact_id.present? && item_id.present?
-
-    # 同じ user, item_id, contact_id のレコードを検索 (自分自身は除く)
-    duplicate_outfit = ActualOutfit.where(
-      user_id: user_id,
-      item_id: item_id,
-      contact_id: contact_id
-    ).where.not(id: id).exists? # .where.not(id: id) は編集時のチェックで重要
-
-    if duplicate_outfit
-      # 重複が確認された場合、エラーメッセージを追加
-      errors.add(:base, "この人に対して既に同じアイテムの着用記録があります。重複を無視する場合はチェックボックスにチェックを入れてください。")
-    end
-  end
-
-  private
-
-  # force_create が有効かどうかを判定
-  def force_create_enabled?
-    force_create.to_s == '1' || force_create == true
-  end
 end

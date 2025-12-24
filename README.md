@@ -8,15 +8,6 @@ MVPとして以下の2点の機能を提供することに特化しています�
 
 日常生活に則し、QOLを上げるための服の管理ができるアプリです。
 
-## 本サービスの画面設計
-### 画面遷移図
-[画面遷移図はこちら](https://www.figma.com/design/TK5MG5SusD3nsWev1gVSDc/%E5%8D%92%E6%A5%AD%E5%88%B6%E4%BD%9C%E3%80%80%E3%80%8C%E3%83%92%E3%83%88%E3%83%8E%E3%83%8F%E3%82%B4%E3%83%AD%E3%83%A2%E3%80%8D%E7%94%BB%E9%9D%A2%E9%81%B7%E7%A7%BB%E5%9B%B3%E3%80%80%E5%B2%A1%E9%83%A8%E6%98%A0%E9%87%8C%E5%A5%88?node-id=0-1&p=f&t=78uOSjv6aE5Ay1zc-0
-)
-
-### ER図
-<img width="1004" height="455" alt="Image" src="https://github.com/user-attachments/assets/40f48746-7947-4a36-9af9-3eb36ba4ff05" />
-
-※ MVPの段階ではLaundry_cyclesテーブルは未実装
 
 ## このサービスへの思い・作りたい理由
 本サービスの開発のきっかけは、私自身がもともと医療職として日々患者様と接する中で、「身だしなみ」や「整容」がその人の心身の健康、ひいてはQOL（生活の質）に大きく影響していることを実感したことでした。

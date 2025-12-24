@@ -11,13 +11,11 @@ class CalendarsController < ApplicationController
     @week_days = (@start_date..@end_date).to_a
 
     # その週のデータを取得
-    # itemのimage, contactのavatarの画像データそのもの(blob)までまとめて取得して高速化
     @outfits = ActualOutfit.where(user: current_user)
                            .where(worn_on: @start_date..@end_date)
-                           .includes(item: { image_attachment: :blob }, contact: { avatar_attachment: :blob })
+                           .includes(items: { image_attachment: :blob }, contacts: { avatar_attachment: :blob })
 
-    # ビューで扱いやすくするため、日付と時間帯のペアでハッシュ化する
-    # { [Date: 2025-12-22, "morning"] => <ActualOutfit>, ... } の形式にする
-    @outfits_map = @outfits.index_by { |o| [o.worn_on, o.time_slot] }
+    # 同じ日・同じ時間帯のデータを配列 [outfit1, outfit2, ...] として取得
+    @outfits_map = @outfits.group_by { |o| [o.worn_on, o.time_slot] }
   end
 end

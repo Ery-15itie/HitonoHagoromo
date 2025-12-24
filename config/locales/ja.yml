@@ -1,4 +1,13 @@
 ja:
+  # --- アプリケーション固有のEnum定義  ---
+  enums:
+    actual_outfit:
+      time_slot:
+        morning: "朝"
+        day: "昼"
+        night: "夕方"
+        late_night: "夜"
+
   # --- 日付/時刻のフォーマット ---
   date:
     formats:
@@ -7,9 +16,7 @@ ja:
       long: "%Y年%m月%d日(%a)"
       short_date: "%m/%d"
       abbr_day_names: [日, 月, 火, 水, 木, 金, 土]
-
     day_names: [日曜日, 月曜日, 火曜日, 水曜日, 木曜日, 金曜日, 土曜日]
-    abbr_day_names: [日, 月, 火, 水, 木, 金, 土]
     month_names: [~, 1月, 2月, 3月, 4月, 5月, 6月, 7月, 8月, 9月, 10月, 11月, 12月]
     abbr_month_names: [~, 1月, 2月, 3月, 4月, 5月, 6月, 7月, 8月, 9月, 10月, 11月, 12月]
 
@@ -18,6 +25,61 @@ ja:
       default: "%Y/%m/%d %H:%M:%S"
       short: "%m/%d %H:%M"
       long: "%Y年%m月%d日(%a) %H:%M"
+
+  # --- ActiveModel/ActiveRecord の日本語翻訳 ---
+  activerecord:
+    models:
+      actual_outfit: "着用記録"
+      item: "アイテム"
+      contact: "会った人"
+      user: "ユーザー"
+
+    attributes:
+      # ★ActualOutfitモデルの属性名を翻訳
+      actual_outfit:
+        worn_on: "日付"
+        time_slot: "時間帯"
+        item: "着た服"
+        item_id: "着た服"
+        contact: "会った人"
+        contact_id: "会った人"
+        memo: "ひとことメモ"
+        image: "写真"
+
+      # ★Userモデルの属性名
+      user:
+        email: "メールアドレス"
+        password: "パスワード"
+        password_confirmation: "パスワード（確認）"
+
+    # エラーメッセージ定義
+    errors:
+      messages: 
+        too_short: "は%{count}文字以上で入力してください"
+        blank: "を入力してください"
+        taken: "はすでに使用されています"
+        confirmation: "と%{attribute}の入力が一致しません"
+        inclusion: "は一覧にありません"
+        exclusion: "は予約されています"
+        invalid: "は不正な値です"
+        accepted: "を承認してください"
+        empty: "を入力してください"
+        too_long: "は%{count}文字以内で入力してください"
+        wrong_length: "は%{count}文字で入力してください"
+        not_a_number: "は数値で入力してください"
+        not_an_integer: "は整数で入力してください"
+        greater_than: "は%{count}より大きい値にしてください"
+        greater_than_or_equal_to: "は%{count}以上の値にしてください"
+        equal_to: "は%{count}にしてください"
+        less_than: "は%{count}より小さい値にしてください"
+        less_than_or_equal_to: "は%{count}以下の値にしてください"
+        other_than: "は%{count}以外の値にしてください"
+        odd: "は奇数にしてください"
+        even: "は偶数にしてください"
+        record_invalid: "バリデーションに失敗しました: %{errors}"
+        restrict_dependent_destroy:
+          one: "参照している%{record}があるため削除できません"
+          other: "参照している%{record}があるため削除できません"
 
   # --- Deviseの日本語翻訳 ---
   devise:
@@ -52,66 +114,22 @@ ja:
       signed_up_but_unconfirmed: "アカウントは正常に登録されましたが、ログインできませんでした。メールで送られた案内に従ってアカウントを確認してください。"
       update_needs_confirmation: "アカウントは正常に更新されましたが、新しいメールアドレスの確認が必要です。メールで送られた案内に従ってメールアドレスを確認してください。"
       updated: "アカウントを正常に更新しました。"
-      
     sessions:
       signed_in: "ログインしました。"
       signed_out: "ログアウトしました。"
-      
     unlocks:
       send_instructions: "数分以内にアカウントのロック解除方法をメールでご連絡します。"
       send_paranoid_instructions: "あなたのメールアドレスがデータベースに存在する場合、数分以内にアカウントのロック解除方法をメールでご連絡します。"
       unlocked: "アカウントのロックを解除しました。ログインしています。"
-      
-    # Deviseのビューで使用されるラベル名
     user:
       email: "メールアドレス"
       password: "パスワード"
       password_confirmation: "パスワード (確認)"
       remember_me: "ログイン情報を記憶する"
 
-  # --- ActiveModel/ActiveRecord の日本語翻訳 (バリデーションエラー) ---
-  activerecord:
-    attributes:
-      user: # Userモデルの属性名
-        email: "メールアドレス"
-        password: "パスワード"
-        password_confirmation: "パスワード（確認）" # 属性名が正しく翻訳されます
-
-    errors:
-      messages: 
-        # ユーザー登録で発生しやすいエラーメッセージ
-        too_short: "は%{count}文字以上で入力してください"
-        blank: "を入力してください"
-        taken: "はすでに使用されています"
-        confirmation: "と%{attribute}の入力が一致しません"
-        
-        # その他の一般的なバリデーションエラーメッセージ
-        inclusion: "は一覧にありません"
-        exclusion: "は予約されています"
-        invalid: "は不正な値です"
-        accepted: "を承認してください"
-        empty: "を入力してください"
-        too_long: "は%{count}文字以内で入力してください"
-        wrong_length: "は%{count}文字で入力してください"
-        not_a_number: "は数値で入力してください"
-        not_an_integer: "は整数で入力してください"
-        greater_than: "は%{count}より大きい値にしてください"
-        greater_than_or_equal_to: "は%{count}以上の値にしてください"
-        equal_to: "は%{count}にしてください"
-        less_than: "は%{count}より小さい値にしてください"
-        less_than_or_equal_to: "は%{count}以下の値にしてください"
-        other_than: "は%{count}以外の値にしてください"
-        odd: "は奇数にしてください"
-        even: "は偶数にしてください"
-        record_invalid: "バリデーションに失敗しました: %{errors}"
-        restrict_dependent_destroy:
-          one: "参照している%{record}があるため削除できません"
-          other: "参照している%{record}があるため削除できません"
-
-
   # --- エラーの表示フォーマット ---
   errors:
-    format: "%{attribute}%{message}" # ★ 'パスワードは6文字以上で...'という形式にするための設定★
+    format: "%{attribute}%{message}"
     messages:
       not_saved:
         one: "1件のエラーが発生したため、%{resource}を保存できませんでした"

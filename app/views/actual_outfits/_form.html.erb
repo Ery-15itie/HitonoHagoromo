@@ -1,6 +1,6 @@
 <%= form_with(model: actual_outfit, local: true, class: "space-y-8") do |f| %>
   
-  <%# エラー表示 %>
+  <%# --- エラーメッセージ表示エリア --- %>
   <% if actual_outfit.errors.any? %>
     <div class="bg-red-50 text-red-700 p-4 rounded-xl border border-red-100">
       <ul class="list-disc list-inside text-sm">
@@ -13,34 +13,62 @@
 
   <div class="bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-stone-100">
     
-    <%# --- 1. 日付と時間帯 (横並び) --- %>
+    <%# ================================================================= %>
+    <%# 1. 日付と時間帯の選択エリア                                       %>
+    <%# ================================================================= %>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
       
-      <%# 日付 %>
+      <%# --- 日付入力 --- %>
       <div>
         <%= f.label :worn_on, "日付", class: "block text-sm font-bold text-stone-500 mb-2" %>
         <%= f.date_field :worn_on, class: "w-full bg-stone-50 border-stone-200 rounded-xl px-4 py-3 font-serif font-bold text-stone-700 focus:ring-indigo-500 focus:border-indigo-500" %>
       </div>
 
-      <%# 時間帯 (ビジュアル選択) %>
+      <%# --- 時間帯選択 (グラデーションボタン) --- %>
       <div>
         <label class="block text-sm font-bold text-stone-500 mb-2">時間帯</label>
         <div class="grid grid-cols-2 gap-3">
           <% ActualOutfit.time_slots.keys.each do |key| %>
             <% 
-              # デザイン定義
-              style = case key
-                when 'morning'    then { color: 'peer-checked:bg-sky-50 peer-checked:border-sky-300 peer-checked:text-sky-700', icon: 'fa-sun text-sky-300' }
-                when 'day'        then { color: 'peer-checked:bg-blue-50 peer-checked:border-blue-300 peer-checked:text-blue-700', icon: 'fa-cloud-sun text-blue-300' }
-                when 'night'      then { color: 'peer-checked:bg-orange-50 peer-checked:border-orange-300 peer-checked:text-orange-700', icon: 'fa-moon text-orange-300' }
-                when 'late_night' then { color: 'peer-checked:bg-stone-100 peer-checked:border-stone-400 peer-checked:text-stone-700', icon: 'fa-star text-stone-400' }
+              time_range = case key
+                when 'morning'    then '06:00 - 11:59'
+                when 'day'        then '12:00 - 17:59'
+                when 'night'      then '18:00 - 23:59'
+                when 'late_night' then '00:00 - 05:59'
+              end
+
+              style_classes = case key
+                when 'morning'    
+                  "peer-checked:bg-gradient-to-br peer-checked:from-[#F0F9FF] peer-checked:to-[#E0F2FE] peer-checked:border-sky-200 peer-checked:text-stone-600 text-stone-400"
+                when 'day'        
+                  "peer-checked:bg-gradient-to-br peer-checked:from-[#E0F2FE] peer-checked:to-[#BAE6FD] peer-checked:border-blue-300 peer-checked:text-stone-600 text-stone-400"
+                when 'night'      
+                  "peer-checked:bg-gradient-to-br peer-checked:from-[#FFF7ED] peer-checked:to-[#FFEDD5] peer-checked:border-orange-200 peer-checked:text-stone-600 text-stone-400"
+                when 'late_night' 
+                  "peer-checked:bg-gradient-to-br peer-checked:from-[#FAFAF9] peer-checked:to-[#E7E5E4] peer-checked:border-stone-300 peer-checked:text-stone-600 text-stone-400"
+              end
+              
+              icon_class = case key
+                when 'morning'    then 'fa-sun'
+                when 'day'        then 'fa-cloud-sun'
+                when 'night'      then 'fa-moon'
+                when 'late_night' then 'fa-star'
+              end
+
+              icon_color = case key
+                when 'morning'    then 'text-sky-300 peer-checked:text-sky-600'
+                when 'day'        then 'text-blue-300 peer-checked:text-blue-600'
+                when 'night'      then 'text-orange-300 peer-checked:text-orange-600'
+                when 'late_night' then 'text-stone-300 peer-checked:text-stone-500'
               end
             %>
-            <label class="cursor-pointer">
+
+            <label class="cursor-pointer group">
               <%= f.radio_button :time_slot, key, class: "peer sr-only" %>
-              <div class="h-full py-3 px-2 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 transition flex flex-col items-center justify-center gap-1 text-stone-400 <%= style[:color] %> ring-2 ring-transparent peer-checked:ring-2 peer-checked:ring-offset-1">
-                <i class="fas <%= style[:icon] %> text-xl mb-1"></i>
+              <div class="h-full py-3 px-2 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 transition flex flex-col items-center justify-center gap-0.5 ring-2 ring-transparent peer-checked:ring-2 peer-checked:ring-offset-1 <%= style_classes %>">
+                <i class="fas <%= icon_class %> text-xl mb-1 <%= icon_color %>"></i>
                 <span class="text-xs font-bold"><%= I18n.t("enums.actual_outfit.time_slot.#{key}") %></span>
+                <span class="text-[10px] opacity-70 font-feature-settings-tnum"><%= time_range %></span>
               </div>
             </label>
           <% end %>
@@ -48,37 +76,130 @@
       </div>
     </div>
 
-    <%# --- 2. アイテム選択 --- %>
-    <div class="mb-8">
-      <%= f.label :item_id, "着た服", class: "block text-sm font-bold text-stone-500 mb-2" %>
-      <div class="relative">
-        <i class="fas fa-tshirt absolute left-4 top-1/2 transform -translate-y-1/2 text-stone-300"></i>
-        <%= f.collection_select :item_id, Item.all, :id, :name, { prompt: "クローゼットから選択..." }, { class: "w-full pl-10 bg-stone-50 border-stone-200 rounded-xl px-4 py-3 font-bold text-stone-700 focus:ring-indigo-500 focus:border-indigo-500" } %>
+    <%# ================================================================= %>
+    <%# 2. スケジュール詳細 (任意) - ★新規追加エリア                     %>
+    <%# ================================================================= %>
+    <div class="mb-8 p-5 bg-stone-50 rounded-2xl border border-stone-100">
+      <h3 class="text-sm font-bold text-stone-500 mb-4 flex items-center gap-2">
+        <i class="fas fa-calendar-check text-indigo-400"></i> スケジュール情報 (任意)
+      </h3>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+        <%# 時間入力 %>
+        <div>
+          <%= f.label :start_time, "開始時間", class: "block text-xs font-bold text-stone-400 mb-1" %>
+          <div class="relative">
+            <%= f.time_field :start_time, class: "w-full bg-white border-stone-200 rounded-lg px-3 py-2 text-sm font-bold text-stone-700 focus:ring-indigo-500 focus:border-indigo-500" %>
+          </div>
+        </div>
+
+        <%# 予定名入力 %>
+        <div>
+          <%= f.label :title, "予定名 (例: ランチ, デート)", class: "block text-xs font-bold text-stone-400 mb-1" %>
+          <%= f.text_field :title, class: "w-full bg-white border-stone-200 rounded-lg px-3 py-2 text-sm font-bold text-stone-700 focus:ring-indigo-500 focus:border-indigo-500", placeholder: "入力するとラベル表示になります" %>
+        </div>
       </div>
-      <p class="text-xs text-right mt-2">
-        <%= link_to "+ 新しい服を登録", new_item_path, class: "text-indigo-500 hover:text-indigo-700 font-bold" %>
-      </p>
+
+      <%# カラーパレット選択 %>
+      <div>
+        <label class="block text-xs font-bold text-stone-400 mb-2">ラベルの色</label>
+        <div class="flex flex-wrap gap-3 items-center">
+          <% 
+            colors = [
+              { code: '#F87171', name: '赤' }, 
+              { code: '#FB923C', name: '橙' }, 
+              { code: '#FACC15', name: '黄' }, 
+              { code: '#4ADE80', name: '緑' }, 
+              { code: '#38BDF8', name: '水色' }, 
+              { code: '#818CF8', name: '青' }, 
+              { code: '#C084FC', name: '紫' }, 
+              { code: '#F472B6', name: '桃' }, 
+              { code: '#A8A29E', name: '灰' } 
+            ] 
+          %>
+          <% colors.each do |color| %>
+            <label class="cursor-pointer group relative">
+              <%= f.radio_button :color, color[:code], class: "peer sr-only" %>
+              <div class="w-8 h-8 rounded-full border-2 border-white shadow-sm transition transform hover:scale-110 peer-checked:scale-110 peer-checked:ring-2 peer-checked:ring-offset-2 peer-checked:ring-stone-400" style="background-color: <%= color[:code] %>;"></div>
+              <%# ツールチップ %>
+              <span class="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[10px] font-bold text-stone-400 opacity-0 group-hover:opacity-100 transition whitespace-nowrap bg-white px-1 rounded shadow-sm border border-stone-100 pointer-events-none z-10"><%= color[:name] %></span>
+            </label>
+          <% end %>
+          
+          <%# リセット(なし)ボタン %>
+          <label class="cursor-pointer group relative ml-2">
+            <%= f.radio_button :color, "", class: "peer sr-only" %>
+            <div class="w-8 h-8 rounded-full border border-stone-200 bg-white flex items-center justify-center text-stone-300 transition hover:bg-stone-50 peer-checked:ring-2 peer-checked:ring-offset-2 peer-checked:ring-stone-400 peer-checked:text-stone-500">
+              <i class="fas fa-ban text-xs"></i>
+            </div>
+            <span class="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[10px] font-bold text-stone-400 opacity-0 group-hover:opacity-100 transition whitespace-nowrap bg-white px-1 rounded shadow-sm border border-stone-100 pointer-events-none z-10">なし</span>
+          </label>
+        </div>
+      </div>
     </div>
 
-    <%# --- 3. 会った人 (任意) --- %>
+    <%# ================================================================= %>
+    <%# 3. アイテム選択エリア (複数選択対応)                              %>
+    <%# ================================================================= %>
     <div class="mb-8">
-      <%= f.label :contact_id, "会った人 (任意)", class: "block text-sm font-bold text-stone-500 mb-2" %>
-      <div class="relative">
-        <i class="fas fa-user-friends absolute left-4 top-1/2 transform -translate-y-1/2 text-stone-300"></i>
-        <%= f.collection_select :contact_id, Contact.all, :id, :name, { include_blank: "選択なし" }, { class: "w-full pl-10 bg-stone-50 border-stone-200 rounded-xl px-4 py-3 font-bold text-stone-700 focus:ring-indigo-500 focus:border-indigo-500" } %>
+      <%= f.label :item_ids, "着た服 (複数選択可)", class: "block text-sm font-bold text-stone-500 mb-2" %>
+      
+      <%# 選択済みアイテムのプレビュー表示エリア %>
+      <div id="selected-items-container" class="grid grid-cols-3 sm:grid-cols-4 gap-3 mb-3">
+        <%# 追加ボタン %>
+        <div onclick="openItemModal()" class="cursor-pointer border-2 border-dashed border-stone-300 rounded-xl aspect-[3/4] flex flex-col items-center justify-center hover:bg-stone-50 hover:border-indigo-300 hover:text-indigo-500 text-stone-400 transition group">
+          <i class="fas fa-plus text-xl mb-1 group-hover:scale-110 transition"></i>
+          <span class="text-[10px] font-bold">追加</span>
+        </div>
+      </div>
+
+      <%# フォーム送信用の隠しフィールド %>
+      <div id="item-hidden-inputs">
+        <% (actual_outfit.try(:item_ids) || []).each do |id| %>
+           <input type="hidden" name="actual_outfit[item_ids][]" value="<%= id %>" id="hidden_item_<%= id %>">
+        <% end %>
       </div>
     </div>
 
-    <%# --- 4. メモ & 写真 --- %>
+
+    <%# ================================================================= %>
+    <%# 4. 会った人選択エリア (複数選択対応)                              %>
+    <%# ================================================================= %>
+    <div class="mb-8">
+      <%= f.label :contact_ids, "会った人 (複数選択可)", class: "block text-sm font-bold text-stone-500 mb-2" %>
+      
+      <div id="selected-contacts-container" class="flex flex-wrap gap-2 mb-3">
+        <%# 追加ボタン %>
+        <div onclick="openContactModal()" class="cursor-pointer border border-dashed border-stone-300 rounded-full px-3 py-1.5 flex items-center gap-2 hover:bg-stone-50 hover:border-indigo-300 hover:text-indigo-500 text-stone-400 transition text-sm font-bold">
+          <i class="fas fa-plus"></i>
+          <span>追加</span>
+        </div>
+      </div>
+      
+      <%# フォーム送信用の隠しフィールド %>
+      <div id="contact-hidden-inputs">
+        <% (actual_outfit.try(:contact_ids) || []).each do |id| %>
+           <input type="hidden" name="actual_outfit[contact_ids][]" value="<%= id %>" id="hidden_contact_<%= id %>">
+        <% end %>
+      </div>
+    </div>
+
+    <%# ================================================================= %>
+    <%# 5. メモ入力エリア                                                 %>
+    <%# ================================================================= %>
     <div class="mb-8">
       <%= f.label :memo, "ひとことメモ", class: "block text-sm font-bold text-stone-500 mb-2" %>
       <%= f.text_area :memo, rows: 3, class: "w-full bg-stone-50 border-stone-200 rounded-xl px-4 py-3 text-stone-700 focus:ring-indigo-500 focus:border-indigo-500", placeholder: "楽しかった！少し寒かったかも。" %>
     </div>
+
   </div>
 
-  <%# --- 送信ボタン --- %>
-  <div class="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
+  <%# ================================================================= %>
+  <%# フッターアクションボタン                                          %>
+  <%# ================================================================= %>
+  <div class="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4 pb-20 sm:pb-0">
     <%= link_to "キャンセル", :back, class: "w-full sm:w-auto text-center px-8 py-3 rounded-full text-stone-500 font-bold hover:bg-stone-100 transition" %>
+    
     <%= f.button class: "w-full sm:w-auto px-10 py-3 rounded-full bg-indigo-600 text-white font-bold shadow-lg hover:bg-indigo-700 hover:shadow-xl transition transform hover:-translate-y-1 flex items-center justify-center gap-2" do %>
       <i class="fas fa-check"></i>
       記録する
@@ -86,3 +207,315 @@
   </div>
 
 <% end %>
+
+
+<%# ================================================================= %>
+<%#  【アイテム選択モーダル】                                           %>
+<%# ================================================================= %>
+<div id="item-modal" class="fixed inset-0 z-[100] hidden">
+  <div class="absolute inset-0 bg-stone-900/60 backdrop-blur-sm" onclick="closeItemModal()"></div>
+  <div class="absolute inset-x-0 bottom-0 top-10 sm:inset-x-10 sm:bottom-10 bg-[#FDFBF7] rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+    
+    <%# ヘッダー %>
+    <div class="p-4 border-b border-stone-100 flex justify-between items-center bg-white z-10 shadow-sm shrink-0">
+      <h3 class="font-bold text-lg text-stone-700 font-serif">服を選ぶ</h3>
+      
+      <button type="button" onclick="closeItemModal()" class="w-8 h-8 rounded-full bg-stone-100 hover:bg-stone-200 flex items-center justify-center transition">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5 text-black">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <%# ボディ %>
+    <div class="flex-1 overflow-y-auto p-4">
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+        <% Item.all.order(created_at: :desc).each do |item| %>
+          <div onclick="toggleItemSelection(this, '<%= item.id %>', '<%= item.name %>', '<%= item.image.attached? ? url_for(item.image) : "" %>')" 
+               data-id="<%= item.id %>"
+               class="item-option relative group rounded-xl overflow-hidden aspect-[3/4] cursor-pointer border-2 border-transparent transition active:scale-95">
+            
+            <div class="w-full h-full bg-white relative">
+              <% if item.image.attached? %>
+                <%= image_tag item.image, class: "w-full h-full object-cover" %>
+              <% else %>
+                <div class="w-full h-full flex items-center justify-center bg-stone-50 text-stone-300">
+                  <i class="fas fa-tshirt text-2xl"></i>
+                </div>
+              <% end %>
+              <div class="absolute inset-0 bg-indigo-900/20 hidden check-overlay"></div>
+            </div>
+
+            <div class="absolute top-2 right-2 w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center shadow-md transform scale-0 transition check-mark">
+              <i class="fas fa-check text-xs"></i>
+            </div>
+            
+            <div class="absolute bottom-0 inset-x-0 bg-white/90 p-1.5 text-center">
+              <p class="text-[10px] font-bold text-stone-700 truncate"><%= item.name %></p>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <%# フッター %>
+    <div class="p-4 border-t border-stone-100 bg-white shrink-0 flex justify-end">
+      <button type="button" onclick="confirmItemSelection()" class="bg-indigo-600 text-white text-sm font-bold px-8 py-3 rounded-full hover:bg-indigo-700 transition shadow-md hover:shadow-lg transform active:scale-95">
+        決定する
+      </button>
+    </div>
+  </div>
+</div>
+
+<%# ================================================================= %>
+<%#  【会った人選択モーダル】                                           %>
+<%# ================================================================= %>
+<div id="contact-modal" class="fixed inset-0 z-[100] hidden">
+  <div class="absolute inset-0 bg-stone-900/60 backdrop-blur-sm" onclick="closeContactModal()"></div>
+  <div class="absolute inset-x-0 bottom-0 top-1/3 sm:inset-x-auto sm:left-1/2 sm:top-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-96 sm:h-auto bg-[#FDFBF7] rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+    
+    <%# ヘッダー %>
+    <div class="p-4 border-b border-stone-100 flex justify-between items-center bg-white shadow-sm shrink-0">
+      <h3 class="font-bold text-lg text-stone-700 font-serif">会った人を選ぶ</h3>
+      
+      <button type="button" onclick="closeContactModal()" class="w-8 h-8 rounded-full bg-stone-100 hover:bg-stone-200 flex items-center justify-center transition">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5 text-black">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <%# ボディ %>
+    <div class="flex-1 overflow-y-auto p-4">
+      <% Contact.all.order(:name).each do |contact| %>
+        <div onclick="toggleContactSelection(this, '<%= contact.id %>', '<%= contact.name %>', '<%= contact.avatar.attached? ? url_for(contact.avatar) : "" %>')" 
+             data-id="<%= contact.id %>"
+             class="contact-option flex items-center gap-3 p-3 bg-white rounded-xl border-2 border-transparent mb-2 cursor-pointer hover:bg-stone-50 transition active:scale-95">
+          
+          <div class="w-10 h-10 rounded-full bg-stone-100 overflow-hidden border border-stone-200 flex-shrink-0 relative">
+             <% if contact.avatar.attached? %>
+               <%= image_tag contact.avatar, class: "w-full h-full object-cover" %>
+             <% else %>
+               <div class="w-full h-full flex items-center justify-center text-stone-400 text-xs font-bold">
+                 <%= contact.name.first %>
+               </div>
+             <% end %>
+             <div class="absolute inset-0 bg-indigo-600/30 hidden check-overlay"></div>
+          </div>
+          
+          <span class="font-bold text-stone-700 flex-1"><%= contact.name %></span>
+          
+          <div class="w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center shadow-sm transform scale-0 transition check-mark">
+             <i class="fas fa-check text-xs"></i>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <%# フッター %>
+    <div class="p-4 border-t border-stone-100 bg-white shrink-0 flex justify-end">
+      <button type="button" onclick="confirmContactSelection()" class="bg-indigo-600 text-white text-sm font-bold px-8 py-3 rounded-full hover:bg-indigo-700 transition shadow-md hover:shadow-lg transform active:scale-95">
+        決定する
+      </button>
+    </div>
+  </div>
+</div>
+
+<%# ================================================================= %>
+<%#  【制御用JS】                                                     %>
+<%# ================================================================= %>
+<script>
+  let selectedItemIds = new Set();
+  let selectedItemData = new Map();
+
+  let selectedContactIds = new Set();
+  let selectedContactData = new Map();
+
+  document.addEventListener("turbo:load", () => {
+    initSelectionFromHiddenInputs('item');
+    initSelectionFromHiddenInputs('contact');
+    renderSelectedItems();
+    renderSelectedContacts();
+  });
+  
+  document.addEventListener("DOMContentLoaded", () => {
+    initSelectionFromHiddenInputs('item');
+    initSelectionFromHiddenInputs('contact');
+    renderSelectedItems();
+    renderSelectedContacts();
+  });
+
+  function initSelectionFromHiddenInputs(type) {
+    const hiddenDiv = document.getElementById(`${type}-hidden-inputs`);
+    if(!hiddenDiv) return;
+    const inputs = hiddenDiv.querySelectorAll('input');
+    inputs.forEach(input => {
+      if (type === 'item') selectedItemIds.add(input.value);
+      else selectedContactIds.add(input.value);
+    });
+  }
+
+  // --- アイテム選択の制御 ---
+  function openItemModal() {
+    document.getElementById('item-modal').classList.remove('hidden');
+    document.querySelectorAll('.item-option').forEach(el => {
+      updateVisualState(el, selectedItemIds.has(el.dataset.id));
+    });
+  }
+
+  function closeItemModal() {
+    document.getElementById('item-modal').classList.add('hidden');
+  }
+
+  function toggleItemSelection(el, id, name, imageUrl) {
+    if (selectedItemIds.has(id)) {
+      selectedItemIds.delete(id);
+      selectedItemData.delete(id);
+      updateVisualState(el, false);
+    } else {
+      selectedItemIds.add(id);
+      selectedItemData.set(id, {name, imageUrl});
+      updateVisualState(el, true);
+    }
+  }
+
+  function updateVisualState(el, isSelected) {
+    const overlay = el.querySelector('.check-overlay');
+    const mark = el.querySelector('.check-mark');
+    if (isSelected) {
+      el.classList.add('ring-2', 'ring-indigo-600', 'ring-offset-1');
+      overlay.classList.remove('hidden');
+      mark.classList.remove('scale-0');
+    } else {
+      el.classList.remove('ring-2', 'ring-indigo-600', 'ring-offset-1');
+      overlay.classList.add('hidden');
+      mark.classList.add('scale-0');
+    }
+  }
+
+  function confirmItemSelection() {
+    const container = document.getElementById('item-hidden-inputs');
+    container.innerHTML = '';
+    selectedItemIds.forEach(id => {
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'actual_outfit[item_ids][]';
+      input.value = id;
+      container.appendChild(input);
+    });
+    renderSelectedItems();
+    closeItemModal();
+  }
+
+  function renderSelectedItems() {
+    const container = document.getElementById('selected-items-container');
+    while (container.children.length > 1) {
+      container.removeChild(container.firstChild);
+    }
+    selectedItemData.forEach((data, id) => {
+      const div = document.createElement('div');
+      div.className = "relative group rounded-xl overflow-hidden aspect-[3/4] border border-stone-200";
+      div.innerHTML = `
+        <img src="${data.imageUrl}" class="w-full h-full object-cover">
+        <div class="absolute inset-0 bg-black/10"></div>
+        <div class="absolute bottom-0 inset-x-0 bg-white/90 p-1 text-[9px] font-bold text-center truncate">
+          ${data.name}
+        </div>
+        <div onclick="removeItem('${id}')" class="absolute top-1 right-1 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow cursor-pointer text-stone-400 hover:text-red-500">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3 h-3 text-stone-500">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </div>
+      `;
+      container.insertBefore(div, container.lastElementChild);
+    });
+  }
+
+  function removeItem(id) {
+    selectedItemIds.delete(id);
+    selectedItemData.delete(id);
+    confirmItemSelection();
+  }
+
+  // --- 会った人選択の制御 ---
+  function openContactModal() {
+    document.getElementById('contact-modal').classList.remove('hidden');
+    document.querySelectorAll('.contact-option').forEach(el => {
+      updateContactVisualState(el, selectedContactIds.has(el.dataset.id));
+    });
+  }
+
+  function closeContactModal() {
+    document.getElementById('contact-modal').classList.add('hidden');
+  }
+
+  function toggleContactSelection(el, id, name, avatarUrl) {
+    if (selectedContactIds.has(id)) {
+      selectedContactIds.delete(id);
+      selectedContactData.delete(id);
+      updateContactVisualState(el, false);
+    } else {
+      selectedContactIds.add(id);
+      selectedContactData.set(id, {name, avatarUrl});
+      updateContactVisualState(el, true);
+    }
+  }
+
+  function updateContactVisualState(el, isSelected) {
+    const mark = el.querySelector('.check-mark');
+    if (isSelected) {
+      el.classList.add('border-indigo-600', 'bg-indigo-50');
+      mark.classList.remove('scale-0');
+    } else {
+      el.classList.remove('border-indigo-600', 'bg-indigo-50');
+      mark.classList.add('scale-0');
+    }
+  }
+
+  function confirmContactSelection() {
+    const container = document.getElementById('contact-hidden-inputs');
+    container.innerHTML = '';
+    selectedContactIds.forEach(id => {
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'actual_outfit[contact_ids][]';
+      input.value = id;
+      container.appendChild(input);
+    });
+    renderSelectedContacts();
+    closeContactModal();
+  }
+
+  function renderSelectedContacts() {
+    const container = document.getElementById('selected-contacts-container');
+    while (container.children.length > 1) {
+      container.removeChild(container.firstChild);
+    }
+    selectedContactData.forEach((data, id) => {
+      const div = document.createElement('div');
+      div.className = "flex items-center gap-2 pl-1 pr-2 py-1 bg-white border border-stone-200 rounded-full shadow-sm";
+      const imgTag = data.avatarUrl 
+        ? `<img src="${data.avatarUrl}" class="w-full h-full object-cover">`
+        : `<div class="w-full h-full flex items-center justify-center text-[8px] text-stone-500">${data.name.charAt(0)}</div>`;
+      
+      div.innerHTML = `
+        <div class="w-6 h-6 rounded-full bg-stone-100 overflow-hidden relative">
+          ${imgTag}
+        </div>
+        <span class="text-xs font-bold text-stone-600">${data.name}</span>
+        <div onclick="removeContact('${id}')" class="w-4 h-4 flex items-center justify-center text-stone-300 hover:text-red-400 cursor-pointer ml-1">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3 h-3 text-stone-500">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </div>
+      `;
+      container.insertBefore(div, container.lastElementChild);
+    });
+  }
+
+  function removeContact(id) {
+    selectedContactIds.delete(id);
+    selectedContactData.delete(id);
+    confirmContactSelection();
+  }
+</script>

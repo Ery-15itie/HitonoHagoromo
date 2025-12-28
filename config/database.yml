@@ -2,7 +2,7 @@ default: &default
   adapter: postgresql
   encoding: unicode
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
-  # Dockerサービス名 'db' を指定
+  # Docker環境(開発/テスト)用の設定
   host: db
   username: postgres
   password: <%= ENV.fetch("POSTGRES_PASSWORD") { 'password' } %>
@@ -16,6 +16,8 @@ test:
   database: hitonohagoromo_test
 
 production:
+  # 本番環境設定
+  # defaultの設定を継承しつつ、DATABASE_URLがある場合はそちらを優先
   <<: *default
   url: <%= ENV['DATABASE_URL'] %>
   sslmode: 'require'

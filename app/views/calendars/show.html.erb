@@ -58,21 +58,21 @@
     <%# 時間帯ごとの行 %>
     <% ActualOutfit.time_slots.keys.each do |slot_key| %>
       <% 
+        # アイコン定義 (朝:コーヒー, 昼:太陽, 夕:本, 夜:月)
         style_config = case slot_key
-          when 'morning'    then { bg: 'bg-gradient-to-b from-[#F0F9FF] to-[#E0F2FE]', icon: 'fa-sun', icon_color: 'text-sky-200', label: '朝', time: '06:00 - 11:59' }
-          when 'day'        then { bg: 'bg-gradient-to-b from-[#E0F2FE] to-[#BAE6FD]', icon: 'fa-cloud-sun', icon_color: 'text-blue-200', label: '昼', time: '12:00 - 17:59' }
-          when 'night'      then { bg: 'bg-gradient-to-b from-[#FFF7ED] to-[#FFEDD5]', icon: 'fa-moon', icon_color: 'text-orange-200', label: '夕方', time: '18:00 - 23:59' }
-          when 'late_night' then { bg: 'bg-gradient-to-b from-[#FAFAF9] to-[#E7E5E4]', icon: 'fa-star', icon_color: 'text-stone-300', label: '夜', time: '00:00 - 05:59' }
+          when 'morning'    then { bg: 'bg-gradient-to-b from-[#F0F9FF] to-[#E0F2FE]', icon: 'fa-mug-hot',   icon_color: 'text-sky-200',    label: '朝',   time: '06:00 - 11:59' }
+          when 'day'        then { bg: 'bg-gradient-to-b from-[#E0F2FE] to-[#BAE6FD]', icon: 'fa-sun',       icon_color: 'text-blue-200',   label: '昼',   time: '12:00 - 17:59' }
+          when 'night'      then { bg: 'bg-gradient-to-b from-[#FFF7ED] to-[#FFEDD5]', icon: 'fa-book-open', icon_color: 'text-orange-200', label: '夕方', time: '18:00 - 23:59' }
+          when 'late_night' then { bg: 'bg-gradient-to-b from-[#FAFAF9] to-[#E7E5E4]', icon: 'fa-moon',      icon_color: 'text-stone-300',  label: '夜',   time: '00:00 - 05:59' }
         end
       %>
 
       <% @week_days.each do |date| %>
-        <%# ★修正: 日付を文字列にしてキー検索。これで確実にヒット%>
         <% outfits = @outfits_map[[date.to_s, slot_key]] || [] %>
         
         <div class="relative h-48 group hover:shadow-lg transition duration-300 <%= style_config[:bg] %> flex flex-col p-1 overflow-hidden">
           
-          <%# 背景アイコン %>
+          <%# 背景アイコン (透かし) %>
           <div class="absolute top-2 left-2 text-4xl <%= style_config[:icon_color] %> pointer-events-none opacity-40 transform group-hover:scale-110 transition duration-500">
             <i class="fas <%= style_config[:icon] %>"></i>
           </div>
@@ -86,7 +86,7 @@
             <% outfits.each do |outfit| %>
               <%= link_to actual_outfit_path(outfit), class: "block w-full flex-shrink-0 relative group/item" do %>
                 
-                <%# ★付箋バーのデザイン %>
+                <%# 付箋バーのデザイン %>
                 <% if outfit.title.present? %>
                   <div class="w-full rounded shadow-sm px-2 py-1 text-white transition transform hover:-translate-y-0.5 hover:shadow-md relative" style="background-color: <%= outfit.color.presence || '#A8A29E' %>;">
                     <div class="flex items-center gap-1 mb-0.5">
@@ -105,7 +105,7 @@
                   </div>
                 <% end %>
                 
-                <%# ★右上のアイテム数バッジ %>
+                <%# 右上のアイテム数バッジ %>
                 <% if outfit.items.size > 0 %>
                   <div class="absolute -top-1.5 -right-1 w-4 h-4 rounded-full bg-red-500 border border-white flex items-center justify-center shadow-md z-20">
                     <span class="text-[9px] font-bold text-white font-sans leading-none"><%= outfit.items.size %></span>
@@ -244,7 +244,9 @@
 
 </div>
 
-<%# モーダルなどの共通部分 %>
+<%# ================================================================= %>
+<%#  【モーダル】 スマホ用追加メニュー (アイコン修正版)                 %>
+<%# ================================================================= %>
 <div id="time-selector-modal" class="fixed inset-0 z-[999] hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
   <div class="fixed inset-0 bg-stone-900/40 backdrop-blur-sm transition-opacity opacity-0" id="modal-backdrop" onclick="closeTimeSelector()"></div>
   <div class="fixed inset-x-0 bottom-0 z-10 transform translate-y-full transition-transform duration-300 ease-out bg-[#FDFBF7] rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.1)] overflow-hidden" id="modal-panel">
@@ -260,23 +262,27 @@
       </button>
     </div>
     <div class="p-6 grid grid-cols-2 gap-4">
+      <%# 朝: コーヒー %>
       <a href="#" id="link-morning" class="relative group overflow-hidden rounded-2xl aspect-square bg-gradient-to-br from-[#F0F9FF] to-[#E0F2FE] border border-white shadow-sm flex flex-col items-center justify-center text-center active:scale-95 transition">
-        <i class="fas fa-sun text-4xl text-sky-200 mb-2 group-hover:scale-110 transition duration-500"></i>
+        <i class="fas fa-mug-hot text-4xl text-sky-200 mb-2 group-hover:scale-110 transition duration-500"></i>
         <span class="font-bold text-stone-600">朝</span>
         <span class="text-[10px] text-stone-400">06:00 - 11:59</span>
       </a>
+      <%# 昼: 太陽 %>
       <a href="#" id="link-day" class="relative group overflow-hidden rounded-2xl aspect-square bg-gradient-to-br from-[#E0F2FE] to-[#BAE6FD] border border-white shadow-sm flex flex-col items-center justify-center text-center active:scale-95 transition">
-        <i class="fas fa-cloud-sun text-4xl text-blue-300 mb-2 group-hover:scale-110 transition duration-500"></i>
+        <i class="fas fa-sun text-4xl text-blue-300 mb-2 group-hover:scale-110 transition duration-500"></i>
         <span class="font-bold text-stone-600">昼</span>
         <span class="text-[10px] text-stone-500">12:00 - 17:59</span>
       </a>
+      <%# 夕方: 本(読書) %>
       <a href="#" id="link-night" class="relative group overflow-hidden rounded-2xl aspect-square bg-gradient-to-br from-[#FFF7ED] to-[#FFEDD5] border border-white shadow-sm flex flex-col items-center justify-center text-center active:scale-95 transition">
-        <i class="fas fa-moon text-4xl text-orange-300 mb-2 group-hover:scale-110 transition duration-500"></i>
+        <i class="fas fa-book-open text-4xl text-orange-300 mb-2 group-hover:scale-110 transition duration-500"></i>
         <span class="font-bold text-stone-600">夕方</span>
         <span class="text-[10px] text-stone-400">18:00 - 23:59</span>
       </a>
+      <%# 夜: 月 %>
       <a href="#" id="link-late_night" class="relative group overflow-hidden rounded-2xl aspect-square bg-gradient-to-br from-[#FAFAF9] to-[#E7E5E4] border border-white shadow-sm flex flex-col items-center justify-center text-center active:scale-95 transition">
-        <i class="fas fa-star text-4xl text-stone-300 mb-2 group-hover:scale-110 transition duration-500"></i>
+        <i class="fas fa-moon text-4xl text-stone-300 mb-2 group-hover:scale-110 transition duration-500"></i>
         <span class="font-bold text-stone-600">夜</span>
         <span class="text-[10px] text-stone-400">00:00 - 05:59</span>
       </a>

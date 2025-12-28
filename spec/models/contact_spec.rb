@@ -1,43 +1,70 @@
 require 'rails_helper'
 
 RSpec.describe Contact, type: :model do
-  # ユーザーを作成しておく (letで定義すると、itの中で user を呼ぶだけで使えるようになります)
+  # FactoryBotで作ったユーザーデータを利用
   let(:user) { FactoryBot.create(:user) }
 
-  describe 'バリデーションの確認' do
-    it '名前、ユーザー、グループがあれば有効であること' do
-      # FactoryBot.build(:contact) でダミーデータを作成
-      contact = FactoryBot.build(:contact, user: user)
-      expect(contact).to be_valid
+  describe 'バリデーションと保存' do
+    context '正常系' do
+      it "名前とカテゴリがあれば有効であること" do
+        # FactoryBotの :contact を使う
+        contact = FactoryBot.build(:contact, user: user)
+        expect(contact).to be_valid
+      end
+
+      it "メモがなくても有効であること" do
+        contact = FactoryBot.build(:contact, user: user, memo: nil)
+        expect(contact).to be_valid
+      end
     end
 
-    it '名前がない場合は無効であること' do
-      contact = FactoryBot.build(:contact, name: nil, user: user)
-      contact.valid?
-      # エラーメッセージが含まれているかチェック
-      expect(contact.errors[:name]).to include("を入力してください")
-    end
+    context '異常系' do
+      it "名前がないと無効であること" do
+        contact = FactoryBot.build(:contact, user: user, name: nil)
+        contact.valid?
+        expect(contact.errors[:name]).to include("を入力してください")
+      end
 
-    it '名前が51文字以上の場合は無効であること' do
-      contact = FactoryBot.build(:contact, name: "a" * 51, user: user)
-      contact.valid?
-      expect(contact.errors[:name]).to include("は50文字以内で入力してください")
+      it "名前が51文字以上だと無効であること" do
+        contact = FactoryBot.build(:contact, user: user, name: "a" * 51)
+        contact.valid?
+        expect(contact.errors[:name]).to include("は50文字以内で入力してください")
+      end
     end
   end
 
-  describe 'グループ順序（Enum）の確認' do
-    it '「その他(other)」グループは、数値の99として保存されること' do
-      # trait :other を使ってその他グループのデータを作成
-      contact = FactoryBot.create(:contact, :other, user: user)
-      
-      # DBに保存されている「生の数値」を確認 (read_attribute_before_type_cast)
-      # これが 99 なら、「その他」が一番後ろに来る設定が成功しています
-      expect(contact.read_attribute_before_type_cast(:group)).to eq 99
+  describe 'カテゴリラベルの表示ロジック' do
+    # ここが今回一番重要な「大切な人優先ロジック」のテストです
+
+    context 'お気に入り(is_favorite)が true の場合' do
+      it "カテゴリが何であっても「大切な人」と表示されること" do
+        # trait :important を使って「大切な人」データを作成
+        # カテゴリはあえて「家族」にしておく
+        contact = FactoryBot.create(:contact, :important, :family, user: user)
+        
+        # 結果は「家族」ではなく「大切な人」になるはず
+        expect(contact.category_label).to eq "大切な人"
+      end
     end
 
-    it '「家族(family)」グループは、数値の10であること' do
-      contact = FactoryBot.create(:contact, :family, user: user)
-      expect(contact.read_attribute_before_type_cast(:group)).to eq 10
+    context 'お気に入り(is_favorite)が false の場合' do
+      it "設定したカテゴリ名（家族）が表示されること" do
+        # trait :family を使用
+        contact = FactoryBot.create(:contact, :family, user: user)
+        expect(contact.category_label).to eq "家族"
+      end
+
+      it "設定したカテゴリ名（仕事）が表示されること" do
+        # trait :work を使用
+        contact = FactoryBot.create(:contact, :work, user: user)
+        expect(contact.category_label).to eq "仕事"
+      end
+      
+      it "設定したカテゴリ名（友達）が表示されること" do
+        # デフォルトは友達
+        contact = FactoryBot.create(:contact, user: user)
+        expect(contact.category_label).to eq "友だち"
+      end
     end
   end
 end

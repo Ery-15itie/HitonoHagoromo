@@ -18,7 +18,7 @@
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
       <div>
         <%= f.label :worn_on, "日付", class: "block text-sm font-bold text-stone-500 mb-2" %>
-        <%= f.date_field :worn_on, class: "w-full bg-stone-50 border-stone-200 rounded-xl px-4 py-3 font-serif font-bold text-stone-700 focus:ring-indigo-500 focus:border-indigo-500" %>
+        <%= f.date_field :worn_on, class: "w-full bg-stone-50 border-stone-200 rounded-xl px-4 py-3 font-serif font-bold text-stone-700 focus:ring-indigo-500 focus:border-indigo-500 cursor-pointer" %>
       </div>
 
       <div>
@@ -26,29 +26,34 @@
         <div class="grid grid-cols-2 gap-3">
           <% ActualOutfit.time_slots.keys.each do |key| %>
             <% 
+              # 時間帯のテキスト定義
               time_range = case key
                 when 'morning'    then '06:00 - 11:59'
                 when 'day'        then '12:00 - 17:59'
                 when 'night'      then '18:00 - 23:59'
                 when 'late_night' then '00:00 - 05:59'
               end
+
+              # 朝(Sky) -> 昼(Blue) -> 夕方(Orange) -> 夜(Stone/Dark)
               style_classes = case key
                 when 'morning'    then "peer-checked:bg-sky-50 peer-checked:border-sky-300 peer-checked:text-sky-700 text-stone-400"
                 when 'day'        then "peer-checked:bg-blue-50 peer-checked:border-blue-300 peer-checked:text-blue-700 text-stone-400"
                 when 'night'      then "peer-checked:bg-orange-50 peer-checked:border-orange-300 peer-checked:text-orange-700 text-stone-400"
                 when 'late_night' then "peer-checked:bg-stone-100 peer-checked:border-stone-400 peer-checked:text-stone-700 text-stone-400"
               end
+
+              # アイコン定義 (コーヒー・太陽・読書・月)
               icon_class = case key
-                when 'morning'    then 'fa-sun'
-                when 'day'        then 'fa-cloud-sun'
-                when 'night'      then 'fa-moon'
-                when 'late_night' then 'fa-star'
+                when 'morning'    then 'fa-mug-hot'       # 朝: コーヒー
+                when 'day'        then 'fa-sun'           # 昼: 太陽
+                when 'night'      then 'fa-book-open'     # 夕方: 読書
+                when 'late_night' then 'fa-moon'          # 夜: 月
               end
             %>
             <label class="cursor-pointer group">
               <%= f.radio_button :time_slot, key, class: "peer sr-only" %>
-              <div class="h-full py-3 px-2 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 transition flex flex-col items-center justify-center gap-0.5 ring-2 ring-transparent peer-checked:ring-0 <%= style_classes %>">
-                <i class="fas <%= icon_class %> text-xl mb-1"></i>
+              <div class="h-full py-3 px-2 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 transition flex flex-col items-center justify-center gap-1 ring-2 ring-transparent peer-checked:ring-0 <%= style_classes %>">
+                <i class="fas <%= icon_class %> text-2xl mb-1 transition-transform group-hover:scale-110"></i>
                 <span class="text-xs font-bold"><%= I18n.t("enums.actual_outfit.time_slot.#{key}") %></span>
                 <span class="text-[10px] opacity-70 font-feature-settings-tnum"><%= time_range %></span>
               </div>
@@ -66,7 +71,7 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
         <div>
           <%= f.label :start_time, "開始時間", class: "block text-xs font-bold text-stone-400 mb-1" %>
-          <%= f.time_field :start_time, class: "w-full bg-white border-stone-200 rounded-lg px-3 py-2 text-sm font-bold text-stone-700 focus:ring-indigo-500 focus:border-indigo-500" %>
+          <%= f.time_field :start_time, class: "w-full bg-white border-stone-200 rounded-lg px-3 py-2 text-sm font-bold text-stone-700 focus:ring-indigo-500 focus:border-indigo-500 cursor-pointer" %>
         </div>
         <div>
           <%= f.label :title, "予定名", class: "block text-xs font-bold text-stone-400 mb-1" %>
@@ -97,6 +102,7 @@
     <div class="mb-8">
       <%= f.label :item_ids, "着た/着る服 (複数選択可)", class: "block text-sm font-bold text-stone-500 mb-2" %>
       <div id="selected-items-container" class="grid grid-cols-3 sm:grid-cols-4 gap-3 mb-3">
+        <%# JSでここにアイテムが追加されます %>
         <div onclick="openItemModal()" class="cursor-pointer border-2 border-dashed border-stone-300 rounded-xl aspect-[3/4] flex flex-col items-center justify-center hover:bg-stone-50 hover:border-indigo-300 hover:text-indigo-500 text-stone-400 transition group" id="add-item-button">
           <i class="fas fa-plus text-xl mb-1 group-hover:scale-110 transition"></i>
           <span class="text-[10px] font-bold">追加</span>
@@ -109,6 +115,7 @@
     <div class="mb-8">
       <%= f.label :contact_ids, "会った/会う人 (複数選択可)", class: "block text-sm font-bold text-stone-500 mb-2" %>
       <div id="selected-contacts-container" class="flex flex-wrap gap-2 mb-3">
+        <%# JSでここに人が追加されます %>
         <div onclick="openContactModal()" class="cursor-pointer border border-dashed border-stone-300 rounded-full px-3 py-1.5 flex items-center gap-2 hover:bg-stone-50 hover:border-indigo-300 hover:text-indigo-500 text-stone-400 transition text-sm font-bold" id="add-contact-button">
           <i class="fas fa-plus"></i>
           <span>追加</span>
@@ -127,7 +134,7 @@
   <%# --- フッターボタン --- %>
   <div class="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4 pb-20 sm:pb-0">
     <%= link_to "キャンセル", :back, class: "w-full sm:w-auto text-center px-8 py-3 rounded-full text-stone-500 font-bold hover:bg-stone-100 transition" %>
-    <%# type="button" にしてJSのhandleRegisterClickを発火させる %>
+    <%# JSの関数を呼び出すためのボタン %>
     <button type="button" onclick="handleRegisterClick()" class="w-full sm:w-auto px-10 py-3 rounded-full bg-indigo-600 text-white font-bold shadow-lg hover:bg-indigo-700 hover:shadow-xl transition transform hover:-translate-y-1 flex items-center justify-center gap-2">
       <i class="fas fa-check"></i>
       記録する
@@ -140,38 +147,33 @@
 <%#  【モーダル: 重複警告ポップアップ】 (絵文字のクローバー版)          %>
 <%# ================================================================= %>
 <div id="duplicate-warning-modal" class="fixed inset-0 z-[200] flex items-center justify-center hidden">
-  <%# 背景: 温かみのあるオレンジ系のぼかし %>
+  <%# 背景 %>
   <div class="absolute inset-0 bg-orange-100/60 backdrop-blur-sm transition-opacity"></div>
   
-  <%# パネル本体: 淡いオレンジ背景、丸みのあるデザイン %>
+  <%# パネル本体 %>
   <div class="relative w-[90%] max-w-[400px] bg-orange-50 rounded-3xl shadow-xl overflow-hidden transform transition-all p-6 border border-orange-100">
     
     <div class="text-center mb-6">
-      <%# アイコンエリア: 淡いオレンジの丸背景に、絵文字のクローバー🍀 %>
       <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-orange-100 mb-4 shadow-sm">
         <span class="text-3xl">🍀</span>
       </div>
-      <%# タイトル: 親しみやすい太字フォント %>
       <h3 class="text-xl font-bold text-gray-800 font-serif mb-2 tracking-wide">
         コーディネートのヒント
       </h3>
-      <%# 本文: 柔らかい表現 %>
       <p class="text-sm text-gray-600 leading-relaxed">
         直近3ヶ月以内に、同じお相手にこのアイテムを着用して会っているようです。
       </p>
     </div>
 
-    <%# リスト表示エリア（デザイン調整済み） %>
+    <%# リスト表示エリア %>
     <div class="bg-white/80 rounded-xl p-4 mb-6 max-h-48 overflow-y-auto custom-scrollbar border border-orange-100 shadow-inner" id="duplicate-list-content">
-      <%# ここにJSでリストを注入 %>
+      <%# JSで注入 %>
     </div>
 
     <div class="flex flex-col gap-3">
-      <%# ボタン: オレンジ系の枠線で温かみを表現 %>
       <button type="button" onclick="closeDuplicateModal()" class="w-full py-3 rounded-full bg-white border-2 border-orange-300 text-orange-600 font-bold hover:bg-orange-50 transition duration-200 shadow-sm">
         別のアイテムを検討する
       </button>
-      <%# ボタン: アクションを促す青系 %>
       <button type="button" onclick="submitFormForce()" class="w-full py-3 rounded-full bg-indigo-600 text-white font-bold shadow-md hover:bg-indigo-700 transition duration-200">
         このまま登録する
       </button>
@@ -181,10 +183,10 @@
 
 
 <%# ================================================================= %>
-<%#  【モーダル】 (アイテム & コンタクト) current_user!!!               %>
+<%#  【モーダル】 (アイテム & コンタクト) current_user対応              %>
 <%# ================================================================= %>
 
-<%# アイテムモーダル %>
+<%# アイテム選択モーダル %>
 <div id="item-modal" class="fixed inset-0 z-[100] hidden">
   <div class="absolute inset-0 bg-stone-900/60 backdrop-blur-sm" onclick="closeItemModal()"></div>
   <div class="absolute inset-x-0 bottom-0 top-10 sm:inset-x-10 sm:bottom-10 bg-[#FDFBF7] rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col">
@@ -196,7 +198,6 @@
     </div>
     <div class="flex-1 overflow-y-auto p-4 custom-scrollbar">
       <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
-        <%# ★自分(current_user)のアイテムのみを表示 !!!%>
         <% current_user.items.includes(image_attachment: :blob).order(created_at: :desc).each do |item| %>
           <div onclick="toggleItemSelection(this, '<%= item.id %>', '<%= j item.name %>', '<%= item.image.attached? ? url_for(item.image.variant(resize_to_limit: [300, 300])) : "" %>')" data-id="<%= item.id %>" class="item-option relative group rounded-xl overflow-hidden aspect-[3/4] cursor-pointer border-2 border-transparent transition active:scale-95">
             <div class="w-full h-full bg-white relative">
@@ -219,7 +220,7 @@
   </div>
 </div>
 
-<%# コンタクトモーダル %>
+<%# コンタクト選択モーダル %>
 <div id="contact-modal" class="fixed inset-0 z-[100] hidden">
   <div class="absolute inset-0 bg-stone-900/60 backdrop-blur-sm" onclick="closeContactModal()"></div>
   <div class="absolute inset-x-0 bottom-0 top-1/3 sm:inset-x-auto sm:left-1/2 sm:top-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-96 sm:h-auto bg-[#FDFBF7] rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col">
@@ -230,7 +231,6 @@
       </button>
     </div>
     <div class="flex-1 overflow-y-auto p-4 custom-scrollbar">
-      <%# ★自分(current_user)のコンタクトのみ表示 %>
       <% current_user.contacts.includes(avatar_attachment: :blob).order(:name).each do |contact| %>
         <div onclick="toggleContactSelection(this, '<%= contact.id %>', '<%= j contact.name %>', '<%= contact.avatar.attached? ? url_for(contact.avatar.variant(resize_to_limit: [100, 100])) : "" %>')" data-id="<%= contact.id %>" class="contact-option flex items-center gap-3 p-3 bg-white rounded-xl border-2 border-transparent mb-2 cursor-pointer hover:bg-stone-50 transition active:scale-95">
           <div class="w-10 h-10 rounded-full bg-stone-100 overflow-hidden border border-stone-200 flex-shrink-0 relative">
@@ -257,9 +257,10 @@
   let selectedItemData = new Map();
   let selectedContactIds = new Set();
   let selectedContactData = new Map();
+  // 新規登録時はIDがないので空文字を入れる
   const currentRecordId = "<%= actual_outfit.id %>"; 
 
-  // --- 初期化 ---
+  // --- 初期化: 編集時などに既存のデータを選択状態にする ---
   <% actual_outfit.items.each do |item| %>
     selectedItemIds.add('<%= item.id %>');
     selectedItemData.set('<%= item.id %>', { name: '<%= j item.name %>', imageUrl: '<%= item.image.attached? ? url_for(item.image.variant(resize_to_limit: [300, 300])) : "" %>' });
@@ -280,6 +281,7 @@
   document.addEventListener("turbo:load", initForms);
   document.addEventListener("DOMContentLoaded", initForms);
 
+  // 隠しフィールドを生成してRailsに送信できるようにする
   function generateHiddenInputs(type) {
     const container = document.getElementById(`${type}-hidden-inputs`);
     if(!container) return;
@@ -295,19 +297,22 @@
     });
   }
 
-  // --- ★新機能: 登録ボタンクリック時の処理 (ポップアップ制御) ---
+  // --- ★重要: 登録ボタンクリック時の重複チェック処理 ---
   async function handleRegisterClick() {
+    // アイテムか人が選択されていなければ、バリデーションエラーを出すためにそのまま送信
     if (selectedItemIds.size === 0 || selectedContactIds.size === 0) {
-      submitFormForce(); // アイテムか人がなければそのまま送信
+      submitFormForce(); 
       return;
     }
 
+    // 重複チェック用のパラメータ作成
     const params = new URLSearchParams();
     selectedItemIds.forEach(id => params.append('item_ids[]', id));
     selectedContactIds.forEach(id => params.append('contact_ids[]', id));
     if(currentRecordId) params.append('id', currentRecordId);
 
     try {
+      // サーバーに問い合わせ
       const response = await fetch(`/actual_outfits/check_duplicates?${params.toString()}`, {
         headers: { "Accept": "application/json" }
       });
@@ -326,13 +331,13 @@
     }
   }
 
+  // 重複ポップアップ表示
   function showDuplicateModal(duplicates) {
     const listArea = document.getElementById('duplicate-list-content');
     listArea.innerHTML = '';
     
     duplicates.forEach(dup => {
       const div = document.createElement('div');
-      // 日付と内容を見やすく整形 (オレンジ系のボーダー)
       div.className = "flex items-start gap-3 mb-3 pb-3 border-b border-orange-100 last:border-0 last:mb-0 last:pb-0";
       
       div.innerHTML = `
@@ -355,14 +360,16 @@
     modal.classList.remove('flex');
   }
 
+  // 強制送信
   function submitFormForce() {
     document.getElementById('outfit-form').submit();
   }
 
-  // --- アイテム描画 ---
+  // --- アイテム描画ロジック ---
   function renderSelectedItems() {
     const container = document.getElementById('selected-items-container');
     const btn = document.getElementById('add-item-button');
+    // 追加ボタン以外の要素をクリア
     while (container.firstChild && container.firstChild !== btn) container.removeChild(container.firstChild);
 
     selectedItemData.forEach((data, id) => {
@@ -377,7 +384,7 @@
         <div class="absolute inset-0 bg-black/5 pointer-events-none"></div>
         <div class="absolute bottom-0 inset-x-0 bg-white/90 p-1 text-[9px] font-bold text-center truncate text-stone-700">${data.name}</div>
         <div onclick="removeItem('${id}')" class="absolute top-1 right-1 w-7 h-7 bg-white rounded-full flex items-center justify-center shadow-md cursor-pointer text-stone-500 hover:text-red-500 hover:bg-stone-50 transition z-20">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5"><path fill-rule="evenodd" d="M5.47 5.47a.75.75 0 011.06 0L12 10.94l5.47-5.47a.75.75 0 111.06 1.06L13.06 12l5.47 5.47a.75.75 0 11-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 01-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 010-1.06z" clip-rule="evenodd" /></svg>
+          <i class="fas fa-times text-xs"></i>
         </div>
       `;
       container.insertBefore(div, btn);
@@ -385,7 +392,7 @@
   }
   function removeItem(id) { selectedItemIds.delete(id); selectedItemData.delete(id); renderSelectedItems(); generateHiddenInputs('item'); }
 
-  // --- 人描画 ---
+  // --- 人描画ロジック ---
   function renderSelectedContacts() {
     const container = document.getElementById('selected-contacts-container');
     const btn = document.getElementById('add-contact-button');
@@ -402,7 +409,7 @@
         <div class="w-6 h-6 rounded-full bg-stone-100 overflow-hidden relative border border-stone-200">${imgTag}</div>
         <span class="text-xs font-bold text-stone-600">${data.name}</span>
         <div onclick="removeContact('${id}')" class="w-6 h-6 flex items-center justify-center text-stone-400 hover:text-red-500 cursor-pointer ml-1 rounded-full hover:bg-stone-50 transition">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4"><path fill-rule="evenodd" d="M5.47 5.47a.75.75 0 011.06 0L12 10.94l5.47-5.47a.75.75 0 111.06 1.06L13.06 12l5.47 5.47a.75.75 0 11-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 01-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 010-1.06z" clip-rule="evenodd" /></svg>
+          <i class="fas fa-times text-xs"></i>
         </div>
       `;
       container.insertBefore(div, btn);
@@ -410,7 +417,7 @@
   }
   function removeContact(id) { selectedContactIds.delete(id); selectedContactData.delete(id); renderSelectedContacts(); generateHiddenInputs('contact'); }
 
-  // --- モーダル操作系 (変更なし) ---
+  // --- モーダル制御系 (CSSクラス切り替え) ---
   function openItemModal() { document.getElementById('item-modal').classList.remove('hidden'); document.querySelectorAll('.item-option').forEach(el => updateVisualState(el, selectedItemIds.has(el.dataset.id))); }
   function closeItemModal() { document.getElementById('item-modal').classList.add('hidden'); }
   function toggleItemSelection(el, id, name, imageUrl) {

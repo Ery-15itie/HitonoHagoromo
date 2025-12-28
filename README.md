@@ -64,7 +64,7 @@
 
 * **バックエンド**: Ruby 3.2, Ruby on Rails 7.0.8
 * **フロントエンド**: Tailwind CSS
-* **データーベース**:Neon (PostgreSQL 1.5)
+* **データーベース**:Neon (PostgreSQL 17)
 * **インフラ環境**: Docker
 * **画像管理**: Active Storage
 * **画像アップロード(クラウドサービス)**: Cloudinary

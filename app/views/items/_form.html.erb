@@ -54,7 +54,7 @@
     <%# アイテム名 %>
     <div class="space-y-2">
       <%= form.label :name, class: "block text-sm font-bold text-slate-600" do %>
-        アイテム名 <span class="text-xs font-normal text-amber-600 ml-1">(必須)</span>
+        アイテム名 <span class="text-xs font-normal text-amber-600 ml-1">(必須。重複チェックに使用されます)</span>
       <% end %>
       <%= form.text_field :name, placeholder: "例：白いTシャツ、お気に入りの〇〇デニム", class: "w-full rounded-xl border-stone-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 py-3 px-4 text-base bg-white transition" %>
     </div>

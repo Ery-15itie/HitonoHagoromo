@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2025_12_24_001102) do
+ActiveRecord::Schema[7.0].define(version: 2025_12_27_235756) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -42,12 +42,30 @@ ActiveRecord::Schema[7.0].define(version: 2025_12_24_001102) do
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
+  create_table "actual_outfit_contacts", force: :cascade do |t|
+    t.bigint "actual_outfit_id", null: false
+    t.bigint "contact_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["actual_outfit_id"], name: "index_actual_outfit_contacts_on_actual_outfit_id"
+    t.index ["contact_id"], name: "index_actual_outfit_contacts_on_contact_id"
+  end
+
+  create_table "actual_outfit_items", force: :cascade do |t|
+    t.bigint "actual_outfit_id", null: false
+    t.bigint "item_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["actual_outfit_id"], name: "index_actual_outfit_items_on_actual_outfit_id"
+    t.index ["item_id"], name: "index_actual_outfit_items_on_item_id"
+  end
+
   create_table "actual_outfits", force: :cascade do |t|
     t.date "worn_on", null: false
     t.bigint "user_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "time_slot"
+    t.integer "time_slot"
     t.text "impression"
     t.text "memo"
     t.string "title"
@@ -71,7 +89,7 @@ ActiveRecord::Schema[7.0].define(version: 2025_12_24_001102) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.boolean "is_favorite", default: false, null: false
-    t.integer "group", default: 99, null: false
+    t.integer "category", default: 0
     t.index ["user_id"], name: "index_contacts_on_user_id"
   end
 
@@ -120,6 +138,10 @@ ActiveRecord::Schema[7.0].define(version: 2025_12_24_001102) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "actual_outfit_contacts", "actual_outfits"
+  add_foreign_key "actual_outfit_contacts", "contacts"
+  add_foreign_key "actual_outfit_items", "actual_outfits"
+  add_foreign_key "actual_outfit_items", "items"
   add_foreign_key "actual_outfits", "users"
   add_foreign_key "contacts", "users"
   add_foreign_key "items", "categories"

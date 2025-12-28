@@ -24,7 +24,12 @@ Rails.application.routes.draw do
   resource :calendar, only: [:show]
 
   # --- 4. メイン機能: 着用記録 (ActualOutfit) ---
-  resources :actual_outfits
+  resources :actual_outfits do
+    # 重複チェック用のルート (Ajaxリクエスト用)
+    collection do
+      get :check_duplicates
+    end
+  end
 
   # --- 5. アイテム管理 ---
   resources :items do

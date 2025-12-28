@@ -1,104 +1,87 @@
 class ItemsController < ApplicationController
-  # ユーザーがサインインしていることを確認
   before_action :authenticate_user!
-  
-  # 特定のアイテムを操作するアクションの前に、アイテムを特定
-  before_action :set_item, only: [:show, :edit, :update, :destroy]
-  
-  # フォームおよび一覧画面のサイドバーで必要なカテゴリ一覧を事前に取得
-  before_action :set_categories, only: [:index, :new, :create, :edit, :update]
+  before_action :set_item, only: %i[show edit update destroy]
+  before_action :set_categories, only: %i[index new create edit update]
 
   # GET /items
   def index
-    # ベースとなるクエリ：現在のユーザーのアイテムを取得
-    # .with_attached_image で画像のN+1問題を回避
-    # .includes(:category) でカテゴリのN+1問題を回避
-    @items = current_user.items.with_attached_image.includes(:category)
+    # ★variant_records の警告を避けるため、シンプルな includes に変更
+    @items = current_user.items.includes(image_attachment: :blob).includes(:category)
 
-    # 1. カテゴリ絞り込み機能
-    # パラメータに category_id が存在する場合、そのカテゴリで絞り込む
+    # 2. カテゴリ絞り込み
     if params[:category_id].present?
       @items = @items.where(category_id: params[:category_id])
     end
 
-    # 2. 並べ替え機能
-    # パラメータ sort の値によって並び順を変更
+    # 3. 並べ替え
     case params[:sort]
     when 'price_high'
-      @items = @items.order(price: :desc)       # 価格が高い順
+      @items = @items.order(price: :desc)
     when 'price_low'
-      @items = @items.order(price: :asc)        # 価格が安い順
+      @items = @items.order(price: :asc)
     when 'oldest'
-      @items = @items.order(created_at: :asc)   # 登録が古い順
+      @items = @items.order(created_at: :asc)
     else
-      @items = @items.order(created_at: :desc)  # デフォルト: 新しい順
+      @items = @items.order(created_at: :desc) # デフォルト
     end
   end
 
-  # GET /items/1 (Show)
+  # GET /items/1
   def show
-    # @item は set_item で設定済み
   end
 
-  # GET /items/new (New)
+  # GET /items/new
   def new
-    @item = current_user.items.build 
+    @item = current_user.items.build
   end
 
-  # POST /items (Create)
+  # GET /items/1/edit
+  def edit
+  end
+
+  # POST /items
   def create
     @item = current_user.items.build(item_params)
 
     if @item.save
-      redirect_to @item, notice: "アイテムが正常に登録されました。"
+      redirect_to @item, notice: "アイテムを登録しました！"
     else
       render :new, status: :unprocessable_entity
     end
   end
 
-  # GET /items/1/edit (Edit)
-  def edit
-    # @item は set_item で設定済み
-  end
-
-  # PATCH/PUT /items/1 (Update)
+  # PATCH/PUT /items/1
   def update
-    # ---  画像未選択時のエラー対策 ---
-    # パラメータを操作可能な変数に格納
+    # --- 画像更新のエラー対策 ---
     update_params = item_params
-
-    # 画像データが空文字("")として送られてきた場合、更新対象から削除する
-    # これにより ActiveSupport::MessageVerifier::InvalidSignature を防ぐ
     update_params.delete(:image) if update_params[:image].blank?
 
     if @item.update(update_params)
-      redirect_to @item, notice: "アイテム情報が正常に更新されました。", status: :see_other
+      redirect_to @item, notice: "アイテム情報を更新しました。", status: :see_other
     else
       render :edit, status: :unprocessable_entity
     end
   end
 
-  # DELETE /items/1 (Destroy)
+  # DELETE /items/1
   def destroy
     @item.destroy
-    redirect_to items_url, notice: "アイテムが削除されました。", status: :see_other
+    redirect_to items_url, notice: "アイテムを削除しました。", status: :see_other
   end
 
   private
-    # Categoryモデルからカテゴリ一覧を取得する
+
     def set_categories
-      @categories = Category.all.order(:id)
+      @categories = Category.order(:id)
     end
-    
-    # URLのIDからアイテムを特定し、かつユーザーの所有権を確認する
+
     def set_item
       @item = current_user.items.find(params[:id])
     rescue ActiveRecord::RecordNotFound
-      redirect_to items_url, alert: "指定されたアイテムが見つからないか、アクセス権がありません。"
+      redirect_to items_url, alert: "アイテムが見つからないか、アクセス権がありません。"
     end
 
-    # ストロングパラメータ
     def item_params
-      params.require(:item).permit(:name, :image, :category_id, :description, :price, :color)
+      params.require(:item).permit(:name, :description, :price, :category_id, :color, :image)
     end
 end

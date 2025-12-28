@@ -1,93 +1,151 @@
-<%= form_with(model: contact, class: "space-y-6 max-w-lg mx-auto") do |form| %>
+<%= form_with(model: contact, local: true, class: "space-y-6") do |form| %>
   
-  <%# --- エラーメッセージ表示 --- %>
+  <%# --- エラーメッセージ --- %>
   <% if contact.errors.any? %>
-    <div id="error_explanation" class="bg-red-50 border-l-4 border-red-500 p-4 rounded mb-6">
-      <div class="flex">
-        <div class="flex-shrink-0">
-          <i class="fas fa-exclamation-circle text-red-500 mt-0.5"></i>
-        </div>
-        <div class="ml-3">
-          <p class="text-sm font-bold text-red-700">
-            <%= contact.errors.count %>件のエラーがあります:
-          </p>
-          <ul class="mt-1 list-disc list-inside text-sm text-red-700">
-            <% contact.errors.full_messages.each do |message| %>
-              <li><%= message %></li>
-            <% end %>
-          </ul>
-        </div>
-      </div>
+    <div class="bg-red-50 text-red-700 p-4 rounded-xl border border-red-100 mb-6">
+      <ul class="list-disc list-inside text-sm">
+        <% contact.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
     </div>
   <% end %>
 
-  <%# --- 1. アイコン画像 (アバター) --- %>
-  <div class="field">
-    <%= form.label :avatar, "アイコン画像", class: "block text-sm font-medium text-gray-700 mb-2" %>
-    <div class="flex flex-col sm:flex-row items-center gap-4">
-      <div class="flex-shrink-0">
-        <% if contact.avatar.attached? %>
-          <%= image_tag contact.avatar, class: "w-20 h-20 rounded-full object-cover border border-gray-200 shadow-sm" %>
-        <% else %>
-          <div class="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 border border-gray-200">
-            <i class="fas fa-camera text-2xl"></i>
-          </div>
-        <% end %>
+  <div class="bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-stone-100">
+    
+    <%# --- 1. アイコン画像  --- %>
+    <div class="mb-8 flex flex-col items-center">
+      
+      <%# 画像表示エリア %>
+      <div class="w-32 h-32 rounded-full bg-stone-100 overflow-hidden border-4 border-white shadow-md mb-4 relative">
+        <%# プレビュー画像 %>
+        <img id="avatar-preview" src="<%= contact.avatar.attached? ? url_for(contact.avatar.variant(resize_to_limit: [300, 300])) : '' %>" class="w-full h-full object-cover <%= contact.avatar.attached? ? '' : 'hidden' %>">
+        
+        <%# 画像がない時のダミーアイコン %>
+        <div id="avatar-placeholder" class="w-full h-full flex items-center justify-center text-stone-300 bg-stone-50 <%= contact.avatar.attached? ? 'hidden' : '' %>">
+          <i class="fas fa-user text-4xl"></i>
+        </div>
       </div>
-      <div class="w-full">
-        <%= form.file_field :avatar, class: "block w-full text-sm text-gray-500
-          file:mr-4 file:py-2 file:px-4
-          file:rounded-full file:border-0
-          file:text-sm file:font-semibold
-          file:bg-indigo-50 file:text-indigo-700
-          hover:file:bg-indigo-100
-          cursor-pointer" %>
-        <p class="text-xs text-gray-500 mt-1">※ JPG, PNG, GIF (推奨: 正方形)</p>
+
+      <%# 操作ボタンエリア %>
+      <div class="flex items-center gap-3">
+        <%# 画像選択ボタン %>
+        <label class="cursor-pointer bg-stone-100 hover:bg-stone-200 text-stone-600 font-bold py-2 px-4 rounded-full text-xs transition flex items-center gap-2 border border-stone-200">
+          <i class="fas fa-camera"></i>
+          <span>画像を選ぶ</span>
+          <%= form.file_field :avatar, class: "hidden", accept: "image/jpeg,image/png,image/webp", id: "contact_avatar" %>
+        </label>
+
+        <%# 取消ボタン %>
+        <button type="button" id="clear-avatar-button" class="hidden text-red-500 hover:bg-red-50 font-bold py-2 px-3 rounded-full text-xs transition border border-transparent hover:border-red-100 flex items-center gap-1">
+          <i class="fas fa-trash-alt"></i> 削除
+        </button>
+      </div>
+      
+    </div>
+
+    <%# --- 2. 名前 --- %>
+    <div class="mb-6">
+      <%= form.label :name, "お名前 (必須)", class: "block text-sm font-bold text-stone-500 mb-2" %>
+      <%= form.text_field :name, class: "w-full bg-stone-50 border-stone-200 rounded-xl px-4 py-3 font-bold text-stone-700 placeholder-stone-300 focus:ring-indigo-500 focus:border-indigo-500 transition", placeholder: "例：羽衣 太郎" %>
+    </div>
+
+    <%# --- 3. カテゴリ --- %>
+    <div class="mb-6">
+      <%= form.label :category, "関係性グループ", class: "block text-sm font-bold text-stone-500 mb-2" %>
+      <div class="relative">
+        <%= form.select :category, 
+            Contact.categories.keys.map { |k| [I18n.t("enums.contact.category.#{k}"), k] }, 
+            {}, 
+            class: "w-full bg-stone-50 border-stone-200 rounded-xl px-4 py-3 font-bold text-stone-700 focus:ring-indigo-500 focus:border-indigo-500 appearance-none cursor-pointer" %>
+        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-stone-500">
+          <i class="fas fa-chevron-down text-xs"></i>
+        </div>
       </div>
     </div>
-  </div>
 
-  <%# --- 2. 名前 (必須) --- %>
-  <div class="field">
-    <%= form.label :name, "名前 (必須)", class: "block text-sm font-medium text-gray-700" %>
-    <%= form.text_field :name, required: true, class: "mt-1 block w-full border border-gray-300 rounded-lg shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm", placeholder: "例：羽衣 太郎" %>
-  </div>
-
-  <%# --- 3. グループ選択 --- %>
-  <div class="field">
-    <%= form.label :group, "グループ", class: "block text-sm font-medium text-gray-700" %>
-    <div class="mt-1 relative rounded-md shadow-sm">
-      <%= form.select :group, 
-          Contact.groups.keys.map { |k| [I18n.t("enums.contact.group.#{k}", default: k.titleize), k] }, 
-          {}, 
-          class: "block w-full border border-gray-300 rounded-lg py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm appearance-none" %>
-      <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-        <i class="fas fa-chevron-down text-xs"></i>
-      </div>
+    <%# --- 4. メモ --- %>
+    <div class="mb-6">
+      <%= form.label :memo, "ひとことメモ (任意)", class: "block text-sm font-bold text-stone-500 mb-2" %>
+      <%= form.text_area :memo, rows: 3, class: "w-full bg-stone-50 border-stone-200 rounded-xl px-4 py-3 text-stone-700 placeholder-stone-300 focus:ring-indigo-500 focus:border-indigo-500 transition", placeholder: "例：よく一緒に出かける同期" %>
     </div>
-  </div>
 
-  <%# --- 4. メモ (ひとこと) --- %>
-  <div class="field">
-    <%= form.label :memo, "ひとこと (ステータスメッセージ)", class: "block text-sm font-medium text-gray-700" %>
-    <%= form.text_area :memo, rows: 3, class: "mt-1 block w-full border border-gray-300 rounded-lg shadow-sm py-2 px-3 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm", placeholder: "例：ゴルフ友達 / 会社の同期" %>
-    <p class="text-xs text-gray-500 mt-1 text-right">一覧画面で名前の下に表示されます</p>
-  </div>
-
-  <%# --- 5. お気に入り設定 --- %>
-  <div class="field bg-yellow-50 rounded-lg p-3 border border-yellow-100 flex items-center">
-    <div class="flex items-center h-5">
-      <%= form.check_box :is_favorite, class: "h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded cursor-pointer" %>
+    <%# --- 5. お気に入り (★デザイン修正箇所) --- %>
+    <div class="mb-2">
+      <label class="group flex items-start gap-3 cursor-pointer p-4 border border-stone-200 rounded-2xl hover:bg-yellow-50/50 hover:border-yellow-200 transition select-none">
+        
+        <%# チェックボックスと星マークのコンテナ %>
+        <div class="flex items-center gap-2 flex-shrink-0 mt-0.5">
+          <%= form.check_box :is_favorite, class: "peer w-5 h-5 text-indigo-600 rounded focus:ring-indigo-500 border-gray-300 cursor-pointer" %>
+          
+          <%# チェック時に表示される星 (横並び・文字被りなし) %>
+          <i class="fas fa-star text-yellow-400 text-xl transition-opacity opacity-0 peer-checked:opacity-100"></i>
+        </div>
+        
+        <%# テキスト部分 %>
+        <div>
+          <span class="text-sm font-bold text-stone-700 block leading-tight">「大切な人」に設定する</span>
+          <span class="text-xs text-stone-400">リストの一番上に大きく表示されます</span>
+        </div>
+      </label>
     </div>
-    <div class="ml-3 text-sm">
-      <%= form.label :is_favorite, "大切な人に登録する", class: "font-medium text-gray-700 cursor-pointer select-none" %>
-      <span class="block text-gray-500 text-xs">リストの一番上に固定表示されます</span>
-    </div>
+
   </div>
 
-  <%# --- 送信ボタン --- %>
-  <div class="actions pt-6">
-    <%= form.submit (contact.new_record? ? "ご縁を登録する" : "情報を更新する"), class: "w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out cursor-pointer" %>
+  <%# --- アクションボタン --- %>
+  <div class="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4 pb-20 sm:pb-0">
+    <%= link_to "キャンセル", contacts_path, class: "w-full sm:w-auto text-center px-8 py-3 rounded-full text-stone-500 font-bold hover:bg-stone-100 transition" %>
+    
+    <%= form.button class: "w-full sm:w-auto px-10 py-3 rounded-full bg-indigo-600 text-white font-bold shadow-lg hover:bg-indigo-700 hover:shadow-xl transition transform hover:-translate-y-1 flex items-center justify-center gap-2" do %>
+      <i class="fas fa-check"></i>
+      <span>保存する</span>
+    <% end %>
   </div>
 
 <% end %>
+
+<%# --- 画像プレビュー用スクリプト --- %>
+<script>
+  (function() {
+    function initAvatarPreview() {
+      const input = document.getElementById('contact_avatar');
+      const preview = document.getElementById('avatar-preview');
+      const placeholder = document.getElementById('avatar-placeholder');
+      const clearBtn = document.getElementById('clear-avatar-button');
+
+      if (!input || !preview || !placeholder || !clearBtn) return;
+
+      // 初期状態のボタン表示制御
+      if (!preview.classList.contains('hidden') && preview.getAttribute('src') !== '') {
+        clearBtn.classList.remove('hidden');
+      }
+
+      // 画像選択時
+      input.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function(ev) {
+            preview.src = ev.target.result;
+            preview.classList.remove('hidden');
+            placeholder.classList.add('hidden');
+            clearBtn.classList.remove('hidden');
+          }
+          reader.readAsDataURL(file);
+        }
+      });
+
+      // 削除ボタンクリック時
+      clearBtn.addEventListener('click', function() {
+        input.value = '';
+        preview.src = '';
+        preview.classList.add('hidden');
+        placeholder.classList.remove('hidden');
+        clearBtn.classList.add('hidden');
+      });
+    }
+
+    document.addEventListener('turbo:load', initAvatarPreview);
+    document.addEventListener('DOMContentLoaded', initAvatarPreview);
+  })();
+</script>

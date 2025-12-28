@@ -1,32 +1,52 @@
 class Contact < ApplicationRecord
-  # --- アソシエーション ---
-  # 連絡先は必ずユーザーに属する
   belongs_to :user
   
-  # この連絡先（会った人）に関連する全ての着用実績を持つ (1:多) 
-  # 連絡先が削除されたら、関連する着用記録の contact_id を nil にする
-  has_many :actual_outfits, dependent: :nullify 
+  # --- アソシエーション ---
+  has_many :actual_outfit_contacts, dependent: :destroy
+  has_many :actual_outfits, through: :actual_outfit_contacts
+  has_many :outfit_contacts, dependent: :destroy
 
-  # --- アイコン画像 (ActiveStorage) ---
+  # --- 画像 ---
   has_one_attached :avatar
 
-  # --- グループ分け・タグ (Enum) ---
-  # データベースには数字で保存され、Rails上では名前で扱う
-  # ★修正: 「その他」を99に変更し、一番下に移動
-  enum group: {
-    家族: 10, # 家族
-    友達: 20, # 友だち
-    仕事: 30, # 会社
-    学校: 40, # 学校
-    その他: 99 # その他 (0から99に変更)
+  # --- ★修正: カテゴリ設定 (Enum) ---
+  # 「大切な人(partner)」を削除し、チェックボックスのみで管理するようにします。
+  # 残りのカテゴリの番号を 0 から振り直します。
+  enum category: {
+    family: 0,  # 家族
+    friend: 1,  # 友達
+    work: 2,    # 仕事
+    other: 3    # その他
   }
 
-  # --- バリデーション (既存) ---
+  # --- バリデーション ---
   validates :name, presence: true, length: { maximum: 50 }
+  validate :avatar_validation
 
   # --- 便利メソッド ---
-  # ビューで日本語のグループ名を表示しやすくするためのメソッド
-  def group_label
-    I18n.t("enums.contact.group.#{group}", default: group.titleize)
+  def category_label
+    # お気に入りの場合は、カテゴリに関係なく「大切な人」と表示する
+    return I18n.t("enums.contact.category.partner") if is_favorite?
+    
+    # それ以外でカテゴリが未設定の場合
+    return "未設定" if category.nil?
+
+    # カテゴリ名を返却
+    I18n.t("enums.contact.category.#{category}")
+  end
+
+  private
+
+  # 画像チェック
+  def avatar_validation
+    return unless avatar.attached?
+
+    if avatar.blob.byte_size > 5.megabytes
+      errors.add(:avatar, "は5MB以下のファイルにしてください")
+    end
+
+    if !avatar.content_type.in?(%w[image/jpeg image/png image/webp])
+      errors.add(:avatar, "はJPEG, PNG, WebP形式のみ可能です")
+    end
   end
 end

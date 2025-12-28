@@ -7,6 +7,15 @@ ja:
         day: "昼"
         night: "夕方"
         late_night: "夜"
+    
+    # ★会った人のカテゴリ
+    contact:
+      category:
+        partner: "大切な人"
+        family: "家族"
+        friend: "友だち"
+        work: "仕事"
+        other: "その他"
 
   # --- 日付/時刻のフォーマット ---
   date:

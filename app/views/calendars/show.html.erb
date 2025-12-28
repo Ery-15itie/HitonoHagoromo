@@ -11,9 +11,11 @@
   </div>
 
   <%# --- ヘッダー：週移動ナビゲーション --- %>
-  <div class="flex items-center justify-between mb-4 sm:mb-6 bg-white p-3 rounded-xl shadow-sm border border-stone-100 relative">
-    <%= link_to calendar_path(start_date: @start_date - 1.week), class: "w-10 h-10 flex items-center justify-center rounded-full hover:bg-stone-100 text-stone-600 hover:text-indigo-600 transition" do %>
-      <i class="fas fa-chevron-left"></i>
+  <div class="flex items-center justify-between mb-4 sm:mb-6 bg-white p-3 rounded-2xl shadow-sm border border-stone-100 relative">
+    <%= link_to calendar_path(start_date: @start_date - 1.week), class: "w-10 h-10 flex items-center justify-center rounded-full bg-white border border-stone-200 text-stone-500 shadow-sm hover:text-indigo-600 hover:border-indigo-300 hover:bg-indigo-50 transition transform hover:-translate-y-0.5 active:scale-95 active:translate-y-0" do %>
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+      </svg>
     <% end %>
 
     <div class="text-center flex flex-col items-center">
@@ -25,13 +27,15 @@
           <%= @start_date.strftime("%-d日") %> 〜 <%= @end_date.strftime("%-d日") %>
         </p>
         <% unless Date.current.all_week.include?(@start_date) %>
-          <%= link_to "今日", calendar_path, class: "text-[10px] bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-full font-bold hover:bg-indigo-100 transition" %>
+          <%= link_to "今日", calendar_path, class: "text-[10px] bg-indigo-50 text-indigo-600 px-3 py-1 rounded-full font-bold hover:bg-indigo-100 transition shadow-sm" %>
         <% end %>
       </div>
     </div>
 
-    <%= link_to calendar_path(start_date: @start_date + 1.week), class: "w-10 h-10 flex items-center justify-center rounded-full hover:bg-stone-100 text-stone-600 hover:text-indigo-600 transition" do %>
-      <i class="fas fa-chevron-right"></i>
+    <%= link_to calendar_path(start_date: @start_date + 1.week), class: "w-10 h-10 flex items-center justify-center rounded-full bg-white border border-stone-200 text-stone-400 shadow-sm hover:text-indigo-600 hover:border-indigo-300 hover:bg-indigo-50 transition transform hover:-translate-y-0.5 active:scale-95 active:translate-y-0" do %>
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+      </svg>
     <% end %>
   </div>
 
@@ -39,8 +43,9 @@
   <%#  【PC用表示】 (md以上で表示)                                      %>
   <%# ================================================================= %>
   <div class="hidden md:grid grid-cols-7 gap-px bg-stone-100 border border-stone-100 rounded-lg overflow-hidden shadow-sm">
+    <%# 曜日ヘッダー %>
     <% @week_days.each do |date| %>
-      <div class="bg-white p-2 text-center">
+      <div class="bg-white p-2 text-center h-16 flex flex-col justify-center">
         <span class="block text-xs font-bold text-stone-400 uppercase tracking-widest <%= 'text-red-400' if date.sunday? %> <%= 'text-blue-400' if date.saturday? %>">
           <%= %w(SUN MON TUE WED THU FRI SAT)[date.wday] %>
         </span>
@@ -50,6 +55,7 @@
       </div>
     <% end %>
 
+    <%# 時間帯ごとの行 %>
     <% ActualOutfit.time_slots.keys.each do |slot_key| %>
       <% 
         style_config = case slot_key
@@ -61,8 +67,12 @@
       %>
 
       <% @week_days.each do |date| %>
-        <% outfits = @outfits_map[[date, slot_key]] || [] %>
+        <%# ★修正: 日付を文字列にしてキー検索。これで確実にヒット%>
+        <% outfits = @outfits_map[[date.to_s, slot_key]] || [] %>
+        
         <div class="relative h-48 group hover:shadow-lg transition duration-300 <%= style_config[:bg] %> flex flex-col p-1 overflow-hidden">
+          
+          <%# 背景アイコン %>
           <div class="absolute top-2 left-2 text-4xl <%= style_config[:icon_color] %> pointer-events-none opacity-40 transform group-hover:scale-110 transition duration-500">
             <i class="fas <%= style_config[:icon] %>"></i>
           </div>
@@ -71,9 +81,12 @@
             <div class="text-[9px] font-bold text-stone-400/70 tracking-tighter"><%= style_config[:time] %></div>
           </div>
 
+          <%# コンテンツエリア %>
           <div class="relative z-10 flex flex-col gap-1.5 w-full h-full overflow-y-auto custom-scrollbar pt-8 pb-2 px-0.5">
             <% outfits.each do |outfit| %>
               <%= link_to actual_outfit_path(outfit), class: "block w-full flex-shrink-0 relative group/item" do %>
+                
+                <%# ★付箋バーのデザイン %>
                 <% if outfit.title.present? %>
                   <div class="w-full rounded shadow-sm px-2 py-1 text-white transition transform hover:-translate-y-0.5 hover:shadow-md relative" style="background-color: <%= outfit.color.presence || '#A8A29E' %>;">
                     <div class="flex items-center gap-1 mb-0.5">
@@ -91,6 +104,8 @@
                     <% end %>
                   </div>
                 <% end %>
+                
+                <%# ★右上のアイテム数バッジ %>
                 <% if outfit.items.size > 0 %>
                   <div class="absolute -top-1.5 -right-1 w-4 h-4 rounded-full bg-red-500 border border-white flex items-center justify-center shadow-md z-20">
                     <span class="text-[9px] font-bold text-white font-sans leading-none"><%= outfit.items.size %></span>
@@ -98,6 +113,8 @@
                 <% end %>
               <% end %>
             <% end %>
+
+            <%# 追加ボタン %>
             <%= link_to new_actual_outfit_path(worn_on: date, time_slot: slot_key), class: "flex-grow min-h-[20px] rounded hover:bg-black/5 transition flex items-center justify-center group/add -mx-1" do %>
                <i class="fas fa-plus text-stone-400 opacity-0 group-hover/add:opacity-100 transition"></i>
             <% end %>
@@ -115,8 +132,8 @@
     <% @week_days.each do |date| %>
       <% is_today = (date == Date.current) %>
       <% 
-         day_outfits = @outfits.select { |o| o.worn_on == date }
-         has_plan = day_outfits.any?
+         # スマホ用も確実に検索
+         day_has_plans = ActualOutfit.time_slots.keys.any? { |slot| @outfits_map[[date.to_s, slot]].present? }
       %>
       
       <div class="bg-white rounded-2xl p-4 shadow-sm border border-stone-100 relative overflow-hidden flex items-center justify-between">
@@ -138,7 +155,7 @@
            
            <div class="flex gap-1.5">
              <% ActualOutfit.time_slots.keys.each do |slot| %>
-               <% if @outfits_map[[date, slot]].present? %>
+               <% if @outfits_map[[date.to_s, slot]].present? %>
                  <div class="w-2.5 h-2.5 rounded-full ring-1 ring-white shadow-sm
                    <%= case slot 
                        when 'morning' then 'bg-sky-200'
@@ -155,8 +172,7 @@
 
         <%# --- 右側: ボタン群 --- %>
         <div class="flex items-center gap-2">
-          <%# 詳細ボタン %>
-          <% if has_plan %>
+          <% if day_has_plans %>
             <button onclick="openDayDetail('<%= date %>')" class="px-3 py-2 rounded-xl bg-indigo-50 text-indigo-600 font-bold text-xs flex items-center gap-1.5 hover:bg-indigo-100 transition active:scale-95 border border-indigo-100 shadow-sm">
               <i class="fas fa-list"></i>
               詳細
@@ -168,7 +184,6 @@
             </button>
           <% end %>
 
-          <%# 追加ボタン (詳細ボタンと同じデザイン) %>
           <button onclick="openTimeSelector('<%= date %>')" class="px-3 py-2 rounded-xl bg-white text-indigo-600 font-bold text-xs flex items-center gap-1.5 border border-indigo-100 shadow-sm hover:bg-indigo-50 transition active:scale-95">
             <i class="fas fa-plus"></i>
             追加
@@ -178,51 +193,47 @@
         <%# --- 隠し要素: 詳細モーダルの中身 --- %>
         <div id="day-content-<%= date %>" class="hidden">
            <div class="space-y-3">
-             <% if has_plan %>
-               <% ActualOutfit.time_slots.keys.each do |slot| %>
-                 <% slot_outfits = @outfits_map[[date, slot]] %>
-                 <% if slot_outfits.present? %>
-                   <div class="text-xs font-bold text-stone-400 mb-1 mt-3 pl-1">
-                     <%= I18n.t("enums.actual_outfit.time_slot.#{slot}") %>
-                   </div>
-                   <% slot_outfits.each do |outfit| %>
-                     <%= link_to actual_outfit_path(outfit), class: "block bg-white border border-stone-100 rounded-xl p-3 shadow-sm hover:bg-stone-50 active:scale-[0.98] transition flex items-center justify-between mb-2" do %>
-                       <div class="flex items-center gap-3">
-                         <div class="flex flex-col items-center justify-center w-10">
-                           <% if outfit.start_time %>
-                             <span class="text-sm font-bold text-stone-700 font-feature-settings-tnum"><%= outfit.start_time.strftime("%H:%M") %></span>
-                           <% else %>
-                             <span class="text-xs text-stone-300">--:--</span>
-                           <% end %>
-                         </div>
-                         
-                         <div>
-                           <% if outfit.title.present? %>
-                             <div class="flex items-center gap-2">
-                               <span class="w-2.5 h-2.5 rounded-full inline-block" style="background-color: <%= outfit.color.presence || '#A8A29E' %>"></span>
-                               <span class="font-bold text-stone-700"><%= outfit.title %></span>
-                             </div>
-                           <% else %>
-                             <div class="flex items-center gap-2 text-stone-500">
-                               <span>👘</span>
-                               <span class="text-xs font-bold">服の記録</span>
-                             </div>
-                           <% end %>
-                         </div>
+             <% ActualOutfit.time_slots.keys.each do |slot| %>
+               <% slot_outfits = @outfits_map[[date.to_s, slot]] %>
+               <% if slot_outfits.present? %>
+                 <div class="text-xs font-bold text-stone-400 mb-1 mt-3 pl-1">
+                   <%= I18n.t("enums.actual_outfit.time_slot.#{slot}") %>
+                 </div>
+                 <% slot_outfits.each do |outfit| %>
+                   <%= link_to actual_outfit_path(outfit), class: "block bg-white border border-stone-100 rounded-xl p-3 shadow-sm hover:bg-stone-50 active:scale-[0.98] transition flex items-center justify-between mb-2" do %>
+                     <div class="flex items-center gap-3">
+                       <div class="flex flex-col items-center justify-center w-10">
+                         <% if outfit.start_time %>
+                           <span class="text-sm font-bold text-stone-700 font-feature-settings-tnum"><%= outfit.start_time.strftime("%H:%M") %></span>
+                         <% else %>
+                           <span class="text-xs text-stone-300">--:--</span>
+                         <% end %>
                        </div>
                        
-                       <% if outfit.items.size > 0 %>
-                         <div class="px-2 py-0.5 bg-indigo-50 text-indigo-600 rounded-full text-[10px] font-bold border border-indigo-100">
-                           Items: <%= outfit.items.size %>
-                         </div>
-                       <% end %>
-                       <i class="fas fa-chevron-right text-stone-300 text-xs ml-2"></i>
+                       <div>
+                         <% if outfit.title.present? %>
+                           <div class="flex items-center gap-2">
+                             <span class="w-2.5 h-2.5 rounded-full inline-block" style="background-color: <%= outfit.color.presence || '#A8A29E' %>"></span>
+                             <span class="font-bold text-stone-700"><%= outfit.title %></span>
+                           </div>
+                         <% else %>
+                           <div class="flex items-center gap-2 text-stone-500">
+                             <span>👘</span>
+                             <span class="text-xs font-bold">服の記録</span>
+                           </div>
+                         <% end %>
+                       </div>
+                     </div>
+                     
+                     <% if outfit.items.size > 0 %>
+                       <div class="px-2 py-0.5 bg-indigo-50 text-indigo-600 rounded-full text-[10px] font-bold border border-indigo-100">
+                         Items: <%= outfit.items.size %>
+                       </div>
                      <% end %>
+                     <i class="fas fa-chevron-right text-stone-300 text-xs ml-2"></i>
                    <% end %>
                  <% end %>
                <% end %>
-             <% else %>
-               <div class="text-center py-8 text-stone-400">予定はありません</div>
              <% end %>
            </div>
         </div>
@@ -233,14 +244,10 @@
 
 </div>
 
-<%# ================================================================= %>
-<%#  【モーダル: 時間帯選択 (追加用)】                                  %>
-<%# ================================================================= %>
+<%# モーダルなどの共通部分 %>
 <div id="time-selector-modal" class="fixed inset-0 z-[999] hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
   <div class="fixed inset-0 bg-stone-900/40 backdrop-blur-sm transition-opacity opacity-0" id="modal-backdrop" onclick="closeTimeSelector()"></div>
-
   <div class="fixed inset-x-0 bottom-0 z-10 transform translate-y-full transition-transform duration-300 ease-out bg-[#FDFBF7] rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.1)] overflow-hidden" id="modal-panel">
-    
     <div class="px-6 py-4 border-b border-stone-100 flex justify-between items-center bg-white/80 backdrop-blur-sm">
       <div>
         <h3 class="text-lg font-bold text-stone-700 font-serif" id="modal-date-display"></h3>
@@ -252,27 +259,22 @@
         </svg>
       </button>
     </div>
-
     <div class="p-6 grid grid-cols-2 gap-4">
-      <%# 朝 %>
       <a href="#" id="link-morning" class="relative group overflow-hidden rounded-2xl aspect-square bg-gradient-to-br from-[#F0F9FF] to-[#E0F2FE] border border-white shadow-sm flex flex-col items-center justify-center text-center active:scale-95 transition">
         <i class="fas fa-sun text-4xl text-sky-200 mb-2 group-hover:scale-110 transition duration-500"></i>
         <span class="font-bold text-stone-600">朝</span>
         <span class="text-[10px] text-stone-400">06:00 - 11:59</span>
       </a>
-      <%# 昼 %>
       <a href="#" id="link-day" class="relative group overflow-hidden rounded-2xl aspect-square bg-gradient-to-br from-[#E0F2FE] to-[#BAE6FD] border border-white shadow-sm flex flex-col items-center justify-center text-center active:scale-95 transition">
         <i class="fas fa-cloud-sun text-4xl text-blue-300 mb-2 group-hover:scale-110 transition duration-500"></i>
         <span class="font-bold text-stone-600">昼</span>
         <span class="text-[10px] text-stone-500">12:00 - 17:59</span>
       </a>
-      <%# 夕方 %>
       <a href="#" id="link-night" class="relative group overflow-hidden rounded-2xl aspect-square bg-gradient-to-br from-[#FFF7ED] to-[#FFEDD5] border border-white shadow-sm flex flex-col items-center justify-center text-center active:scale-95 transition">
         <i class="fas fa-moon text-4xl text-orange-300 mb-2 group-hover:scale-110 transition duration-500"></i>
         <span class="font-bold text-stone-600">夕方</span>
         <span class="text-[10px] text-stone-400">18:00 - 23:59</span>
       </a>
-      <%# 夜 %>
       <a href="#" id="link-late_night" class="relative group overflow-hidden rounded-2xl aspect-square bg-gradient-to-br from-[#FAFAF9] to-[#E7E5E4] border border-white shadow-sm flex flex-col items-center justify-center text-center active:scale-95 transition">
         <i class="fas fa-star text-4xl text-stone-300 mb-2 group-hover:scale-110 transition duration-500"></i>
         <span class="font-bold text-stone-600">夜</span>
@@ -282,15 +284,9 @@
   </div>
 </div>
 
-
-<%# ================================================================= %>
-<%#  【モーダル: その日の予定一覧 (詳細用)】                             %>
-<%# ================================================================= %>
 <div id="day-detail-modal" class="fixed inset-0 z-[999] hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
   <div class="fixed inset-0 bg-stone-900/40 backdrop-blur-sm transition-opacity opacity-0" id="detail-modal-backdrop" onclick="closeDayDetail()"></div>
-
   <div class="fixed inset-x-0 bottom-0 z-10 transform translate-y-full transition-transform duration-300 ease-out bg-[#FDFBF7] rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.1)] overflow-hidden max-h-[80vh] flex flex-col" id="detail-modal-panel">
-    
     <div class="px-6 py-4 border-b border-stone-100 flex justify-between items-center bg-white/80 backdrop-blur-sm shrink-0">
       <div>
         <h3 class="text-lg font-bold text-stone-700 font-serif" id="detail-modal-date-display"></h3>
@@ -302,77 +298,60 @@
         </svg>
       </button>
     </div>
-
-    <div class="p-6 overflow-y-auto" id="detail-modal-body">
-       <%# ここにJSでコンテンツを注入 %>
-    </div>
+    <div class="p-6 overflow-y-auto" id="detail-modal-body"></div>
   </div>
 </div>
-
 
 <script>
   function openTimeSelector(dateString) {
     const modal = document.getElementById('time-selector-modal');
     const backdrop = document.getElementById('modal-backdrop');
     const panel = document.getElementById('modal-panel');
-    
     const dateObj = new Date(dateString);
     const formattedDate = `${dateObj.getFullYear()}年 ${dateObj.getMonth() + 1}月 ${dateObj.getDate()}日`;
     document.getElementById('modal-date-display').textContent = formattedDate;
-
     document.getElementById('link-morning').href = `<%= new_actual_outfit_path %>?worn_on=${dateString}&time_slot=morning`;
     document.getElementById('link-day').href = `<%= new_actual_outfit_path %>?worn_on=${dateString}&time_slot=day`;
     document.getElementById('link-night').href = `<%= new_actual_outfit_path %>?worn_on=${dateString}&time_slot=night`;
     document.getElementById('link-late_night').href = `<%= new_actual_outfit_path %>?worn_on=${dateString}&time_slot=late_night`;
-
     modal.classList.remove('hidden');
     setTimeout(() => {
       backdrop.classList.remove('opacity-0');
       panel.classList.remove('translate-y-full');
     }, 10);
   }
-
   function closeTimeSelector() {
     const modal = document.getElementById('time-selector-modal');
     const backdrop = document.getElementById('modal-backdrop');
     const panel = document.getElementById('modal-panel');
-
     backdrop.classList.add('opacity-0');
     panel.classList.add('translate-y-full');
-
     setTimeout(() => {
       modal.classList.add('hidden');
     }, 300);
   }
-
   function openDayDetail(dateString) {
     const modal = document.getElementById('day-detail-modal');
     const backdrop = document.getElementById('detail-modal-backdrop');
     const panel = document.getElementById('detail-modal-panel');
     const body = document.getElementById('detail-modal-body');
-
     const dateObj = new Date(dateString);
     const formattedDate = `${dateObj.getFullYear()}年 ${dateObj.getMonth() + 1}月 ${dateObj.getDate()}日`;
     document.getElementById('detail-modal-date-display').textContent = formattedDate;
-
     const content = document.getElementById(`day-content-${dateString}`).innerHTML;
     body.innerHTML = content;
-
     modal.classList.remove('hidden');
     setTimeout(() => {
       backdrop.classList.remove('opacity-0');
       panel.classList.remove('translate-y-full');
     }, 10);
   }
-
   function closeDayDetail() {
     const modal = document.getElementById('day-detail-modal');
     const backdrop = document.getElementById('detail-modal-backdrop');
     const panel = document.getElementById('detail-modal-panel');
-
     backdrop.classList.add('opacity-0');
     panel.classList.add('translate-y-full');
-
     setTimeout(() => {
       modal.classList.add('hidden');
     }, 300);

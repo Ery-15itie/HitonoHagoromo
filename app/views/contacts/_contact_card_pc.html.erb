@@ -1,0 +1,43 @@
+<%# --- PC用カードデザイン --- %>
+<div class="hidden md:block group relative bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.05)] hover:shadow-md transition-all duration-300 overflow-hidden p-6 flex flex-col items-center text-center h-full border border-transparent hover:border-stone-100">
+  
+  <%= link_to contact_path(contact), class: "absolute inset-0 z-0" do %>
+    <span class="sr-only">詳細を見る</span>
+  <% end %>
+
+  <%# アバター %>
+  <div class="relative mb-4">
+    <div class="w-20 h-20 rounded-full bg-stone-100 overflow-hidden border-[3px] border-white shadow-sm relative z-10">
+      <% if contact.avatar.attached? %>
+        <%= image_tag contact.avatar, class: "w-full h-full object-cover transition transform group-hover:scale-105 duration-500" %>
+      <% else %>
+        <%# デフォルトアバターの背景色をランダムっぽく %>
+        <% bg_colors = ['bg-orange-300', 'bg-blue-300', 'bg-green-300', 'bg-pink-300', 'bg-purple-300'] %>
+        <% bg_color = bg_colors[contact.id % bg_colors.length] %>
+        <div class="w-full h-full flex items-center justify-center text-3xl font-bold text-white <%= bg_color %>">
+          <%= contact.name.to_s.first %>
+        </div>
+      <% end %>
+    </div>
+    <%# お気に入りバッジ %>
+    <% if contact.is_favorite %>
+      <div class="absolute top-0 right-0 z-20 text-yellow-400 drop-shadow-sm">
+        <i class="fas fa-star text-lg"></i>
+      </div>
+    <% else %>
+      <div class="absolute top-0 right-0 z-20 text-stone-200 group-hover:text-stone-300 transition">
+        <i class="far fa-star text-lg"></i>
+      </div>
+    <% end %>
+  </div>
+
+  <%# 情報 %>
+  <div class="w-full flex-1 flex flex-col justify-center z-10 pointer-events-none">
+    <h2 class="text-lg font-bold text-stone-700 truncate w-full mb-1 group-hover:text-indigo-600 transition">
+      <%= contact.name %>
+    </h2>
+    <p class="text-xs text-stone-400 w-full line-clamp-2 px-2">
+      <%= contact.memo.presence || "ステータスなし" %>
+    </p>
+  </div>
+</div>

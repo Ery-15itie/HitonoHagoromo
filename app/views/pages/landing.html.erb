@@ -1,6 +1,7 @@
-<% resource = User.new %>
-<% resource_name = :user %>
-<% devise_mapping = Devise.mappings[:user] %>
+<%# --- Deviseのリソース定義 --- %>
+<% resource ||= User.new %>
+<% resource_name ||= :user %>
+<% devise_mapping ||= Devise.mappings[:user] %>
 
 <%# --- Global Base Styles --- %>
 <div class="min-h-screen bg-[#FDFBF7] text-slate-700 font-sans selection:bg-amber-100 selection:text-amber-900">
@@ -8,22 +9,19 @@
  <%# --- Header --- %>
   <header class="w-full py-6 px-6 flex justify-between items-center max-w-6xl mx-auto z-50 relative">
     
-    <%# Google Fonts: 和風フォント「しっぽり明朝」を読み込み %>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@600&display=swap" rel="stylesheet">
 
-    <%# ロゴ部分 %>
     <div class="flex items-center gap-3 text-indigo-950 hover:opacity-80 transition duration-300">
       <span class="text-3xl filter drop-shadow-sm">👘</span>
-      <%# style属性でフォントを直接指定 %>
       <span class="text-3xl font-bold tracking-widest" style="font-family: 'Shippori Mincho', serif;">
         ヒトノハゴロモ
       </span>
     </div>
 
     <% if user_signed_in? %>
-      <%= link_to "クローゼットへ", timeline_actual_outfits_path, class: "text-base font-bold text-indigo-800 hover:text-amber-700 transition border-b-2 border-transparent hover:border-amber-700" %>
+      <%= link_to "クローゼットへ", authenticated_root_path, class: "text-base font-bold text-indigo-800 hover:text-amber-700 transition border-b-2 border-transparent hover:border-amber-700" %>
     <% end %>
   </header>
 
@@ -55,15 +53,28 @@
       </div>
 
       <%# Right: Login/Signup Forms (Floating) %>
-      <div id="login-area" class="lg:w-1/2 max-w-md mx-auto w-full relative min-h-[580px] z-20">
+      <div id="login-area" class="lg:w-1/2 max-w-md mx-auto w-full relative min-h-[650px] z-20">
         
+        <%# ★エラーメッセージ表示エリア %>
+        <% if flash[:alert] || resource.errors.any? %>
+          <div class="absolute -top-16 left-0 w-full bg-red-50 text-red-600 px-4 py-3 rounded-xl border border-red-100 shadow-sm z-30 animate-pulse">
+            <div class="flex items-center gap-2 font-bold text-sm">
+              <i class="fas fa-exclamation-circle"></i>
+              <span>
+                <%= flash[:alert] %>
+                <%= resource.errors.full_messages.first if resource.errors.any? %>
+              </span>
+            </div>
+          </div>
+        <% end %>
+
         <%# Login Form %>
         <div id="login-form" class="bg-white rounded-2xl shadow-xl shadow-stone-200/50 border border-stone-100 p-8 lg:p-10 absolute w-full top-0 left-0 z-10 transition-all duration-500 ease-in-out">
           <h2 class="text-2xl font-bold text-indigo-950 mb-8 text-center tracking-wide flex items-center justify-center gap-3">
             <span class="text-2xl">🔑</span> サインイン
           </h2>
           
-          <%= form_for(resource, as: resource_name, url: session_path(resource_name), html: { class: "space-y-6" }) do |f| %>
+          <%= form_for(resource, as: resource_name, url: session_path(resource_name), html: { data: { turbo: false }, class: "space-y-6" }) do |f| %>
             <div class="space-y-2">
               <%= f.label :email, "メールアドレス", class: "block text-base font-bold text-slate-600" %>
               <%= f.email_field :email, autofocus: true, autocomplete: "email", class: "w-full rounded-xl border-2 border-stone-200 shadow-sm focus:border-amber-500 focus:ring-amber-500 py-3.5 px-4 text-lg bg-stone-50 transition-colors", placeholder: "example@email.com" %>
@@ -100,7 +111,8 @@
           <h2 class="text-2xl font-bold text-indigo-950 mb-8 text-center tracking-wide flex items-center justify-center gap-3">
             <span class="text-2xl">✨</span> アカウント登録
           </h2>
-          <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { class: "space-y-5" }) do |f| %>
+          
+          <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { data: { turbo: false }, class: "space-y-5" }) do |f| %>
             <div class="space-y-2">
               <%= f.label :email, "メールアドレス", class: "block text-base font-bold text-slate-600" %>
               <%= f.email_field :email, autocomplete: "email", class: "w-full rounded-xl border-2 border-stone-200 shadow-sm focus:border-amber-500 focus:ring-amber-500 py-3.5 px-4 text-lg bg-stone-50", placeholder: "example@email.com" %>
@@ -128,7 +140,8 @@
     </div>
   </main>
 
-  <%# --- Narrative Section: Morning / Day / Night (Mixed Layout) --- %>
+  <%# --- Narrative Section: Morning / Day / Night --- %>
+  <%# ★ここから下が消えていた部分です %>
   <div class="max-w-6xl mx-auto px-6 py-12 space-y-32">
     
     <%# === Morning Section === %>
@@ -145,20 +158,15 @@
         </p>
       </div>
       
-      <%# Visual Area: Illustration + Floating UI Mock %>
       <div class="md:w-7/12 w-full relative group">
-        <%# Illustration Layer %>
         <div class="rounded-3xl overflow-hidden shadow-2xl border-4 border-white transform transition duration-700 group-hover:scale-[1.01]">
-          <%# ★修正箇所: PNGに変更 %>
           <% begin %>
             <%= image_tag "morning_scene_wide.png", class: "w-full h-auto object-cover", alt: "朝の着替え" %>
           <% rescue Propshaft::MissingAssetError, Sprockets::Rails::Helper::AssetNotFound %>
-            <%# 画像がない場合はダミー画像を表示 %>
-            <img src="https://placehold.co/800x533/ffecb3/d97706?text=Morning+Scene" class="w-full h-auto object-cover" alt="朝の着替え(ダミー)">
+            <div class="w-full h-64 bg-amber-100 flex items-center justify-center text-amber-700 font-bold">画像が見つかりません</div>
           <% end %>
         </div>
-
-        <%# Floating UI Mock Layer (Overlapping) %>
+        
         <div class="absolute -bottom-10 -left-6 md:-left-12 w-3/4 md:w-1/2 z-10 animate-fade-in-up">
           <div class="bg-white p-5 rounded-2xl shadow-xl border border-stone-100 relative overflow-hidden transform rotate-1 group-hover:rotate-0 transition duration-500">
             <div class="absolute top-0 right-0 w-16 h-16 bg-yellow-50 rounded-bl-full -mr-4 -mt-4 z-0"></div>
@@ -184,7 +192,7 @@
       </div>
     </section>
 
-    <%# === Day Section (Reversed Layout) === %>
+    <%# === Day Section === %>
     <section class="flex flex-col md:flex-row-reverse items-center gap-10">
       <div class="md:w-5/12 space-y-4">
         <span class="text-amber-600 font-bold tracking-widest text-sm uppercase bg-amber-50 px-3 py-1 rounded-full">Daytime</span>
@@ -198,18 +206,15 @@
         </p>
       </div>
 
-      <%# Visual Area %>
       <div class="md:w-7/12 w-full relative group">
         <div class="rounded-3xl overflow-hidden shadow-2xl border-4 border-white transform transition duration-700 group-hover:scale-[1.01]">
-          <%# ★修正箇所: PNGに変更 %>
           <% begin %>
             <%= image_tag "daytime_scene_wide.png", class: "w-full h-auto object-cover", alt: "友人との会話" %>
           <% rescue Propshaft::MissingAssetError, Sprockets::Rails::Helper::AssetNotFound %>
-            <img src="https://placehold.co/800x533/e0f2fe/0369a1?text=Daytime+Scene" class="w-full h-auto object-cover" alt="日中(ダミー)">
+            <div class="w-full h-64 bg-sky-100 flex items-center justify-center text-sky-700 font-bold">画像が見つかりません</div>
           <% end %>
         </div>
 
-        <%# Floating UI Mock %>
         <div class="absolute -bottom-10 -right-6 md:-right-12 w-3/4 md:w-1/2 z-10">
           <div class="bg-white p-5 rounded-2xl shadow-xl border border-stone-100 relative overflow-hidden transform -rotate-1 group-hover:rotate-0 transition duration-500">
             <div class="flex items-center gap-3 mb-3">
@@ -245,18 +250,15 @@
         </p>
       </div>
 
-      <%# Visual Area %>
       <div class="md:w-7/12 w-full relative group">
         <div class="rounded-3xl overflow-hidden shadow-2xl border-4 border-white transform transition duration-700 group-hover:scale-[1.01]">
-          <%# ★修正箇所: PNGに変更 %>
           <% begin %>
             <%= image_tag "night_scene_wide.png", class: "w-full h-auto object-cover", alt: "夜のクローゼット" %>
           <% rescue Propshaft::MissingAssetError, Sprockets::Rails::Helper::AssetNotFound %>
-            <img src="https://placehold.co/800x533/312e81/ffffff?text=Night+Scene" class="w-full h-auto object-cover" alt="夜(ダミー)">
+            <div class="w-full h-64 bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold">画像が見つかりません</div>
           <% end %>
         </div>
 
-        <%# Floating UI Mock %>
         <div class="absolute -bottom-10 -left-6 md:-left-12 w-3/4 md:w-1/2 z-10">
           <div class="bg-white p-5 rounded-2xl shadow-xl border border-stone-100 relative overflow-hidden transform rotate-1 group-hover:rotate-0 transition duration-500">
             <div class="absolute top-0 left-0 w-full h-1 bg-indigo-900"></div>
@@ -278,7 +280,7 @@
     </section>
   </div>
 
-  <%# --- Features Section (修正: 背景色を透過させ、カードを白に) --- %>
+  <%# --- Features Section --- %>
   <section class="py-16 lg:py-24 mt-20">
     <div class="max-w-6xl mx-auto px-6">
       <div class="text-center mb-16">
@@ -289,7 +291,6 @@
       </div>
       
       <div class="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
-        <%# Feature 1 (カード背景を白に変更) %>
         <div class="bg-white rounded-2xl p-8 border border-stone-100 shadow-sm hover:shadow-lg transition duration-300 group">
           <div class="text-4xl mb-4 group-hover:scale-110 transition duration-300">🕰️</div>
           <h4 class="text-xl font-bold text-indigo-900 mb-3">日々のリズムを記録</h4>
@@ -298,7 +299,6 @@
           </p>
         </div>
 
-        <%# Feature 2 (カード背景を白に変更) %>
         <div class="bg-white rounded-2xl p-8 border border-stone-100 shadow-sm hover:shadow-lg transition duration-300 group">
           <div class="text-4xl mb-4 group-hover:scale-110 transition duration-300">👤</div>
           <h4 class="text-xl font-bold text-indigo-900 mb-3">二度目の装い問題を回避</h4>
@@ -307,7 +307,6 @@
           </p>
         </div>
 
-        <%# Feature 3 (カード背景を白に変更) %>
         <div class="bg-white rounded-2xl p-8 border border-stone-100 shadow-sm hover:shadow-lg transition duration-300 group">
           <div class="text-4xl mb-4 group-hover:scale-110 transition duration-300">📅</div>
           <h4 class="text-xl font-bold text-indigo-900 mb-3">着用習慣を可視化</h4>
@@ -330,7 +329,6 @@
     const loginForm = document.getElementById('login-form');
     const signupForm = document.getElementById('signup-form');
     
-    // スクロール位置をフォームエリアまでスムーズに移動（モバイル向け）
     if(window.innerWidth < 1024) {
        document.getElementById('login-area').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
@@ -347,9 +345,21 @@
       loginForm.classList.add('z-10');
     }
   }
+
+  // 初期表示の判定
+  document.addEventListener('turbo:load', function() {
+    <% if request.path.include?('sign_up') || (resource.errors.any? && resource.is_a?(User) && resource.new_record?) %>
+      toggleForms('signup');
+    <% end %>
+  });
+  
+  document.addEventListener('DOMContentLoaded', function() {
+    <% if request.path.include?('sign_up') || (resource.errors.any? && resource.is_a?(User) && resource.new_record?) %>
+      toggleForms('signup');
+    <% end %>
+  });
 </script>
 
-<%# Custom Animation Styles %>
 <style>
   @keyframes fadeInUp {
     from { opacity: 0; transform: translateY(20px); }

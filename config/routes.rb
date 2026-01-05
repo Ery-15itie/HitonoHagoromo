@@ -5,12 +5,11 @@ Rails.application.routes.draw do
   end
 
   # --- 2. ユーザー認証 (Devise) ---
-  devise_for :users, controllers: {
-    sessions: 'users/sessions',
-    registrations: 'users/registrations'
-  }
+  # ビュー側(app/views/devise/...)でランディングページを表示する設定に対応
+  devise_for :users
 
   # ログイン済みユーザーのトップページ
+  # クローゼット(items#index)へ案内
   authenticated :user do
     root to: "items#index", as: :authenticated_root
   end
@@ -18,10 +17,10 @@ Rails.application.routes.draw do
   # ログインしていない人（LP）
   root "pages#landing"
 
-  # --- 3. カレンダー機能 (Timelineから移行・独立) ---
+  # --- 3. カレンダー機能 ---
   # URL: /calendar
-  # Helper: calendar_path
-  resource :calendar, only: [:show]
+  # Path: calendar_path
+  resource :calendar, only: [:show], controller: 'calendars'
 
   # --- 4. メイン機能: 着用記録 (ActualOutfit) ---
   resources :actual_outfits do

@@ -38,7 +38,8 @@ Rails.application.configure do
   # config.action_dispatch.x_sendfile_header = "X-Accel-Redirect" # for NGINX
 
   # Store uploaded files on the local file system (see config/storage.yml for options).
-  config.active_storage.service = :local
+  # 本番環境ではCloudinaryを使用する設定に変更
+  config.active_storage.service = :cloudinary
 
   # Mount Action Cable outside main process or domain.
   # config.action_cable.mount_path = nil
@@ -80,11 +81,11 @@ Rails.application.configure do
 
   # SMTPサーバーの設定（環境変数から認証情報を取得）
   config.action_mailer.smtp_settings = {
-    address:              ENV.fetch('SMTP_ADDRESS'),
+    address:              ENV.fetch('SMTP_ADDRESS', 'smtp.gmail.com'), # デフォルト値を追加しておくと安全です
     port:                 ENV.fetch('MAIL_PORT', 587).to_i,
-    domain:               ENV.fetch('SMTP_DOMAIN'),
-    user_name:            ENV.fetch('SMTP_USERNAME'),
-    password:             ENV.fetch('SMTP_PASSWORD'),
+    domain:               ENV.fetch('SMTP_DOMAIN', 'gmail.com'),
+    user_name:            ENV.fetch('SMTP_USERNAME', nil),
+    password:             ENV.fetch('SMTP_PASSWORD', nil),
     authentication:       :plain,
     enable_starttls_auto: true,
     open_timeout:         5,

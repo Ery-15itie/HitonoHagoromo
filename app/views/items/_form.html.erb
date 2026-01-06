@@ -1,5 +1,6 @@
 <%# --- アイテム登録・編集フォーム --- %>
-<%= form_with(model: item, local: true, class: "space-y-8") do |form| %>
+<%# ★修正: html: { multipart: true } を追加して画像を送信可能に %>
+<%= form_with(model: item, local: true, class: "space-y-8", html: { multipart: true }) do |form| %>
 
   <%# --- エラーメッセージ表示 --- %>
   <% if item.errors.any? %>
@@ -27,7 +28,7 @@
         <% if item.image.attached? %>
           <%= image_tag item.image, id: "preview-target", class: "w-full h-full object-cover" %>
         <% else %>
-          <img id="preview-target" class="w-full h-full object-cover">
+          <img id="preview-target" class="w-full h-full object-cover hidden">
         <% end %>
         
         <%# 画像あり時のオーバーレイ %>
@@ -193,13 +194,11 @@
 
       const updateButtonStates = () => {
         if (!colorInput) return;
-        // 全角・半角スペースで分割して配列化
         const currentColors = colorInput.value.trim().split(/[\s\u3000]+/).filter(Boolean);
         
         colorButtons.forEach(btn => {
           const colorName = btn.dataset.color;
           if (currentColors.includes(colorName)) {
-            // 選択状態のデザイン
             btn.classList.add('ring-4', 'ring-amber-400', 'ring-offset-2');
           } else {
             btn.classList.remove('ring-4', 'ring-amber-400', 'ring-offset-2');
@@ -208,27 +207,22 @@
       };
 
       if (colorInput) {
-        // 入力欄が手動変更された時も同期
         colorInput.addEventListener('input', updateButtonStates);
-        // 初期化
         updateButtonStates();
 
-        // ボタンクリック時の挙動
         colorButtons.forEach(btn => {
           btn.addEventListener('click', function() {
             const colorName = this.dataset.color;
             let currentColors = colorInput.value.trim().split(/[\s\u3000]+/).filter(Boolean);
 
             if (currentColors.includes(colorName)) {
-              // 削除
               currentColors = currentColors.filter(c => c !== colorName);
             } else {
-              // 追加
               currentColors.push(colorName);
             }
 
             colorInput.value = currentColors.join(' ');
-            updateButtonStates(); // 見た目を更新
+            updateButtonStates();
           });
         });
       }
@@ -257,7 +251,6 @@
       }
     };
 
-    // Turboを使っている場合と使っていない場合の両方に対応
     document.addEventListener("turbo:load", initFormScripts);
     document.addEventListener("DOMContentLoaded", initFormScripts);
   })();

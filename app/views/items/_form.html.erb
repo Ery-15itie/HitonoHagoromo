@@ -1,6 +1,6 @@
 <%# --- アイテム登録・編集フォーム --- %>
-<%# ★修正: html: { multipart: true } を追加して画像を送信可能に %>
-<%= form_with(model: item, local: true, class: "space-y-8", html: { multipart: true }) do |form| %>
+<%# ★修正箇所: multipart: true に加えて、data: { turbo: false } を追加してTurboを無効化し、確実に画像を送信%>
+<%= form_with(model: item, local: true, class: "space-y-8", html: { multipart: true, data: { turbo: false } }) do |form| %>
 
   <%# --- エラーメッセージ表示 --- %>
   <% if item.errors.any? %>

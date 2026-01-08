@@ -1,4 +1,6 @@
-<%= form_with(model: contact, local: true, class: "space-y-6") do |form| %>
+<%# --- コンタクト（会う人）登録・編集フォーム --- %>
+<%# ★修正箇所: html: { multipart: true, data: { turbo: false } } を追加 %>
+<%= form_with(model: contact, local: true, class: "space-y-6", html: { multipart: true, data: { turbo: false } }) do |form| %>
   
   <%# --- エラーメッセージ --- %>
   <% if contact.errors.any? %>
@@ -19,7 +21,8 @@
       <%# 画像表示エリア %>
       <div class="w-32 h-32 rounded-full bg-stone-100 overflow-hidden border-4 border-white shadow-md mb-4 relative">
         <%# プレビュー画像 %>
-        <img id="avatar-preview" src="<%= contact.avatar.attached? ? url_for(contact.avatar.variant(resize_to_limit: [300, 300])) : '' %>" class="w-full h-full object-cover <%= contact.avatar.attached? ? '' : 'hidden' %>">
+        <%# variantを使う場合はActiveStorageの設定が必要。単純表示なら単に contact.avatar でもOK %>
+        <img id="avatar-preview" src="<%= contact.avatar.attached? ? url_for(contact.avatar) : '' %>" class="w-full h-full object-cover <%= contact.avatar.attached? ? '' : 'hidden' %>">
         
         <%# 画像がない時のダミーアイコン %>
         <div id="avatar-placeholder" class="w-full h-full flex items-center justify-center text-stone-300 bg-stone-50 <%= contact.avatar.attached? ? 'hidden' : '' %>">
@@ -36,7 +39,7 @@
           <%= form.file_field :avatar, class: "hidden", accept: "image/jpeg,image/png,image/webp", id: "contact_avatar" %>
         </label>
 
-        <%# 取消ボタン %>
+        <%# 取消ボタン（表示上のリセットのみ） %>
         <button type="button" id="clear-avatar-button" class="hidden text-red-500 hover:bg-red-50 font-bold py-2 px-3 rounded-full text-xs transition border border-transparent hover:border-red-100 flex items-center gap-1">
           <i class="fas fa-trash-alt"></i> 削除
         </button>
@@ -70,15 +73,13 @@
       <%= form.text_area :memo, rows: 3, class: "w-full bg-stone-50 border-stone-200 rounded-xl px-4 py-3 text-stone-700 placeholder-stone-300 focus:ring-indigo-500 focus:border-indigo-500 transition", placeholder: "例：よく一緒に出かける同期" %>
     </div>
 
-    <%# --- 5. お気に入り (★デザイン修正箇所) --- %>
+    <%# --- 5. お気に入り --- %>
     <div class="mb-2">
       <label class="group flex items-start gap-3 cursor-pointer p-4 border border-stone-200 rounded-2xl hover:bg-yellow-50/50 hover:border-yellow-200 transition select-none">
         
         <%# チェックボックスと星マークのコンテナ %>
         <div class="flex items-center gap-2 flex-shrink-0 mt-0.5">
           <%= form.check_box :is_favorite, class: "peer w-5 h-5 text-indigo-600 rounded focus:ring-indigo-500 border-gray-300 cursor-pointer" %>
-          
-          <%# チェック時に表示される星 (横並び・文字被りなし) %>
           <i class="fas fa-star text-yellow-400 text-xl transition-opacity opacity-0 peer-checked:opacity-100"></i>
         </div>
         
@@ -135,7 +136,7 @@
         }
       });
 
-      // 削除ボタンクリック時
+      // 削除ボタンクリック時（プレビューをクリアするのみ）
       clearBtn.addEventListener('click', function() {
         input.value = '';
         preview.src = '';

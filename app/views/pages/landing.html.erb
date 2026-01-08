@@ -141,7 +141,6 @@
   </main>
 
   <%# --- Narrative Section: Morning / Day / Night --- %>
-  <%# ★ここから下が消えていた部分です %>
   <div class="max-w-6xl mx-auto px-6 py-12 space-y-32">
     
     <%# === Morning Section === %>
@@ -318,8 +317,20 @@
     </div>
   </section>
 
-  <footer class="bg-indigo-950 text-white py-10 text-center">
-    <div class="opacity-60 text-sm">&copy; Hitonohagoromo </div>
+  <%# --- Footer --- %>
+  <footer class="bg-indigo-950 text-white py-12 text-center">
+    
+    <%# リンクエリア %>
+    <div class="flex flex-wrap justify-center gap-x-8 gap-y-4 mb-8 text-sm font-bold tracking-wide">
+      <%= link_to "利用規約", terms_path, class: "hover:text-amber-400 transition duration-200 border-b border-transparent hover:border-amber-400 pb-0.5" %>
+      
+      <%= link_to "プライバシーポリシー", privacy_path, class: "hover:text-amber-400 transition duration-200 border-b border-transparent hover:border-amber-400 pb-0.5" %>
+    </div>
+
+    <%# コピーライト %>
+    <div class="opacity-50 text-xs font-mono">
+      &copy; 2026 Hitonohagoromo
+    </div>
   </footer>
 </div>
 

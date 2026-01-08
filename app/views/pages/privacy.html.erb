@@ -1,0 +1,110 @@
+<%# --- 全体ラッパー (背景色統一) --- %>
+<div class="min-h-screen bg-[#FDFBF7] pb-20">
+
+  <%# --- ナビゲーション (上部戻るボタン) --- %>
+  <nav class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <%= link_to root_path, class: "inline-flex items-center text-stone-500 hover:text-amber-700 transition duration-200 font-bold group" do %>
+      <svg class="w-5 h-5 mr-2 transform group-hover:-translate-x-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+      トップページに戻る
+    <% end %>
+  </nav>
+
+  <%# --- メインコンテンツ --- %>
+  <div class="elegant-font px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto text-slate-700 leading-relaxed">
+    <h1 class="text-3xl font-bold text-center text-indigo-950 mb-10 font-serif">プライバシーポリシー</h1>
+
+    <div class="bg-white p-8 sm:p-12 rounded-3xl shadow-sm border border-stone-100 space-y-10">
+      
+      <p class="text-base text-stone-600">
+        「ヒトノハゴロモ」（以下「本サービス」）は、ユーザーの皆様の生活の質（QOL）を高めるために、衣服や日々の記録をお預かりするサービスです。<br>
+        衣服の好みや購入価格、誰と会ったかという記録は、極めてプライベートかつ重要な情報です。当方はこれらの情報の重要性を深く認識し、以下の方針に基づき慎重に取り扱います。
+      </p>
+
+      <section>
+        <h2 class="text-xl font-bold text-indigo-900 border-b border-amber-100 pb-2 mb-4">1. 個人情報の収集</h2>
+        <p>本サービスでは、利用にあたり以下の情報を収集します。</p>
+        <ul class="list-disc list-inside mt-2 space-y-1 text-sm pl-4">
+          <li><strong>アカウント情報：</strong> メールアドレス、パスワード（暗号化して保存）</li>
+          <li><strong>衣服データ：</strong> 写真、購入価格、ブランド名、色情報など</li>
+          <li><strong>生活記録データ：</strong> 着用日時、会った相手のお名前、関係性メモなど</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 class="text-xl font-bold text-indigo-900 border-b border-amber-100 pb-2 mb-4">2. 個人情報の利用目的</h2>
+        <p>収集した情報は、以下の目的でのみ利用します。</p>
+        <ul class="list-disc list-inside mt-2 space-y-1 text-sm pl-4">
+          <li>本サービスの提供・運営（ログイン認証、データの保存・表示）のため</li>
+          <li>「前回会った時の服」の確認など、ユーザーご本人の生活管理を支援するため</li>
+          <li>サービスの改善、新機能開発のための統計的な分析（※個人を特定できない形での利用）</li>
+          <li>お問い合わせへの対応や、重要なお知らせの通知のため</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 class="text-xl font-bold text-indigo-900 border-b border-amber-100 pb-2 mb-4">3. 情報の公開範囲と非公開性</h2>
+        <p>
+          本サービスは、ユーザーご自身の記録を行うための「クローズドな日記アプリ」としての性質を持っています。<br>
+          <strong>ユーザーが登録した衣服の写真、カレンダー、会った人の情報などが、他のユーザーに勝手に公開されることはありません。</strong>
+        </p>
+        <p class="mt-2 text-sm text-stone-500">
+          ※将来的に大切な人へのシェア機能などを実装する場合は、必ずユーザーご本人の同意・操作をもって公開される仕組みとします。
+        </p>
+      </section>
+
+      <section>
+        <h2 class="text-xl font-bold text-indigo-900 border-b border-amber-100 pb-2 mb-4">4. 第三者への提供と外部サービス</h2>
+        <p>当方は、法令に基づく場合や人の生命保護が必要な場合を除き、ユーザーの同意なく個人情報を第三者に提供しません。</p>
+        <p class="mt-2">なお、本サービスのシステム運用にあたり、以下の信頼できる外部サービスを利用しています。</p>
+        <ul class="list-disc list-inside mt-2 space-y-1 text-sm pl-4">
+          <li><strong>Render：</strong> アプリケーションおよびデータベースのホスティング</li>
+          <li><strong>Cloudinary：</strong> 衣服写真などの画像データの保存・配信</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 class="text-xl font-bold text-indigo-900 border-b border-amber-100 pb-2 mb-4">5. 安全管理措置</h2>
+        <p>お預かりした情報を安全に管理するため、以下の措置を講じています。</p>
+        <ul class="list-disc list-inside mt-2 space-y-1 text-sm pl-4">
+          <li>通信の暗号化（SSL/TLS）による盗聴防止</li>
+          <li>パスワードのハッシュ化（bcrypt）による保護</li>
+          <li>外部クラウドサービスの適切なアクセス権限管理</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2 class="text-xl font-bold text-indigo-900 border-b border-amber-100 pb-2 mb-4">6. 他者のプライバシーについて</h2>
+        <p>
+          本サービスでは「会った人」の名前や特徴を記録する機能がありますが、これらはあくまでユーザーご本人の備忘録として管理してください。<br>
+          他者のプライバシーを侵害するような内容の書き込みや、スクリーンショット等による外部への不用意な公開はお控えください。
+        </p>
+      </section>
+
+      <section>
+        <h2 class="text-xl font-bold text-indigo-900 border-b border-amber-100 pb-2 mb-4">7. 個人情報の開示・訂正・削除</h2>
+        <p>ユーザーは、本サービス上で自身の登録情報の閲覧、修正、削除をいつでも行うことができます。退会（アカウント削除）をご希望の場合は、アプリ内の設定またはお問い合わせよりご連絡ください。</p>
+      </section>
+
+      <section>
+        <h2 class="text-xl font-bold text-indigo-900 border-b border-amber-100 pb-2 mb-4">8. 本サービスの性質について</h2>
+        <p>本サービスは個人開発作品です。商用サービスと同等のセキュリティー対策に努めておりますが、永続的なサービス継続や完全なデータ保全を保証するものではありません。ご利用の際は、この点をご理解いただいた上でご利用ください。</p>
+      </section>
+
+      <section>
+        <h2 class="text-xl font-bold text-indigo-900 border-b border-amber-100 pb-2 mb-4">9. プライバシーポリシーの変更</h2>
+        <p>当方は、必要に応じて本ポリシーを変更することがあります。重要な変更がある場合は、ユーザーに通知するか、本ページにてお知らせいたします。</p>
+      </section>
+
+      <div class="text-right text-sm text-stone-500 mt-12">
+        制定日：2026年1月8日
+      </div>
+    </div>
+
+    <%# --- 下部戻るリンク --- %>
+    <div class="mt-8 text-center">
+      <%= link_to root_path, class: "inline-block text-stone-500 hover:text-amber-700 font-bold transition" do %>
+        トップページに戻る
+      <% end %>
+    </div>
+  </div>
+</div>

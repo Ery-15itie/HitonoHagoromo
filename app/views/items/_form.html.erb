@@ -1,5 +1,4 @@
 <%# --- アイテム登録・編集フォーム --- %>
-<%# ★修正箇所: multipart: true に加えて、data: { turbo: false } を追加してTurboを無効化し、確実に画像を送信%>
 <%= form_with(model: item, local: true, class: "space-y-8", html: { multipart: true, data: { turbo: false } }) do |form| %>
 
   <%# --- エラーメッセージ表示 --- %>
@@ -17,36 +16,46 @@
     </div>
   <% end %>
 
-  <%# --- 1. 画像アップロードエリア (プレビュー機能付き) --- %>
+  <%# --- 1. 画像アップロードエリア (削除機能付き) --- %>
   <div class="space-y-3">
     <%= form.label :image, "写真 (タップして選択)", class: "block text-base font-bold text-indigo-950" %>
     
-    <div class="relative w-full aspect-square md:aspect-[4/3] bg-stone-50 rounded-2xl border-2 border-dashed border-stone-300 hover:bg-stone-100 hover:border-amber-400 transition-colors cursor-pointer overflow-hidden group shadow-inner" onclick="document.getElementById('item_image').click()">
+    <%# 画像削除フラグ（隠しフィールド） %>
+    <%= form.check_box :remove_image, class: "hidden", id: "remove_image_flag" %>
+
+    <div class="relative w-full aspect-square md:aspect-[4/3] bg-stone-50 rounded-2xl border-2 border-dashed border-stone-300 hover:bg-stone-100 hover:border-amber-400 transition-colors cursor-pointer overflow-hidden group shadow-inner" id="image-upload-area">
       
       <%# プレビュー画像表示エリア %>
-      <div id="preview-container" class="<%= 'hidden' unless item.image.attached? %> w-full h-full relative">
+      <div id="preview-container" class="<%= 'hidden' unless item.image.attached? %> w-full h-full relative group">
         <% if item.image.attached? %>
           <%= image_tag item.image, id: "preview-target", class: "w-full h-full object-cover" %>
         <% else %>
           <img id="preview-target" class="w-full h-full object-cover hidden">
         <% end %>
         
-        <%# 画像あり時のオーバーレイ %>
-        <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300">
-          <span class="text-white font-bold border-2 border-white px-6 py-2 rounded-full backdrop-blur-sm shadow-lg">
+        <%# 操作オーバーレイ (変更・削除ボタン) %>
+        <div class="absolute inset-0 bg-black/40 flex flex-col items-center justify-center gap-3 opacity-0 group-hover:opacity-100 transition duration-300 z-10">
+          <%# 変更ボタン（クリックイベントは親要素へ伝播させる） %>
+          <span class="text-white font-bold border-2 border-white px-6 py-2 rounded-full backdrop-blur-sm shadow-lg pointer-events-none">
             写真を変更
           </span>
+
+          <%# ★削除ボタン (z-indexでクリック可能に) %>
+          <button type="button" id="delete-image-btn" class="text-white bg-red-500/80 hover:bg-red-600 font-bold px-4 py-1.5 rounded-full text-sm shadow-md transition pointer-events-auto flex items-center gap-1">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+            削除する
+          </button>
         </div>
       </div>
 
       <%# 未選択時の表示 %>
-      <div id="upload-placeholder" class="<%= 'hidden' if item.image.attached? %> absolute inset-0 flex flex-col items-center justify-center text-stone-400 group-hover:text-amber-500 transition duration-300">
+      <div id="upload-placeholder" class="<%= 'hidden' if item.image.attached? %> absolute inset-0 flex flex-col items-center justify-center text-stone-400 group-hover:text-amber-500 transition duration-300 pointer-events-none">
         <svg class="w-14 h-14 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
         <span class="text-sm font-bold tracking-wide">写真を撮る / 選ぶ</span>
       </div>
     </div>
 
-    <%= form.file_field :image, class: "hidden", accept: "image/*", data: { action: "change->preview#update" } %>
+    <%= form.file_field :image, class: "hidden", accept: "image/*", id: "item_image" %>
   </div>
 
   <%# --- 2. アイテム情報入力 --- %>
@@ -55,7 +64,7 @@
     <%# アイテム名 %>
     <div class="space-y-2">
       <%= form.label :name, class: "block text-sm font-bold text-slate-600" do %>
-        アイテム名 <span class="text-xs font-normal text-amber-600 ml-1">(必須。重複チェックに使用されます)</span>
+        アイテム名 <span class="text-xs font-normal text-amber-600 ml-1">(必須。重複チェックに使用されるので唯一無二の名付けを)</span>
       <% end %>
       <%= form.text_field :name, placeholder: "例：白いTシャツ、お気に入りの〇〇デニム", class: "w-full rounded-xl border-stone-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 py-3 px-4 text-base bg-white transition" %>
     </div>
@@ -71,17 +80,13 @@
       </div>
     </div>
 
-    <%# --- カラーパレット選択 (複数選択・追記対応) --- %>
+    <%# --- カラーパレット選択 --- %>
     <div class="space-y-3">
-      <%= form.label :color, "カラー,デザイン（複数選択可 スペース区切りでタグ付けされます）", class: "block text-sm font-bold text-slate-600" %>
-      
-      <%# テキスト入力欄 %>
+      <%= form.label :color, "カラー,デザイン（複数選択可。スペース区切りでタグ付けされます）", class: "block text-sm font-bold text-slate-600" %>
       <%= form.text_field :color, id: "color-input", placeholder: "色を選択、または「花柄」など手入力", class: "w-full rounded-xl border-stone-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 py-3 px-4 text-base bg-white mb-2" %>
 
-      <%# パレットボタン %>
       <div class="flex flex-wrap gap-3 p-2 bg-stone-50 rounded-xl border border-stone-100">
-        <% 
-          colors = [
+        <% colors = [
             { name: 'ホワイト', bg: 'bg-white border-stone-200' },
             { name: 'ブラック', bg: 'bg-black border-black ring-offset-gray-200' },
             { name: 'グレー',   bg: 'bg-gray-500 border-gray-500' },
@@ -92,66 +97,45 @@
             { name: 'グリーン', bg: 'bg-green-600 border-green-600' },
             { name: 'レッド',   bg: 'bg-red-500 border-red-500' },
             { name: 'イエロー', bg: 'bg-yellow-400 border-yellow-400' }
-          ]
-        %>
+          ] %>
         <% colors.each do |c| %>
           <button type="button" 
                   class="color-btn w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 shadow-sm transition-all duration-200 hover:scale-110 active:scale-95 <%= c[:bg] %>" 
                   data-color="<%= c[:name] %>"
-                  title="<%= c[:name] %>"
-                  aria-label="<%= c[:name] %>を追加">
+                  title="<%= c[:name] %>">
           </button>
         <% end %>
       </div>
-      <p class="text-xs text-stone-400 text-right">※ボタンを押すと色が追記・解除されます</p>
     </div>
 
     <%# 詳細情報 %>
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-      
-      <%# ブランド/購入店 %>
       <div class="col-span-1 sm:col-span-2 space-y-2">
         <%= form.label :description, "ブランド・メモ", class: "block text-sm font-bold text-slate-600" %>
         <%= form.text_area :description, rows: 2, placeholder: "2025年購入など", class: "w-full rounded-xl border-stone-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 py-3 px-4 text-base bg-white" %>
       </div>
 
-      <%# --- 価格 (補助ボタン付き) --- %>
       <div class="col-span-1 sm:col-span-2 space-y-2">
         <%= form.label :price, "購入価格", class: "block text-sm font-bold text-slate-600" %>
-        
         <div class="flex items-center gap-3">
           <div class="relative flex-1">
             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-stone-400 font-bold">¥</div>
             <%= form.number_field :price, id: "item_price", placeholder: "0", class: "w-full rounded-xl border-stone-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 py-3 pl-8 pr-4 text-base bg-white font-mono text-lg" %>
           </div>
         </div>
-
-        <%# 金額加算ボタンエリア %>
         <div class="flex flex-wrap gap-2 pt-1">
           <% [10000, 1000, 100].each do |amount| %>
-            <button type="button" 
-                    data-price-add="<%= amount %>"
-                    class="price-add-btn flex-shrink-0 px-4 py-2 bg-stone-100 text-stone-600 text-sm font-bold rounded-lg border border-stone-200 hover:bg-amber-100 hover:border-amber-300 hover:text-amber-800 active:bg-amber-200 transition">
-              +<%= amount.to_fs(:delimited) %>
-            </button>
+            <button type="button" data-price-add="<%= amount %>" class="price-add-btn flex-shrink-0 px-4 py-2 bg-stone-100 text-stone-600 text-sm font-bold rounded-lg border border-stone-200 hover:bg-amber-100 hover:border-amber-300 hover:text-amber-800 active:bg-amber-200 transition">+<%= amount.to_fs(:delimited) %></button>
           <% end %>
-          
-          <button type="button" id="price-clear-btn" class="flex-shrink-0 px-3 py-2 text-red-500 text-xs font-bold rounded-lg hover:bg-red-50 hover:text-red-700 transition ml-auto border border-transparent hover:border-red-100">
-            <span class="flex items-center gap-1">
-              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-              クリア
-            </span>
-          </button>
+          <button type="button" id="price-clear-btn" class="flex-shrink-0 px-3 py-2 text-red-500 text-xs font-bold rounded-lg hover:bg-red-50 hover:text-red-700 transition ml-auto border border-transparent hover:border-red-100">クリア</button>
         </div>
       </div>
-
     </div>
   </div>
 
   <%# --- 3. アクションボタン --- %>
   <div class="pt-8 flex flex-col sm:flex-row gap-4 border-t border-stone-100 mt-8">
-    <%= form.submit "登録する", class: "w-full sm:w-auto flex-1 bg-gradient-to-r from-amber-600 to-amber-500 text-white font-bold py-4 px-8 rounded-xl shadow-lg hover:shadow-xl hover:from-amber-700 hover:to-amber-600 transition transform active:scale-[0.98] cursor-pointer text-center text-lg" %>
-    
+    <%= form.submit "保存する", class: "w-full sm:w-auto flex-1 bg-gradient-to-r from-amber-600 to-amber-500 text-white font-bold py-4 px-8 rounded-xl shadow-lg hover:shadow-xl hover:from-amber-700 hover:to-amber-600 transition transform active:scale-[0.98] cursor-pointer text-center text-lg" %>
     <%= link_to "キャンセル", items_path, class: "w-full sm:w-auto flex-none bg-stone-100 text-stone-500 font-bold py-4 px-8 rounded-xl hover:bg-stone-200 hover:text-stone-700 transition text-center" %>
   </div>
 
@@ -160,17 +144,25 @@
 <%# --- JavaScript (Turbo対応版) --- %>
 <script>
   (function() {
-    // Turboのロードイベント毎に初期化する（ページ遷移後も動くように）
     const initFormScripts = () => {
-      // --------------------------------------------------------
-      // 1. 画像プレビュー機能
-      // --------------------------------------------------------
+      // 1. 画像アップロード・削除機能
+      const uploadArea = document.getElementById('image-upload-area');
       const fileInput = document.getElementById('item_image');
       const previewContainer = document.getElementById('preview-container');
       const previewImage = document.getElementById('preview-target');
       const placeholder = document.getElementById('upload-placeholder');
+      const removeFlag = document.getElementById('remove_image_flag');
+      const deleteBtn = document.getElementById('delete-image-btn');
 
-      if (fileInput) {
+      if (uploadArea && fileInput) {
+        // エリアクリックでファイル選択を開く
+        uploadArea.addEventListener('click', function(e) {
+          // 削除ボタンを押した時はファイル選択を開かない
+          if (e.target.closest('#delete-image-btn')) return;
+          fileInput.click();
+        });
+
+        // ファイル選択時
         fileInput.addEventListener('change', function(e) {
           const file = e.target.files[0];
           if (file) {
@@ -180,60 +172,70 @@
               previewImage.classList.remove('hidden');
               previewContainer.classList.remove('hidden');
               if(placeholder) placeholder.classList.add('hidden');
+              
+              // 削除フラグをオフにする
+              if(removeFlag) removeFlag.checked = false;
             }
             reader.readAsDataURL(file);
           }
         });
+
+        // 削除ボタンクリック時
+        if (deleteBtn) {
+          deleteBtn.addEventListener('click', function(e) {
+            e.stopPropagation(); // 親要素のクリックイベントを止める
+            e.preventDefault();
+
+            // 1. ファイル入力をクリア
+            fileInput.value = "";
+            // 2. プレビューを隠す
+            previewImage.src = "";
+            previewImage.classList.add('hidden');
+            previewContainer.classList.add('hidden');
+            // 3. プレースホルダーを表示
+            if(placeholder) placeholder.classList.remove('hidden');
+            // 4. ★重要: 削除フラグをオンにする
+            if(removeFlag) removeFlag.checked = true;
+          });
+        }
       }
 
-      // --------------------------------------------------------
-      // 2. カラー選択ロジック
-      // --------------------------------------------------------
+      // 2. カラー選択
       const colorInput = document.getElementById('color-input');
       const colorButtons = document.querySelectorAll('.color-btn');
-
       const updateButtonStates = () => {
         if (!colorInput) return;
         const currentColors = colorInput.value.trim().split(/[\s\u3000]+/).filter(Boolean);
-        
         colorButtons.forEach(btn => {
-          const colorName = btn.dataset.color;
-          if (currentColors.includes(colorName)) {
+          if (currentColors.includes(btn.dataset.color)) {
             btn.classList.add('ring-4', 'ring-amber-400', 'ring-offset-2');
           } else {
             btn.classList.remove('ring-4', 'ring-amber-400', 'ring-offset-2');
           }
         });
       };
-
       if (colorInput) {
         colorInput.addEventListener('input', updateButtonStates);
         updateButtonStates();
-
         colorButtons.forEach(btn => {
           btn.addEventListener('click', function() {
             const colorName = this.dataset.color;
             let currentColors = colorInput.value.trim().split(/[\s\u3000]+/).filter(Boolean);
-
             if (currentColors.includes(colorName)) {
               currentColors = currentColors.filter(c => c !== colorName);
             } else {
               currentColors.push(colorName);
             }
-
             colorInput.value = currentColors.join(' ');
             updateButtonStates();
           });
         });
       }
 
-      // --------------------------------------------------------
-      // 3. 金額入力補助
-      // --------------------------------------------------------
+      // 3. 価格入力
       const priceInput = document.getElementById('item_price');
       const addButtons = document.querySelectorAll('.price-add-btn');
       const clearButton = document.getElementById('price-clear-btn');
-
       if (priceInput) {
         addButtons.forEach(btn => {
           btn.addEventListener('click', function() {
@@ -242,15 +244,9 @@
             priceInput.value = currentVal + amount;
           });
         });
-
-        if (clearButton) {
-          clearButton.addEventListener('click', () => {
-            priceInput.value = "";
-          });
-        }
+        if (clearButton) clearButton.addEventListener('click', () => { priceInput.value = ""; });
       }
     };
-
     document.addEventListener("turbo:load", initFormScripts);
     document.addEventListener("DOMContentLoaded", initFormScripts);
   })();

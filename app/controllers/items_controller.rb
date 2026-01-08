@@ -52,8 +52,14 @@ class ItemsController < ApplicationController
 
   # PATCH/PUT /items/1
   def update
+    # ★追加: 「画像削除」フラグが立っていたら、画像を削除（パージ）する
+    if item_params[:remove_image] == '1' && @item.image.attached?
+      @item.image.purge
+    end
+
     # --- 画像更新のエラー対策 ---
     update_params = item_params
+    # 画像フィールドが空で送信された場合（変更なしの場合）、既存の画像を消さないようにパラメータから除外
     update_params.delete(:image) if update_params[:image].blank?
 
     if @item.update(update_params)
@@ -82,6 +88,7 @@ class ItemsController < ApplicationController
     end
 
     def item_params
-      params.require(:item).permit(:name, :description, :price, :category_id, :color, :image)
+      # ★修正: :remove_image を許可リストに追加
+      params.require(:item).permit(:name, :description, :price, :category_id, :color, :image, :remove_image)
     end
 end

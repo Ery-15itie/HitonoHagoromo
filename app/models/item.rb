@@ -6,6 +6,7 @@ class Item < ApplicationRecord
   # --- 多対多のアソシエーション ---
 
   # 1. 中間テーブル (アイテム削除時、この紐付けデータは消す)
+  # ※ dependent: :destroy があるので、アイテムを消せば中間データも消えて安全です
   has_many :actual_outfit_items, dependent: :destroy
 
   # 2. 着用記録 (中間テーブルを経由して取得。アイテムを消しても記録本体は消さない)
@@ -13,6 +14,10 @@ class Item < ApplicationRecord
 
   # 画像
   has_one_attached :image
+
+  # ★追加: 画像削除機能のための仮想属性
+  # これにより、フォームから remove_image パラメータを受け取れるようになる
+  attr_accessor :remove_image
 
   # --- バリデーション ---
   validates :name, presence: true, length: { maximum: 50 }

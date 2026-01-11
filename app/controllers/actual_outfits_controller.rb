@@ -16,16 +16,22 @@ class ActualOutfitsController < ApplicationController
       worn_on: params[:worn_on] || Date.current,
       time_slot: params[:time_slot]
     )
-    prepare_form_options # ★ここで画像付きで読み込む
+    prepare_form_options
   end
 
   def edit
-    prepare_form_options # ★ここでも読み込む
+    prepare_form_options
   end
 
   def create
     @actual_outfit = current_user.actual_outfits.build(actual_outfit_params)
+    
     if @actual_outfit.save
+      # 紐付いたアイテムの着用回数(wears_count)を +1 する
+      @actual_outfit.items.each do |item|
+        item.increment!(:wears_count)
+      end
+
       redirect_to calendar_path(start_date: @actual_outfit.worn_on), notice: '着用記録を保存しました'
     else
       prepare_form_options
@@ -87,7 +93,6 @@ class ActualOutfitsController < ApplicationController
     @actual_outfit = current_user.actual_outfits.find(params[:id])
   end
 
-  # ★画像データ(attached)を事前に読み込むことでN+1問題を解決
   def prepare_form_options
     @items = current_user.items.with_attached_image.order(created_at: :desc)
     @contacts = current_user.contacts.with_attached_avatar.order(:name)

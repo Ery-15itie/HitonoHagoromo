@@ -1,0 +1,81 @@
+<%# app/views/items/care.html.erb %>
+<div class="max-w-4xl mx-auto px-4 py-8 pb-32">
+  
+  <div class="flex items-end justify-between mb-8 border-b border-blue-100 pb-4">
+    <div>
+      <h1 class="text-3xl font-bold text-sky-900 font-serif flex items-center gap-3">
+        <span>🫧</span> 洗濯カゴ
+      </h1>
+      <p class="text-sky-600/70 mt-1 text-sm font-bold tracking-wider">服のケア</p>
+    </div>
+    <%= link_to items_path, class: "text-stone-400 hover:text-stone-600 text-sm font-bold" do %>
+      ← クローゼットに戻る
+    <% end %>
+  </div>
+
+  <% if @dirty_items.any? %>
+    <%= form_with url: wash_items_path, method: :patch, local: true do |f| %>
+      
+      <div class="bg-sky-50 p-6 rounded-2xl border border-sky-100 mb-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-3 text-sky-800">
+          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+          <div>
+            <p class="font-bold text-lg"><%= @dirty_items.count %>点の洗濯物があります</p>
+            <p class="text-xs text-sky-600">チェックを入れて「洗濯完了」を押してください</p>
+          </div>
+        </div>
+        <%= f.submit "まとめて洗濯完了にする ✨", class: "w-full sm:w-auto bg-gradient-to-r from-sky-500 to-blue-500 hover:from-sky-600 hover:to-blue-600 text-white font-bold py-3 px-8 rounded-xl shadow-lg shadow-sky-200 transition transform hover:scale-105 cursor-pointer" %>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <% @dirty_items.each do |item| %>
+          <label class="relative flex items-center gap-4 p-4 bg-white rounded-2xl border-2 border-transparent hover:border-sky-200 shadow-sm cursor-pointer transition group select-none">
+            
+            <%# チェックボックス %>
+            <div class="flex items-center h-5">
+              <%= check_box_tag "item_ids[]", item.id, true, class: "w-6 h-6 text-sky-600 border-gray-300 rounded focus:ring-sky-500 cursor-pointer" %>
+            </div>
+
+            <%# 画像 %>
+            <div class="flex-shrink-0 w-16 h-16 bg-stone-100 rounded-lg overflow-hidden">
+              <% if item.image.attached? %>
+                <%= image_tag item.image, class: "w-full h-full object-cover" %>
+              <% else %>
+                <div class="w-full h-full flex items-center justify-center text-stone-300">👕</div>
+              <% end %>
+            </div>
+
+            <%# 情報 %>
+            <div class="flex-1 min-w-0">
+              <h3 class="font-bold text-stone-700 truncate"><%= item.name %></h3>
+              <div class="flex items-center gap-2 mt-1">
+                <span class="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full font-bold">
+                  着用 <%= item.wears_count %>回
+                </span>
+                <span class="text-xs text-stone-400">
+                  / 目安 <%= item.wash_frequency %>回
+                </span>
+              </div>
+            </div>
+
+            <%# 鮮度バー %>
+            <% percent = item.freshness_percentage %>
+            <div class="absolute bottom-0 left-0 w-full h-1 bg-gray-100 rounded-b-2xl overflow-hidden">
+               <div class="h-full <%= percent == 0 ? 'bg-red-500' : 'bg-sky-500' %>" style="width: <%= percent %>%"></div>
+            </div>
+          </label>
+        <% end %>
+      </div>
+
+    <% end %>
+  
+  <% else %>
+    <%# 洗濯物がない時 %>
+    <div class="text-center py-20">
+      <div class="text-6xl mb-6 opacity-50">✨</div>
+      <h2 class="text-2xl font-bold text-stone-400 mb-2">洗濯カゴは空っぽです</h2>
+      <p class="text-stone-400">すべて綺麗にお手入れされています。<br>素敵な一日を！</p>
+      <%= link_to "クローゼットへ", items_path, class: "inline-block mt-8 text-sky-600 font-bold hover:underline" %>
+    </div>
+  <% end %>
+</div>

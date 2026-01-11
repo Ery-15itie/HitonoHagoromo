@@ -1,6 +1,10 @@
 <%# --- アイテム登録・編集フォーム --- %>
 <%= form_with(model: item, local: true, class: "space-y-8", html: { multipart: true, data: { turbo: false } }) do |form| %>
 
+  <%# --- ★重要: どの部屋（通常/素肌）からの登録かを保持する隠し項目 --- %>
+  <%# コントローラーでセットされた is_private の値を引き継ぐ %>
+  <%= form.hidden_field :is_private %>
+
   <%# --- エラーメッセージ表示 --- %>
   <% if item.errors.any? %>
     <div class="bg-red-50 text-red-700 p-5 rounded-2xl border border-red-200 animate-pulse">
@@ -35,12 +39,9 @@
         
         <%# 操作オーバーレイ (変更・削除ボタン) %>
         <div class="absolute inset-0 bg-black/40 flex flex-col items-center justify-center gap-3 opacity-0 group-hover:opacity-100 transition duration-300 z-10">
-          <%# 変更ボタン（クリックイベントは親要素へ伝播させる） %>
           <span class="text-white font-bold border-2 border-white px-6 py-2 rounded-full backdrop-blur-sm shadow-lg pointer-events-none">
             写真を変更
           </span>
-
-          <%# ★削除ボタン (z-indexでクリック可能に) %>
           <button type="button" id="delete-image-btn" class="text-white bg-red-500/80 hover:bg-red-600 font-bold px-4 py-1.5 rounded-full text-sm shadow-md transition pointer-events-auto flex items-center gap-1">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
             削除する
@@ -54,7 +55,6 @@
         <span class="text-sm font-bold tracking-wide">写真を撮る / 選ぶ</span>
       </div>
     </div>
-
     <%= form.file_field :image, class: "hidden", accept: "image/*", id: "item_image" %>
   </div>
 
@@ -131,12 +131,43 @@
         </div>
       </div>
     </div>
+
+    <%# --- ケア設定 (プルダウンに0回を追加) --- %>
+    <div class="bg-amber-50/60 p-5 rounded-2xl border border-amber-100 space-y-6 mt-6">
+      <h3 class="font-bold text-amber-800 flex items-center gap-2">
+        <span class="text-xl">🫧</span> ケア設定
+      </h3>
+
+      <%# 洗濯頻度 (0回 + 1回〜10回) %>
+      <div class="space-y-2">
+        <%= form.label :wash_frequency, "お洗濯のサイクル目安", class: "block text-sm font-bold text-slate-600" %>
+        <div class="relative">
+          <%# オプション作成: 0(洗濯管理しない) + 1〜10回 %>
+          <% 
+            options = [['洗濯管理をしない (シューズ・アクセ等)', 0]] + 
+                      (1..10).map { |n| [n == 1 ? "1回 (毎回洗う)" : "#{n}回着たら洗う", n] }
+          %>
+          <%= form.select :wash_frequency, 
+              options, 
+              {}, 
+              class: "w-full rounded-xl border-stone-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 py-3 px-4 text-base bg-white appearance-none cursor-pointer" 
+          %>
+          <div class="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none text-stone-500">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+          </div>
+        </div>
+        <p class="text-xs text-stone-500">※ 設定した回数を着ると、お洗濯カゴへ移動します。</p>
+      </div>
+    </div>
+
   </div>
 
   <%# --- 3. アクションボタン --- %>
   <div class="pt-8 flex flex-col sm:flex-row gap-4 border-t border-stone-100 mt-8">
     <%= form.submit "保存する", class: "w-full sm:w-auto flex-1 bg-gradient-to-r from-amber-600 to-amber-500 text-white font-bold py-4 px-8 rounded-xl shadow-lg hover:shadow-xl hover:from-amber-700 hover:to-amber-600 transition transform active:scale-[0.98] cursor-pointer text-center text-lg" %>
-    <%= link_to "キャンセル", items_path, class: "w-full sm:w-auto flex-none bg-stone-100 text-stone-500 font-bold py-4 px-8 rounded-xl hover:bg-stone-200 hover:text-stone-700 transition text-center" %>
+    <%# キャンセル先を、登録しようとしていた場所に戻す %>
+    <% cancel_path = item.is_private ? suhada_items_path : items_path %>
+    <%= link_to "キャンセル", cancel_path, class: "w-full sm:w-auto flex-none bg-stone-100 text-stone-500 font-bold py-4 px-8 rounded-xl hover:bg-stone-200 hover:text-stone-700 transition text-center" %>
   </div>
 
 <% end %>

@@ -32,6 +32,15 @@ Rails.application.routes.draw do
 
   # --- 5. アイテム管理 ---
   resources :items do
+    # 拡張機能のルート設定
+    collection do
+      get :suhada  # 素肌を包む（ランジェリー）ページ
+      
+      # お手入れ（洗濯）機能
+      get :care    # 洗濯カゴ画面 (要洗濯アイテム一覧)
+      patch :wash  # 洗濯実行処理
+    end
+
     # アイテム詳細から「これを着た」を登録するためのネスト
     resources :actual_outfits, only: [:create]
   end
